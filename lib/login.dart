@@ -1,3 +1,4 @@
+import 'package:barter_system/signup.dart';
 import 'package:flutter/material.dart';
 
 
@@ -122,7 +123,7 @@ class LoginScreen extends StatelessWidget {
               const Text("Don’t have an account? "),
               TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/signup');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpScreen()));
                 },
                 child: const Text(
                   "Sign Up",
