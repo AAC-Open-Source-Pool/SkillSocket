@@ -1,0 +1,243 @@
+import 'package:flutter/material.dart';
+void main() {
+  runApp(MyApp());
+}
+
+// Entry widget
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: SelectCommunitiesPage(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+// Model class for Community
+class Community {
+  final String name;
+  final int members;
+
+  Community({required this.name, required this.members});
+}
+
+// Main page for selecting communities
+class SelectCommunitiesPage extends StatefulWidget {
+  @override
+  _SelectCommunitiesPageState createState() => _SelectCommunitiesPageState();
+}
+
+class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
+  final List<Community> communities = [
+    Community(name: "Java", members: 456),
+    Community(name: "Python", members: 789),
+    Community(name: "App Development", members: 300),
+    Community(name: "Devops", members: 600),
+    Community(name: "Machine learning", members: 212),
+    Community(name: "Full stack", members: 512),
+  ];
+
+  final Set<int> selectedIndexes = {};
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Select your communities',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 67, 4, 78),
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: ElevatedButton(
+              onPressed: () {
+                print("User chose to skip");
+                // Navigate to EmptyPage on skip
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EmptyPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurpleAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 4,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: const Text(
+                "SKIP",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.fromARGB(255, 170, 45, 192), // Lighter purple at top
+              Color.fromARGB(255, 120, 20, 150), // Slightly darker purple at bottom
+            ],
+          ),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            const Center(
+              child: Text(
+                "Select 2 or more Communities you'd like to join",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 1,
+                crossAxisSpacing: 1,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                children: List.generate(communities.length, (index) {
+                  final community = communities[index];
+                  final isSelected = selectedIndexes.contains(index);
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (isSelected) {
+                          selectedIndexes.remove(index);
+                        } else {
+                          selectedIndexes.add(index);
+                        }
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              width: 90,
+                              height: 90,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.purpleAccent,
+                                border: isSelected
+                                    ? Border.all(
+                                        color: Colors.green,
+                                        width: 3,
+                                      )
+                                    : null,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 4,
+                                    offset: Offset(2, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isSelected)
+                              const Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                  size: 20,
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          community.name,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          "${community.members} members",
+                          style: const TextStyle(color: Colors.black54, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 20, bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      print("Selected communities: $selectedIndexes");
+                      // Navigate to EmptyPage on next
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => EmptyPage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 67, 4, 78),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                      child: Text("NEXT", style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// New EmptyPage widget
+class EmptyPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Empty Page', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color.fromARGB(255, 67, 4, 78),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.fromARGB(255, 170, 45, 192),
+              Color.fromARGB(255, 120, 20, 150),
+            ],
+          ),
+        ),
+        child: const Center(
+          child: Text(
+            'This is an empty page!',
+            style: TextStyle(fontSize: 24, color: Colors.white),
+          ),
+        ),
+      ),
+    );
+  }
+}
