@@ -1,3 +1,4 @@
+import 'package:barter_system/home.dart';
 import 'package:barter_system/signup.dart';
 import 'package:flutter/material.dart';
 
@@ -106,7 +107,7 @@ class LoginScreen extends StatelessWidget {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => SignUpScreen()),
+                            MaterialPageRoute(builder: (context) => MyHomePage(title: 'app name',)),
                           );
                           print("Login button pressed");
                         },

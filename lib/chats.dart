@@ -1,5 +1,6 @@
 import 'package:barter_system/communities.dart';
 import 'package:barter_system/history.dart';
+import 'package:barter_system/home.dart';
 import 'package:barter_system/reviews.dart';
 import 'package:flutter/material.dart';
 import 'package:barter_system/profile.dart';
@@ -27,7 +28,7 @@ class _ChatsState extends State<Chats> {
   });
 
   final List<Widget> _pages = [
-    MyApp(),
+    MyHomePage(title: 'App name',),
     Chats(),
     Add(),
     Community(),

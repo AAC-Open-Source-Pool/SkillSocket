@@ -10,7 +10,6 @@ import 'package:barter_system/community.dart';
 import 'package:barter_system/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter/material.dart';
 class TodoList extends StatelessWidget {
   final DateTime selectedDate;
   final TextEditingController controller;
@@ -113,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final List<Widget> _pages = [
-    //MyApp(),
+    MyHomePage(title: 'App name',),
     Chats(),
     Add(),
     Community(),
@@ -254,6 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
               }
             ),
             Divider(color: Colors.white, thickness: 1),
