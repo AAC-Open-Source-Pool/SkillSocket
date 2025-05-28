@@ -1,7 +1,5 @@
+import 'package:barter_system/home.dart';
 import 'package:flutter/material.dart';
-void main() {
-  runApp(MyApp());
-}
 
 // Entry widget
 class MyApp extends StatelessWidget {
@@ -59,7 +57,7 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
                 // Navigate to EmptyPage on skip
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => EmptyPage()),
+                  MaterialPageRoute(builder: (context) => MyHomePage(title: 'App name',)),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -187,7 +185,7 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
                       // Navigate to EmptyPage on next
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => EmptyPage()),
+                        MaterialPageRoute(builder: (context) => MyHomePage(title: 'App name',)),
                       );
                     },
                     style: ElevatedButton.styleFrom(

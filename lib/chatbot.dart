@@ -1,10 +1,6 @@
+import 'package:barter_system/home.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-// Root widget
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -29,7 +25,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
   void navigateToEmptyPage(String message) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => EmptyPage(message: message)),
+      MaterialPageRoute(builder: (context) => MyHomePage(title: 'App name')),
     );
   }
 

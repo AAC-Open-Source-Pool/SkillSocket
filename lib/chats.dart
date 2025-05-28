@@ -1,6 +1,7 @@
 import 'package:barter_system/communities.dart';
 import 'package:barter_system/history.dart';
 import 'package:barter_system/home.dart';
+import 'package:barter_system/login.dart';
 import 'package:barter_system/reviews.dart';
 import 'package:flutter/material.dart';
 import 'package:barter_system/profile.dart';
@@ -8,7 +9,6 @@ import 'package:barter_system/add.dart';
 import 'package:barter_system/studyroom.dart';
 import 'package:barter_system/community.dart';
 import 'package:barter_system/notification.dart';
-import 'package:barter_system/main.dart';
 import 'package:barter_system/chat.dart';
 
 class Chats extends StatefulWidget {
@@ -130,6 +130,7 @@ class _ChatsState extends State<Chats> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
               }
             ),
             Divider(color: Colors.white, thickness: 1),

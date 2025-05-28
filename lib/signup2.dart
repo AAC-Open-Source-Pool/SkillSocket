@@ -1,7 +1,5 @@
+import 'package:barter_system/selectcommunity.dart';
 import 'package:flutter/material.dart';
-void main() {
-  runApp(MyApp());
-}
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -264,7 +262,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const DummyPage(),
+                            builder: (context) => SelectCommunitiesPage(),
                           ),
                         );
                       },

@@ -1,3 +1,4 @@
+import 'package:barter_system/signup2.dart';
 import 'package:flutter/material.dart';
 class SignUpScreen extends StatefulWidget {
   @override
@@ -89,7 +90,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 20),
                       Center(
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpPage()));
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF4B014B),
                             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),

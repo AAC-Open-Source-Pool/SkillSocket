@@ -1,3 +1,4 @@
+import 'package:barter_system/chatbot.dart';
 import 'package:barter_system/communities.dart';
 import 'package:barter_system/history.dart';
 import 'package:barter_system/login.dart';
@@ -10,6 +11,7 @@ import 'package:barter_system/community.dart';
 import 'package:barter_system/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+
 class TodoList extends StatelessWidget {
   final DateTime selectedDate;
   final TextEditingController controller;
@@ -112,7 +114,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final List<Widget> _pages = [
-    MyHomePage(title: 'App name',),
+    MyHomePage(
+      title: 'App name',
+    ),
     Chats(),
     Add(),
     Community(),
@@ -175,26 +179,24 @@ class _MyHomePageState extends State<MyHomePage> {
             DrawerHeader(
                 child: Row(
               children: [
-                IconButton(
+                /*IconButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
                   icon: Icon(Icons.arrow_back_ios_new_rounded),
                   color: Color.fromARGB(255, 255, 255, 255),
-                ),
+                ),*/
                 Expanded(
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
                       'App Name',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 45),
                     ),
                   ),
                 ),
-                SizedBox(
-                  width: 48,
-                )
               ],
             )),
             ListTile(
@@ -208,7 +210,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => History()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => History()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
@@ -223,7 +226,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Communities()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Communities()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
@@ -238,24 +242,25 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Reviews()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Reviews()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
             ListTile(
-              leading: Icon(
-                Icons.logout,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text(
-                'Sign Out',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
-              }
-            ),
+                leading: Icon(
+                  Icons.logout,
+                  color: Color.fromARGB(255, 255, 255, 255),
+                ),
+                title: Text(
+                  'Sign Out',
+                  style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()));
+                }),
             Divider(color: Colors.white, thickness: 1),
           ],
         ),
@@ -296,45 +301,45 @@ class _MyHomePageState extends State<MyHomePage> {
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: TableCalendar(
-  focusedDay: _focusedDay,
-  firstDay: DateTime.utc(1970, 1, 1),
-  lastDay: DateTime.utc(2100, 12, 31),
-  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-  onDaySelected: (selectedDay, focusedDay) {
-    setState(() {
-      _selectedDay = selectedDay;
-      _focusedDay = focusedDay;
-    });
-  },
-  eventLoader: (day) {
-    return _events[_getDateKey(day)] ?? [];
-  },
-  calendarFormat: _calendarFormat,
-  onFormatChanged: (format) {
-    setState(() {
-      _calendarFormat = format;
-    });
-  },
-  availableCalendarFormats: const {
-    CalendarFormat.month: 'Month',
-    CalendarFormat.week: 'Week',
-  },
-  calendarStyle: const CalendarStyle(
-    selectedDecoration: BoxDecoration(
-      color: Color(0xFFECC9EE),
-      shape: BoxShape.circle,
-    ),
-    todayDecoration: BoxDecoration(
-      color: Color(0xFF56195B),
-      shape: BoxShape.circle,
-    ),
-    markerDecoration: BoxDecoration(
-      color: Color(0xFF56195B),
-      shape: BoxShape.circle,
-    ),
-  ),
-),
-
+                      focusedDay: _focusedDay,
+                      firstDay: DateTime.utc(1970, 1, 1),
+                      lastDay: DateTime.utc(2100, 12, 31),
+                      selectedDayPredicate: (day) =>
+                          isSameDay(_selectedDay, day),
+                      onDaySelected: (selectedDay, focusedDay) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                      },
+                      eventLoader: (day) {
+                        return _events[_getDateKey(day)] ?? [];
+                      },
+                      calendarFormat: _calendarFormat,
+                      onFormatChanged: (format) {
+                        setState(() {
+                          _calendarFormat = format;
+                        });
+                      },
+                      availableCalendarFormats: const {
+                        CalendarFormat.month: 'Month',
+                        CalendarFormat.week: 'Week',
+                      },
+                      calendarStyle: const CalendarStyle(
+                        selectedDecoration: BoxDecoration(
+                          color: Color(0xFFECC9EE),
+                          shape: BoxShape.circle,
+                        ),
+                        todayDecoration: BoxDecoration(
+                          color: Color(0xFF56195B),
+                          shape: BoxShape.circle,
+                        ),
+                        markerDecoration: BoxDecoration(
+                          color: Color(0xFF56195B),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -519,7 +524,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     },
                   ),
+                  
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end, 
+                    children: [
+                      FloatingActionButton(onPressed: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatbotPage()));
+                      }, child: Icon(Icons.face_retouching_natural_sharp)),
+                    ],
+                  )
                 ],
+                
               ))),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -529,8 +544,7 @@ class _MyHomePageState extends State<MyHomePage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
               icon: Icon(Icons.chat_bubble_rounded), label: 'Chats'),
           BottomNavigationBarItem(
