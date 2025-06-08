@@ -54,10 +54,13 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
             child: ElevatedButton(
               onPressed: () {
                 print("User chose to skip");
-                // Navigate to EmptyPage on skip
+                // Navigate to MyHomePage on skip
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MyHomePage(title: 'App name',)),
+                  MaterialPageRoute(
+                      builder: (context) => MyHomePage(
+                            title: 'App name',
+                          )),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -66,7 +69,8 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 4,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
               child: const Text(
                 "SKIP",
@@ -81,15 +85,18 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
+            // Updated gradient colors to match the image
             colors: [
-              Color.fromARGB(255, 170, 45, 192), // Lighter purple at top
-              Color.fromARGB(255, 120, 20, 150), // Slightly darker purple at bottom
+              Color.fromARGB(255, 200, 150, 220), // Lighter purple at top
+              Color.fromARGB(
+                  255, 150, 80, 180), // Slightly darker purple at bottom
             ],
           ),
         ),
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            // Adjusted SizedBox height to give more vertical space
+            const SizedBox(height: 10),
             const Center(
               child: Text(
                 "Select 2 or more Communities you'd like to join",
@@ -100,9 +107,9 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
-                mainAxisSpacing: 1,
-                crossAxisSpacing: 1,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                mainAxisSpacing: 10, // Decreased vertical spacing
+                crossAxisSpacing: 10, // Decreased horizontal spacing
+                padding: const EdgeInsets.all(10), // Adjusted padding
                 children: List.generate(communities.length, (index) {
                   final community = communities[index];
                   final isSelected = selectedIndexes.contains(index);
@@ -123,8 +130,9 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
                           alignment: Alignment.center,
                           children: [
                             Container(
-                              width: 90,
-                              height: 90,
+                              // Reduced circle size to fit all items without scrolling
+                              width: 70,
+                              height: 70,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.purpleAccent,
@@ -166,7 +174,8 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
                         ),
                         Text(
                           "${community.members} members",
-                          style: const TextStyle(color: Colors.black54, fontSize: 12),
+                          style: const TextStyle(
+                              color: Colors.black54, fontSize: 12),
                         ),
                       ],
                     ),
@@ -182,10 +191,13 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
                   ElevatedButton(
                     onPressed: () {
                       print("Selected communities: $selectedIndexes");
-                      // Navigate to EmptyPage on next
+                      // Navigate to MyHomePage on next
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => MyHomePage(title: 'App name',)),
+                        MaterialPageRoute(
+                            builder: (context) => MyHomePage(
+                                  title: 'App name',
+                                )),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -195,8 +207,10 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
                       ),
                     ),
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                      child: Text("NEXT", style: TextStyle(color: Colors.white)),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                      child:
+                          Text("NEXT", style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
@@ -209,7 +223,7 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
   }
 }
 
-// New EmptyPage widget
+// New EmptyPage widget (kept for completeness if needed elsewhere, though not navigated to directly now)
 class EmptyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
