@@ -1,5 +1,6 @@
 import 'package:barter_system/home.dart';
 import 'package:flutter/material.dart';
+import 'home.dart';
 
 // Entry widget
 class MyApp extends StatelessWidget {
@@ -59,7 +60,7 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => MyHomePage(
-                            title: 'App name',
+                            title: "app name",
                           )),
                 );
               },
