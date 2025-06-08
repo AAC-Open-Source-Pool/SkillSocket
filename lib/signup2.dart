@@ -50,13 +50,9 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
+            colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            // UPDATED COLORS FOR A RICHER PURPLE GRADIENT
-            colors: [
-              Color.fromARGB(255, 182, 12, 188), // Pure Purple (lighter top)
-              Color.fromARGB(255, 107, 15, 116), // DarkViolet (darker bottom)
-            ],
           ),
         ),
         child: SingleChildScrollView(

@@ -178,7 +178,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               elevation: 4,
             ),
-            child: Text(buttonText),
+            child: Text(buttonText,style:TextStyle(color: Colors.white)),
           ),
         ],
       ),
