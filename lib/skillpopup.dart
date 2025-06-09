@@ -1,16 +1,16 @@
+import 'package:barter_system/add.dart';
+import 'package:barter_system/notification.dart';
+import 'package:barter_system/profile.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(SkillMatchApp());
-
 class SkillMatchApp extends StatelessWidget {
+  const SkillMatchApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: HomeScreen(),
-      debugShowCheckedModeBanner: false,
-    );
+    return HomeScreen(); 
   }
 }
+
 
 class HomeScreen extends StatelessWidget {
   final TextEditingController requireController = TextEditingController();
@@ -20,16 +20,32 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Color(0xFF5D1A6A),
-        title: Text("Home", style: TextStyle(fontWeight: FontWeight.bold)),
+   appBar: AppBar(
         centerTitle: true,
-        leading: Icon(Icons.menu),
+        title: Text(
+          'APP NAME',
+          style: TextStyle(
+              fontSize: 32,
+              fontStyle: FontStyle.italic,
+              color: Color.fromARGB(255, 255, 255, 255)),
+        ),
+        backgroundColor: Color(0xFF56195B),
+        
+        iconTheme:
+            IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
         actions: [
-          Icon(Icons.notifications),
-          SizedBox(width: 16),
-          Icon(Icons.person),
-          SizedBox(width: 10),
+          IconButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Notifications()));
+              },
+              icon: Icon(Icons.notifications)),
+          IconButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Profile()));
+              },
+              icon: Icon(Icons.person_rounded)),
         ],
       ),
       body: Center(
@@ -84,9 +100,9 @@ class HomeScreen extends StatelessWidget {
                     elevation: 6,
                   ),
                   onPressed: () {
-                    
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>Add()));
                   },
-                  child: Text("NEXT"),
+                  child: Text("NEXT",style: TextStyle(color: Colors.white),),
                 ),
               ),
             ],
