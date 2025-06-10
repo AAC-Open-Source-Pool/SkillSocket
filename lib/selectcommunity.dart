@@ -1,6 +1,5 @@
 import 'package:barter_system/home.dart';
 import 'package:flutter/material.dart';
-import 'home.dart';
 
 // Entry widget
 class MyApp extends StatelessWidget {

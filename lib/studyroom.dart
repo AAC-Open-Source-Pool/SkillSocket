@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: StudyRoom(),
-    debugShowCheckedModeBanner: false,
-  ));
-}
 
 class StudyRoom extends StatefulWidget {
   @override
