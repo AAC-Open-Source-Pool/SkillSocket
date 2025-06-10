@@ -1,4 +1,5 @@
 import 'package:barter_system/selectcommunity.dart';
+import 'package:barter_system/signup.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
@@ -121,7 +122,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                         // Ensure this matches the darker gradient color for consistency
-                        color: Color(0xFF6A0DAD),
+                        color: Color.fromARGB(255, 0, 0, 0),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -230,62 +231,61 @@ class _SignUpPageState extends State<SignUpPage> {
                     const SizedBox(height: 8),
                     _buildPurpleTextField(_skillsOfferedController),
                     const SizedBox(height: 50),
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                           ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpScreen()));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF4B014B),
+                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: const Text("PREV", style: TextStyle(color: Colors.white)),
+                        ),
+                        
+                          ElevatedButton(
+                            onPressed: () {
+                              print('SKIP button pressed');
+                              print('Education: ${_educationController.text}');
+                              print('Profession: ${_professionController.text}');
+                              print(
+                                'Skills Required: ${_skillsRequiredController.text}',
+                              );
+                              print(
+                                'Skills Offered: ${_skillsOfferedController.text}',
+                              );
+                              print(
+                                'Currently Working: ${_currentWorkingStatus ?? 'Not selected'}',
+                              );
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SelectCommunitiesPage()));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF4B014B),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            child: const Text("NEXT",
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 30), // Spacing before the button
-              // SKIP Button - Moved to the bottom middle
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Retrieve and print all collected data
-                      print('SKIP button pressed');
-                      print('Education: ${_educationController.text}');
-                      print('Profession: ${_professionController.text}');
-                      print(
-                        'Skills Required: ${_skillsRequiredController.text}',
-                      );
-                      print(
-                        'Skills Offered: ${_skillsOfferedController.text}',
-                      );
-                      print(
-                        'Currently Working: ${_currentWorkingStatus ?? 'Not selected'}',
-                      );
-
-                      // Navigate to SelectCommunitiesPage
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SelectCommunitiesPage(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      // Ensure background color matches the darker gradient color
-                      backgroundColor: const Color.fromARGB(255, 185, 82, 214),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: const Text(
-                      'NEXT',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20), // Spacing at the very bottom
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -299,7 +299,7 @@ class _SignUpPageState extends State<SignUpPage> {
       controller: controller, // Attach the controller
       decoration: InputDecoration(
         filled: true,
-        fillColor: const Color(0xFFE6E6FA), // Lavender color for input fields
+        fillColor: const Color(0xFFE8CFF7), // Lavender color for input fields
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide.none,
@@ -316,7 +316,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget _buildCertificatesField() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFE6E6FA), // Lavender color
+        color: const Color(0xFFE8CFF7), // Lavender color
         borderRadius: BorderRadius.circular(15),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

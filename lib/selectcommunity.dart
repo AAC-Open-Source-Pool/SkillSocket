@@ -44,53 +44,21 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
       appBar: AppBar(
         title: const Text(
           'Select your communities',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 20),
         ),
         backgroundColor: const Color.fromARGB(255, 67, 4, 78),
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
         centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: ElevatedButton(
-              onPressed: () {
-                print("User chose to skip");
-                // Navigate to MyHomePage on skip
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => MyHomePage(
-                            title: "app name",
-                          )),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurpleAccent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 4,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              ),
-              child: const Text(
-                "SKIP",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ],
+    
       ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
+            colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            // Updated gradient colors to match the image
-            colors: [
-              Color.fromARGB(255, 200, 150, 220), // Lighter purple at top
-              Color.fromARGB(
-                  255, 150, 80, 180), // Slightly darker purple at bottom
-            ],
           ),
         ),
         child: Column(
@@ -131,11 +99,11 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
                           children: [
                             Container(
                               // Reduced circle size to fit all items without scrolling
-                              width: 70,
-                              height: 70,
+                              width: 80,
+                              height: 80,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.purpleAccent,
+                                color: const Color.fromARGB(255, 255, 255, 255),
                                 border: isSelected
                                     ? Border.all(
                                         color: Colors.green,
@@ -186,12 +154,35 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
             Padding(
               padding: const EdgeInsets.only(right: 20, bottom: 20),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
                     onPressed: () {
                       print("Selected communities: $selectedIndexes");
                       // Navigate to MyHomePage on next
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyHomePage(
+                                  title: 'App name',
+                                )),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 67, 4, 78),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                      child:
+                          Text("SKIP", style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(

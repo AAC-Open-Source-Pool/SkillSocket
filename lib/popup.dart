@@ -2,18 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-void main() => runApp(const MyApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ProfileEditScreen(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});

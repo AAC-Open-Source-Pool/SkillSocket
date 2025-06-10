@@ -1,5 +1,6 @@
 import 'package:barter_system/add.dart';
 import 'package:barter_system/notification.dart';
+import 'package:barter_system/popup.dart';
 import 'package:barter_system/profile.dart';
 import 'package:flutter/material.dart';
 
@@ -100,7 +101,7 @@ class HomeScreen extends StatelessWidget {
                     elevation: 6,
                   ),
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>Add()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileEditScreen()));
                   },
                   child: Text("NEXT",style: TextStyle(color: Colors.white),),
                 ),
