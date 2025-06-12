@@ -5,7 +5,6 @@ class Reviews extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sample review data
     final List<Map<String, dynamic>> posts = [
       {
         "user": "Sara",
@@ -18,6 +17,7 @@ class Reviews extends StatelessWidget {
         "comments": "18",
         "shares": "24",
         "color": Color(0xFFECC9EE),
+        "rating": 4,
       },
       {
         "user": "Rahul",
@@ -29,6 +29,7 @@ class Reviews extends StatelessWidget {
         "comments": "25",
         "shares": "30",
         "color": Color(0xFFA86D9F),
+        "rating": 3,
       },
       {
         "user": "Meera",
@@ -40,6 +41,7 @@ class Reviews extends StatelessWidget {
         "comments": "12",
         "shares": "10",
         "color": Color(0xFF7E4682),
+        "rating": 5,
       },
       {
         "user": "Sara",
@@ -52,6 +54,7 @@ class Reviews extends StatelessWidget {
         "comments": "18",
         "shares": "24",
         "color": Color(0xFFECC9EE),
+        "rating": 4,
       },
       {
         "user": "Rahul",
@@ -63,6 +66,7 @@ class Reviews extends StatelessWidget {
         "comments": "25",
         "shares": "30",
         "color": Color(0xFFA86D9F),
+        "rating": 3,
       },
       {
         "user": "Meera",
@@ -74,6 +78,7 @@ class Reviews extends StatelessWidget {
         "comments": "12",
         "shares": "10",
         "color": Color(0xFF7E4682),
+        "rating": 5,
       },
     ];
 
@@ -117,23 +122,35 @@ class Reviews extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 12,
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.person,
-                                size: 16, color: Colors.black), // logo/icon
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            post['user'],
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                        ],
+                      Flexible(
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.person,
+                                  size: 16, color: Colors.black), // logo/icon
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              post['user'],
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            SizedBox(width: 4),
+                            Row(
+                              children: List.generate(
+                                post['rating'],
+                                (index) => Icon(
+                                  Icons.star,
+                                  size: 14,
+                                  color: Colors.yellow[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      
                       Text(
                         post['date'],
                         style: TextStyle(

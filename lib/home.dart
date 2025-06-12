@@ -105,10 +105,10 @@ class _MyHomePageState extends State<MyHomePage> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   final TextEditingController _todoController = TextEditingController();
   final TextEditingController _eventController = TextEditingController();
-  int _selectedIndex = 0;
+  final int _selectedIndex = 0;
 
-  Map<DateTime, List<Map<String, dynamic>>> _todos = {};
-  Map<DateTime, List<String>> _events = {};
+  final Map<DateTime, List<Map<String, dynamic>>> _todos = {};
+  final Map<DateTime, List<String>> _events = {};
 
   DateTime _getDateKey(DateTime date) {
     return DateTime(date.year, date.month, date.day);
@@ -490,7 +490,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                   TodoList(
                     selectedDate: dateKey,
                     controller: _todoController,

@@ -51,7 +51,6 @@ class _SelectCommunitiesPageState extends State<SelectCommunitiesPage> {
           color: Colors.white,
         ),
         centerTitle: true,
-    
       ),
       body: Container(
         decoration: const BoxDecoration(

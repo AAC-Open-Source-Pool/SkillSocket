@@ -63,7 +63,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   SizedBox(width: 16),
                   CircleAvatar(
                     radius: 30,
-                    backgroundColor: Colors.purple.shade200,
+                    backgroundColor: Color(0xFF56195B),
                     child: Icon(Icons.android, size: 40, color: Colors.white),
                   ),
                 ],
@@ -85,7 +85,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                       ),
                       padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.purple,
+                        color: Color(0xFF7E4682),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -107,7 +107,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                         ), // decreased vertical margin
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.purple.shade400,
+                          color: Color(0xFFA86D9F),
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Text(msg, style: TextStyle(color: Colors.white)),
@@ -117,14 +117,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     // Buttons with reduced vertical spacing
                     buildOptionButton(
                       label: "Trending skills",
-                      color: Colors.purple.shade600,
+                      color: Color(0xFFA86D9F),
                       onTap: () {
                         navigateToEmptyPage("Trending skills clicked");
                       },
                     ),
                     buildOptionButton(
                       label: "Suggest me a skill",
-                      color: Colors.purple.shade300,
+                      color: Color(0xFF56195B),
                       onTap: () {
                         navigateToEmptyPage("Suggest me a skill clicked");
                       },
@@ -138,7 +138,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
             // Bottom input bar
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              color: Colors.purple.shade600,
+              color: Color(0xFF7E4682),
               child: Row(
                 children: [
                   GestureDetector(

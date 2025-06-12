@@ -134,7 +134,7 @@ class _ProfileState extends State<Profile> {
         iconTheme: const IconThemeData(color: Colors.white), // Icons on AppBar
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
               Navigator.push(
                 context,
