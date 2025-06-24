@@ -144,7 +144,7 @@ class _StudyRoomState extends State<StudyRoom> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20)),
                           ),
-                          child: const Text("Join"),
+                          child: const Text("Join",style: TextStyle(color: Colors.white),),
                         ),
                       ],
                     ),
@@ -162,15 +162,14 @@ class _StudyRoomState extends State<StudyRoom> {
             onPressed: () {
               _showCreateDialog();
             },
-            label: const Text("Create"),
-            icon: const Icon(Icons.add),
+            label: const Text("Create",style: TextStyle(color: Colors.white),),
+            icon: const Icon(Icons.add,color: Colors.white,),
             backgroundColor: const Color(0xFF4B014B),
           ),
           const SizedBox(height: 16),
           FloatingActionButton(
             onPressed: () {},
             child: const Icon(Icons.chat),
-            backgroundColor: const Color(0xFF00C8C8),
           ),
         ],
       ),
