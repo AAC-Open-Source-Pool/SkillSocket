@@ -525,18 +525,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     },
                   ),
-                  
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end, 
-                    children: [
-                      FloatingActionButton(onPressed: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatbotPage()));
-                      }, child: Icon(Icons.face_retouching_natural_sharp)),
-                    ],
-                  )
                 ],
-                
               ))),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => ChatbotPage()));
+        },
+        child: Icon(Icons.smart_toy),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: const Color(0xFF56195B),

@@ -1,4 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:barter_system/communities.dart';
+import 'package:barter_system/history.dart';
+import 'package:barter_system/login.dart';
+import 'package:barter_system/profile.dart';
+import 'package:barter_system/chats.dart';
+import 'package:barter_system/reviews.dart';
+import 'package:barter_system/skillpopup.dart';
+import 'package:barter_system/studyroom.dart';
+import 'package:barter_system/home.dart';
+import 'package:barter_system/notification.dart';
 import 'package:image_picker/image_picker.dart'; // For image selection
 import 'package:share_plus/share_plus.dart'; // For share functionality
 import 'dart:io'; // For File operations (though we'll simulate URL for Post model)
@@ -24,6 +34,22 @@ class _CommunityState extends State<Community> {
     super.dispose();
   }
 
+  int _selectedIndex = 3;
+  final List<Widget> _pages = [
+    MyHomePage(
+      title: 'App name',
+    ),
+    Chats(),
+    SkillMatchApp(),
+    Community(),
+    StudyRoom(),
+  ];
+  void _onItemTapped(int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => _pages[index]),
+    );
+  }
   void _initializePosts() {
     allPosts = [
       Post(
@@ -173,30 +199,118 @@ class _CommunityState extends State<Community> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+       drawer: Drawer(
+        backgroundColor: const Color(0xFF7E4682),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+                child: Row(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      'App Name',
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 45),
+                    ),
+                  ),
+                ),
+              ],
+            )),
+            ListTile(
+              leading: Icon(
+                Icons.history,
+                color: Color.fromARGB(255, 255, 255, 255),
+              ),
+              title: Text(
+                'History',
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => History()));
+              },
+            ),
+            Divider(color: Colors.white, thickness: 1),
+            ListTile(
+              leading: Icon(
+                Icons.groups,
+                color: Color.fromARGB(255, 255, 255, 255),
+              ),
+              title: Text(
+                'Communities',
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Communities()));
+              },
+            ),
+            Divider(color: Colors.white, thickness: 1),
+            ListTile(
+              leading: Icon(
+                Icons.reviews,
+                color: Color.fromARGB(255, 255, 255, 255),
+              ),
+              title: Text(
+                'Reviews',
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Reviews()));
+              },
+            ),
+            Divider(color: Colors.white, thickness: 1),
+            ListTile(
+                leading: Icon(
+                  Icons.logout,
+                  color: Color.fromARGB(255, 255, 255, 255),
+                ),
+                title: Text(
+                  'Sign Out',
+                  style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()));
+                }),
+            Divider(color: Colors.white, thickness: 1),
+          ],
+        ),
+      ),
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
-          'Community',
+        title: Text(
+          'COMMUNITY',
           style: TextStyle(
-            fontSize: 32,
-            fontStyle: FontStyle.italic,
-            color: Color.fromARGB(255, 255, 255, 255),
-          ),
+              fontSize: 32,
+              fontStyle: FontStyle.italic,
+              color: Color.fromARGB(255, 255, 255, 255)),
         ),
-        backgroundColor: const Color(0xFF56195B),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+        backgroundColor: Color(0xFF56195B),
+        iconTheme:
+            IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Notifications()));
+              },
+              icon: Icon(Icons.notifications)),
           IconButton(
-            icon: const Icon(Icons.person_outline, color: Colors.white),
-            onPressed: () {},
-          ),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Profile()));
+              },
+              icon: Icon(Icons.person_rounded)),
         ],
       ),
       body: Column(
@@ -205,18 +319,11 @@ class _CommunityState extends State<Community> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFE91E63),
-                  Color(0xFFC2185B)
-                ], // Pinkish gradient
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: Colors.white,
             ),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+               color: Color(0xFFECC9EE),
                 borderRadius: BorderRadius.circular(25),
               ),
               child: TextField(
@@ -225,7 +332,7 @@ class _CommunityState extends State<Community> {
                 decoration: InputDecoration(
                   hintText: 'write a post',
                   hintStyle:
-                      TextStyle(color: const Color.fromARGB(255, 230, 67, 165)),
+                      TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
                   prefixIcon: Container(
                     margin: const EdgeInsets.all(8),
                     width: 30,
@@ -257,7 +364,7 @@ class _CommunityState extends State<Community> {
                 prefixIcon: Icon(Icons.search,
                     color: const Color.fromARGB(255, 133, 56, 125)),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Color(0xFFECC9EE),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -470,16 +577,13 @@ class _CommunityState extends State<Community> {
         width: 56,
         height: 56,
         decoration: const BoxDecoration(
-          color: Color(0xFF00BCD4),
           shape: BoxShape.circle,
         ),
         child: FloatingActionButton(
           onPressed: _navigateToCreateCommunity, // New functionality
-          backgroundColor: Colors.transparent,
           elevation: 0,
           child: const Icon(
             Icons.add,
-            color: Colors.white,
             size: 28,
           ),
         ),
@@ -487,33 +591,20 @@ class _CommunityState extends State<Community> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: const Color(0xFF56195B),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        currentIndex: 3,
-        onTap: (index) {
-          // Handle navigation for bottom bar items here
-        },
+        selectedItemColor: const Color(0xFFECC9EE),
+        unselectedItemColor: Colors.white,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
+              icon: Icon(Icons.chat_bubble_rounded), label: 'Chats'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'Chat',
-          ),
+              icon: Icon(Icons.add_circle_outlined), label: 'ADD'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: 'Match',
-          ),
+              icon: Icon(Icons.groups_rounded), label: 'Community'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.people_outline),
-            label: 'Community',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school_outlined),
-            label: 'Study Room',
-          ),
+              icon: Icon(Icons.menu_book_rounded), label: 'Study Room'),
         ],
       ),
     );
