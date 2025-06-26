@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 
+
 class HistoryDetailPage extends StatelessWidget {
   final Map<String, dynamic> data;
 
