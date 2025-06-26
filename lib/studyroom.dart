@@ -3,6 +3,10 @@ import 'package:barter_system/notification.dart';
 import 'package:barter_system/profile.dart';
 import 'package:barter_system/home.dart';
 import 'package:barter_system/chats.dart';
+import 'package:barter_system/reviews.dart';
+import 'package:barter_system/communities.dart';
+import 'package:barter_system/history.dart';
+import 'package:barter_system/login.dart';
 import 'community.dart';
 import 'skillpopup.dart';
 
@@ -39,6 +43,90 @@ class _StudyRoomState extends State<StudyRoom> {
         .toList();
 
     return Scaffold(
+      drawer: Drawer(
+        backgroundColor: const Color(0xFF7E4682),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+                child: Row(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      'App Name',
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 45),
+                    ),
+                  ),
+                ),
+              ],
+            )),
+            
+            ListTile(
+              leading: Icon(
+                Icons.history,
+                color: Color.fromARGB(255, 255, 255, 255),
+              ),
+              title: Text('History',
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => History()));
+              },
+            ),
+            Divider(color: Colors.white, thickness: 1),
+            ListTile(
+              leading: Icon(
+                Icons.groups,
+                color: Color.fromARGB(255, 255, 255, 255),
+              ),
+              title: Text(
+                'Communities',
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Communities()));
+              },
+            ),
+            Divider(color: Colors.white, thickness: 1),
+            ListTile(
+              leading: Icon(
+                Icons.reviews,
+                color: Color.fromARGB(255, 255, 255, 255),
+              ),
+              title: Text(
+                'Reviews',
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Reviews()));
+              },
+            ),
+            Divider(color: Colors.white, thickness: 1),
+            ListTile(
+              leading: Icon(
+                Icons.logout,
+                color: Color.fromARGB(255, 255, 255, 255),
+              ),
+              title: Text(
+                'Sign Out',
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+              }
+            ),
+            Divider(color: Colors.white, thickness: 1),
+          ],
+        ),
+      ),
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,

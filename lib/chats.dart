@@ -5,7 +5,7 @@ import 'package:barter_system/login.dart';
 import 'package:barter_system/reviews.dart';
 import 'package:flutter/material.dart';
 import 'package:barter_system/profile.dart';
-import 'package:barter_system/add.dart';
+import 'package:barter_system/skillpopup.dart';
 import 'package:barter_system/studyroom.dart';
 import 'package:barter_system/community.dart';
 import 'package:barter_system/notification.dart';
@@ -30,7 +30,7 @@ class _ChatsState extends State<Chats> {
   final List<Widget> _pages = [
     MyHomePage(title: 'App name',),
     Chats(),
-    Add(),
+    SkillMatchApp(),
     Community(),
     StudyRoom(),
   ];
@@ -53,28 +53,20 @@ class _ChatsState extends State<Chats> {
             DrawerHeader(
                 child: Row(
               children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(Icons.arrow_back_ios_new_rounded),
-                  color: Color.fromARGB(255, 255, 255, 255),
-                ),
                 Expanded(
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
                       'App Name',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 45),
                     ),
                   ),
                 ),
-                SizedBox(
-                  width: 48,
-                )
               ],
             )),
+            
             ListTile(
               leading: Icon(
                 Icons.history,
