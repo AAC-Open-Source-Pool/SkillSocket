@@ -1,4 +1,3 @@
-import 'package:barter_system/chat.dart';
 import 'package:flutter/material.dart';
 
 class Notifications extends StatefulWidget {
@@ -17,6 +16,7 @@ class _NotificationsState extends State<Notifications> {
         "action": "You got a match!",
         "time": "Just now",
         "icon": Icons.favorite_border,
+        "accepted": false, // Added accepted flag
       },
       {
         "type": "normal",
@@ -28,6 +28,45 @@ class _NotificationsState extends State<Notifications> {
       },
     ],
   };
+
+  void _showOverlayMessage(String message) {
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 100,
+        left: MediaQuery.of(context).size.width * 0.2,
+        width: MediaQuery.of(context).size.width * 0.6,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Center(
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+    Future.delayed(const Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
+  }
+
+  void _markAccepted(String section, int index) {
+    setState(() {
+      notifications[section]?[index]["accepted"] = true;
+    });
+    _showOverlayMessage("You have accepted the request");
+  }
 
   void _removeNotification(String section, int index) {
     setState(() {
@@ -52,9 +91,7 @@ class _NotificationsState extends State<Notifications> {
           ),
         ),
         backgroundColor: const Color(0xFF56195B),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ListView(
         children: notifications.entries.map((entry) {
@@ -74,6 +111,8 @@ class _NotificationsState extends State<Notifications> {
                 Map<String, dynamic> notif = notifEntry.value;
 
                 if (notif["type"] == "match") {
+                  bool isAccepted = notif["accepted"] ?? false;
+
                   return Card(
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     elevation: 2,
@@ -102,36 +141,45 @@ class _NotificationsState extends State<Notifications> {
                                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                                 ),
                                 const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => Chat(name: "${notif["user"]}"),
+                                isAccepted
+                                    ? Row(
+                                        children: const [
+                                          Icon(Icons.check_circle, color: Colors.green),
+                                          SizedBox(width: 6),
+                                          Text(
+                                            "Accepted",
+                                            style: TextStyle(
+                                              color: Colors.green,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        );
-                                      },
-                                      icon: const Icon(Icons.check),
-                                      label: const Text("Accept"),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green,
+                                        ],
+                                      )
+                                    : Row(
+                                        children: [
+                                          ElevatedButton.icon(
+                                            onPressed: () {
+                                              _markAccepted(section, index);
+                                            },
+                                            icon: const Icon(Icons.check),
+                                            label: const Text("Accept"),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          OutlinedButton.icon(
+                                            onPressed: () {
+                                              _removeNotification(section, index);
+                                            },
+                                            icon: const Icon(Icons.close),
+                                            label: const Text("Decline"),
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor: Colors.red,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    OutlinedButton.icon(
-                                      onPressed: () {
-                                        _removeNotification(section, index);
-                                      },
-                                      icon: const Icon(Icons.close),
-                                      label: const Text("Decline"),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: Colors.red,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ],
                             ),
                           ),

@@ -100,18 +100,47 @@ class _CommunitiesState extends State<Communities> {
                       const SizedBox(height: 4),
                       Text(
                         '${community['members']} members',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ],
                   ),
                 ),
                 // Join/Unjoin Button
                 TextButton(
-                  onPressed: () => toggleJoinStatus(index),
+                  onPressed: () {
+                    if (community['joined']) {
+                      // Show confirmation dialog before unjoining
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Confirm Unjoin'),
+                          content: Text(
+                              'Are you sure you want to unjoin "${community['name']}"?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context), // Cancel
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                toggleJoinStatus(index); // Unjoin
+                                Navigator.pop(context); // Close dialog
+                              },
+                              child: const Text('Unjoin'),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      toggleJoinStatus(index); // Directly join
+                    }
+                  },
                   child: Text(
                     community['joined'] ? "Joined" : "Join",
                     style: TextStyle(
-                      color: community['joined'] ? Color(0xFF56195B) : Colors.grey,
+                      color:
+                          community['joined'] ? Color(0xFF56195B) : Colors.grey,
                     ),
                   ),
                 ),

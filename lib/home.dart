@@ -525,8 +525,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     },
                   ),
+                  Padding(
+                      padding: EdgeInsets.all(25.0),
+                    ),
                 ],
-              ))),
+                
+              )
+              ),
+              ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
