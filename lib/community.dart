@@ -50,6 +50,7 @@ class _CommunityState extends State<Community> {
       MaterialPageRoute(builder: (context) => _pages[index]),
     );
   }
+
   void _initializePosts() {
     allPosts = [
       Post(
@@ -199,7 +200,7 @@ class _CommunityState extends State<Community> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       drawer: Drawer(
+      drawer: Drawer(
         backgroundColor: const Color(0xFF7E4682),
         child: ListView(
           padding: EdgeInsets.zero,
@@ -323,7 +324,7 @@ class _CommunityState extends State<Community> {
             ),
             child: Container(
               decoration: BoxDecoration(
-               color: Color(0xFFECC9EE),
+                color: Color(0xFFECC9EE),
                 borderRadius: BorderRadius.circular(25),
               ),
               child: TextField(
@@ -840,10 +841,6 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                               color: Colors.white, fontSize: 16),
                         ),
                       const SizedBox(height: 8),
-                      Text(
-                        'Swipe left for comments / Swipe right to close comments',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
-                      ),
                     ],
                   ),
                 ),
@@ -1161,8 +1158,34 @@ class _CreatePostPageState extends State<CreatePostPage> {
 }
 
 // Placeholder for CreateCommunityPage
-class CreateCommunityPage extends StatelessWidget {
+
+class CreateCommunityPage extends StatefulWidget {
   const CreateCommunityPage({super.key});
+
+  @override
+  State<CreateCommunityPage> createState() => _CreateCommunityPageState();
+}
+
+class _CreateCommunityPageState extends State<CreateCommunityPage> {
+  final nameController = TextEditingController();
+  final bioController = TextEditingController();
+  final tagsController = TextEditingController();
+
+  File? _selectedImage;
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 75,
+    );
+
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1172,27 +1195,136 @@ class CreateCommunityPage extends StatelessWidget {
         backgroundColor: const Color(0xFF56195B),
         foregroundColor: Colors.white,
       ),
-      body: const Center(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
             children: [
-              Icon(Icons.people_alt_outlined, size: 80, color: Colors.grey),
-              SizedBox(height: 20),
-              Text(
-                'This is where you would create a new community!',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: Colors.black54),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Label for Icon
+                      const Text(
+                        'Add Icon of the Community',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Community Icon Picker
+                      GestureDetector(
+                        onTap: _pickImage,
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundColor: Colors.grey.shade300,
+                          backgroundImage: _selectedImage != null
+                              ? FileImage(_selectedImage!)
+                              : null,
+                          child: _selectedImage == null
+                              ? Icon(
+                                  Icons.camera_alt,
+                                  size: 40,
+                                  color: Colors.grey.shade700,
+                                )
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      _buildGradientTextField(
+                        controller: nameController,
+                        hintText: 'Community Name',
+                      ),
+                      const SizedBox(height: 24),
+
+                      _buildGradientTextField(
+                        controller: bioController,
+                        hintText: 'Community Bio',
+                        maxLines: 6, // Increased size
+                      ),
+                      const SizedBox(height: 24),
+
+                      _buildGradientTextField(
+                        controller: tagsController,
+                        hintText: 'Tags (comma separated)',
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              SizedBox(height: 10),
-              Text(
-                'Add community name, description, and rules here.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+
+              // Bottom Save Button
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 12.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const Community(), // Your real page
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF56195B),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Create Community',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
+          );
+        },
+      ),
+    );
+  }
+
+  // Reusable styled text field widget
+  Widget _buildGradientTextField({
+    required TextEditingController controller,
+    required String hintText,
+    int maxLines = 1,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color.fromARGB(255, 209, 123, 213), Color(0xFF56195B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          hintText: hintText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
           ),
+          filled: true,
+          fillColor: const Color.fromARGB(0, 24, 3, 3),
         ),
       ),
     );
