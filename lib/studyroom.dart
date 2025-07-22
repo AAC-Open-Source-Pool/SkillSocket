@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:barter_system/notification.dart';
+import 'package:barter_system/chatbot.dart';
 import 'package:barter_system/profile.dart';
 import 'package:barter_system/home.dart';
 import 'package:barter_system/chats.dart';
@@ -256,10 +257,12 @@ class _StudyRoomState extends State<StudyRoom> {
           ),
           const SizedBox(height: 16),
           FloatingActionButton(
-            onPressed: () {},
-            child: const Icon(Icons.chat),
-          ),
-        ],
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => ChatbotPage()));
+        },
+        child: Icon(Icons.android),)
+        ]
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

@@ -154,7 +154,7 @@ class _ChatState extends State<Chat> {
                   ),
                 ),
                 IconButton(
-                    icon: const Icon(Icons.attachment, color: Colors.white),
+                    icon: const Icon(Icons.attach_file, color: Colors.white),
                     onPressed: () {}),
                 IconButton(
                     icon: const Icon(Icons.camera_alt, color: Colors.white),

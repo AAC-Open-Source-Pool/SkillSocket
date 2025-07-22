@@ -538,7 +538,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => ChatbotPage()));
         },
-        child: Icon(Icons.smart_toy),
+        child: Icon(Icons.android),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
