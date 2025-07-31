@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-
-
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
 
@@ -45,13 +43,13 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
+              style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 15, fontWeight: FontWeight.w500)),
           TextFormField(
             initialValue: initialValue,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.black),
             decoration: const InputDecoration(
-              border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+              border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
             ),
             validator: isRequired
                 ? (val) => val == null || val.trim().isEmpty ? '$label is required' : null
@@ -65,7 +63,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   void _saveForm() {
     if (_formKey.currentState!.validate()) {
-    
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile saved successfully!")),
       );
@@ -75,168 +72,169 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Text("Match your skill!!",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
-            ),
-            Column(
-              children: [
-                const SizedBox(height: 30),
-                GestureDetector(
-                  onTap: _pickImage,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 40),
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF5C1A82),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: _image != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.file(_image!,
-                                  height: 200, width: double.infinity, fit: BoxFit.cover),
-                            )
-                          : const Text(
-                              "Photo",
-                              style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-                            ),
-                    ),
+      backgroundColor: const Color(0xFFEFEAEA),
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // Main swipeable card layout
+              Center(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  height: isExpanded ? 500 : 380,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 4,
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            Positioned(
-              top: 190,
-              left: 20,
-              right: 20,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                height: isExpanded ? 530 : 400,
-                padding: const EdgeInsets.only(top: 60),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFB276B2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Column(
-                      children: [
-                        _buildEditableField(
-                            label: "Name",
-                            initialValue: name,
-                            isRequired: true,
-                            onChanged: (val) => setState(() => name = val)),
-                        _buildEditableField(
-                            label: "Skills Offered",
-                            initialValue: skillsOffered,
-                            isRequired: true,
-                            onChanged: (val) => setState(() => skillsOffered = val)),
-                        _buildEditableField(
-                            label: "Skills Required",
-                            initialValue: skillsRequired,
-                            isRequired: true,
-                            onChanged: (val) => setState(() => skillsRequired = val)),
-                        _buildEditableField(
-                            label: "Ratings",
-                            initialValue: ratings,
-                            onChanged: (val) => setState(() => ratings = val)),
-                        if (isExpanded) ...[
-                          _buildEditableField(
-                              label: "Education",
-                              initialValue: education,
-                              onChanged: (val) => setState(() => education = val)),
-                          _buildEditableField(
-                              label: "Location",
-                              initialValue: location,
-                              isRequired: true,
-                              onChanged: (val) => setState(() => location = val)),
-                          _buildEditableField(
-                              label: "Profession",
-                              initialValue: profession,
-                              onChanged: (val) => setState(() => profession = val)),
-                        ],
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: _saveForm,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20)),
-                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                  child: Column(
+                    children: [
+                      
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 70,
+                            backgroundImage: _image != null
+                                ? FileImage(_image!)
+                                : const AssetImage('assets/avatar.png') as ImageProvider,
                           ),
-                          child: const Text("Save"),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(name,
+                                    style: const TextStyle(
+                                        fontSize: 20, fontWeight: FontWeight.bold)),
+                                const Text("Student", style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => setState(() => isExpanded = !isExpanded),
+                            icon: Icon(
+                              isExpanded ? Icons.expand_less : Icons.expand_more,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      const Divider(thickness: 1.5),
+                      const SizedBox(height: 25),
+                      // Basic info
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Skills Offered:", style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16)),
+                          Text(skillsOffered),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Skills Required:", style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16)),
+                          Text(skillsRequired),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Ratings:", style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16)),
+                          Text(ratings),
+                        ],
+                      ),
+                      if (isExpanded) ...[
+                        const Divider(thickness: 1),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("Education:", style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16)),
+                            Text(education),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("Location:", style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16)),
+                            Text(location),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("Profession:", style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16)),
+                            Text(profession),
+                          ],
                         ),
                       ],
-                    ),
+                      const Spacer(),
+                    ],
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              top: 200,
-              left: 40,
-              right: 40,
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE4CCE5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: _image != null
-                          ? FileImage(_image!)
-                          : const AssetImage('assets/avatar.png') as ImageProvider,
-                      radius: 18,
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        const Text("session", style: TextStyle(fontSize: 10)),
-                      ],
-                    ),
-                    const Spacer(),
-                    const Text("Mon–Fri", style: TextStyle(fontSize: 12)),
-                  ],
+        
+              // Tinder-style action buttons
+              Positioned(
+                bottom: 45,
+                left: 130,
+                child: FloatingActionButton(
+                  heroTag: 'reject',
+                  backgroundColor: Colors.redAccent,
+                  onPressed: () {
+                    // Reject logic here
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(Icons.close, size: 30,color: Colors.white,),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 80,
-              right: 40,
-              child: FloatingActionButton(
-                backgroundColor: Colors.white,
-                onPressed: () => setState(() => isExpanded = !isExpanded),
-                child: Icon(isExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up, color: Colors.black),
+              Positioned(
+                bottom: 45,
+                right: 130,
+                child: FloatingActionButton(
+                  heroTag: 'accept',
+                  backgroundColor: Colors.green,
+                  onPressed: () {
+                    _saveForm(); // or match logic
+                  },
+                  child: const Icon(Icons.check, size: 28,color: Colors.white,),
+                ),
               ),
-            ),
-            Positioned(
-              top: 10,
-              left: 10,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () => Navigator.pop(context),
+        
+              // Back button
+              Positioned(
+                top: 10,
+                left: 10,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 }

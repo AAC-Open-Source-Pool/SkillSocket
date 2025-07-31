@@ -76,7 +76,7 @@ class _ProfileState extends State<Profile> {
     required TextEditingController controller,
     bool readOnly = false, // To make Date of Birth field read-only
     VoidCallback? onTap, // For Date of Birth picker
-    Color fillColor = const Color(0xFFC0A2C2), // Default light purple
+    Color fillColor = const Color(0xFFECC9EE), // Default light purple
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
@@ -87,7 +87,7 @@ class _ProfileState extends State<Profile> {
             label,
             style: const TextStyle(
               fontSize: 16,
-              color: Colors.black54, // Label text color
+              color: Color.fromARGB(255, 0, 0, 0), // Label text color
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -103,7 +103,7 @@ class _ProfileState extends State<Profile> {
               filled: true,
               fillColor: fillColor, // Background color of the text field
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(25),
                 borderSide: BorderSide.none, // No border line
               ),
               contentPadding:
@@ -141,7 +141,12 @@ class _ProfileState extends State<Profile> {
                 MaterialPageRoute(builder: (context) => const Notifications()),
               );
             },
-          )
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -200,8 +205,7 @@ class _ProfileState extends State<Profile> {
               label: 'Date of Birth',
               controller: _dobController,
               readOnly: true, // Make it read-only
-              fillColor: const Color.fromARGB(
-                  255, 214, 164, 214), // Darker purple for DOB
+              fillColor: Color(0xFFECC9EE), // Darker purple for DOB
               onTap: () async {
                 DateTime? pickedDate = await showDatePicker(
                   context: context,
@@ -251,7 +255,7 @@ class _ProfileState extends State<Profile> {
                     'Ratings',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black54,
+                      color: Color.fromARGB(255, 0, 0, 0),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -276,11 +280,11 @@ class _ProfileState extends State<Profile> {
               controller: _educationController,
             ),
             _buildProfileInputField(
-              label: 'Skills',
+              label: 'Skills Known',
               controller: _skillsController,
             ),
             _buildProfileInputField(
-              label: 'History',
+              label: 'Skills Learnt',
               controller: _historyController,
             ),
 
@@ -291,7 +295,7 @@ class _ProfileState extends State<Profile> {
               // Center the button horizontally
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: ElevatedButton(
+                /* child: ElevatedButton(
                   onPressed: _saveProfileData, // Call the local save function
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
@@ -311,7 +315,7 @@ class _ProfileState extends State<Profile> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
+                ), */
               ),
             ),
             const SizedBox(height: 20), // Space after the button

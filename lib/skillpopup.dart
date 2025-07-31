@@ -48,27 +48,45 @@ class HomeScreen extends StatelessWidget {
               icon: Icon(Icons.person_rounded)),
         ],
       ),
-      body: Center(
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
         child: Container(
           padding: EdgeInsets.all(20),
           margin: EdgeInsets.symmetric(horizontal: 30),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFB575A1), Color(0xFF5D1A6A)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const Text(
+                      'Enter to Match!',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
+              SizedBox(height: 25,),
+              Row(
+                children: [
+                  const Text(
+                          'Skill Required',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
+                ],
+              ),
               TextField(
                 controller: requireController,
                 decoration: InputDecoration(
                   hintText: 'Skill you require',
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.3),
+                  fillColor:const Color(0xFFE8CFF7),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide.none,
@@ -76,12 +94,20 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20),
+              Row(
+                children: [
+                  const Text(
+                          'Skill Offered',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
+                ],
+              ),
               TextField(
                 controller: offerController,
                 decoration: InputDecoration(
                   hintText: 'Skill you offer',
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.3),
+                  fillColor: const Color(0xFFE8CFF7),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide.none,
@@ -107,24 +133,9 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-        ),
+        ),)
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF5D1A6A),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle), label: "Match"),
-          BottomNavigationBarItem(icon: Icon(Icons.group), label: "Community"),
-          BottomNavigationBarItem(icon: Icon(Icons.meeting_room), label: "Study Room"),
-        ],
-        currentIndex: 0,
-        onTap: (index) {
-          
-        },
-      ),
+      
     );
   }
 }

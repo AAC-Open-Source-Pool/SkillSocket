@@ -589,25 +589,55 @@ class _CommunityState extends State<Community> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color(0xFF56195B),
-        selectedItemColor: const Color(0xFFECC9EE),
-        unselectedItemColor: Colors.white,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_rounded), label: 'Chats'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outlined), label: 'ADD'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.groups_rounded), label: 'Community'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book_rounded), label: 'Study Room'),
-        ],
-      ),
+      bottomNavigationBar: Container(
+  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+  decoration: const BoxDecoration(
+    color: Color(0xFF56195B),
+    borderRadius: BorderRadius.only(
+      topLeft: Radius.circular(25),
+      topRight: Radius.circular(25),
+    ),
+  ),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: List.generate(5, (index) {
+      final List<IconData> icons = [
+        Icons.home,
+        Icons.chat_bubble_rounded,
+        Icons.add_circle_outlined,
+        Icons.groups_rounded,
+        Icons.menu_book_rounded,
+      ];
+      final List<String> labels = ['Home', 'Chats', 'ADD', 'Community', 'Study Room'];
+      final isSelected = index == _selectedIndex;
+
+      return GestureDetector(
+        onTap: () => _onItemTapped(index),
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 250),
+          padding: EdgeInsets.symmetric(horizontal: isSelected ? 12 : 0, vertical: 8),
+          decoration: isSelected
+              ? BoxDecoration(
+                  color: Color(0xFFECC99EE),
+                  borderRadius: BorderRadius.circular(20),
+                )
+              : null,
+          child: Row(
+            children: [
+              Icon(icons[index], color: isSelected ? Colors.white : Colors.white70),
+              if (isSelected)
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Text(labels[index], style: TextStyle(color: Colors.white)),
+                ),
+            ],
+          ),
+        ),
+      );
+    }),
+  ),
+),
+
     );
   }
 

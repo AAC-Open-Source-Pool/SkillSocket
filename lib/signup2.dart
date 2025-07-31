@@ -24,18 +24,13 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  // State variable for the selected radio button
   String? _currentWorkingStatus;
 
-  // Define TextEditingControllers for each input field
   final TextEditingController _educationController = TextEditingController();
   final TextEditingController _professionController = TextEditingController();
-  final TextEditingController _skillsRequiredController =
-      TextEditingController();
-  final TextEditingController _skillsOfferedController =
-      TextEditingController();
+  final TextEditingController _skillsRequiredController = TextEditingController();
+  final TextEditingController _skillsOfferedController = TextEditingController();
 
-  // Dispose of controllers to prevent memory leaks
   @override
   void dispose() {
     _educationController.dispose();
@@ -57,10 +52,8 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         ),
         child: SingleChildScrollView(
-          // Made the entire body scrollable
           child: Column(
             children: [
-              // Top section: LOGO and APP NAME
               Padding(
                 padding: const EdgeInsets.only(top: 60.0, left: 20.0),
                 child: Row(
@@ -96,9 +89,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   ],
                 ),
               ),
-              const SizedBox(
-                  height: 50), // Spacing between top section and card
-              // Main white card container
+              const SizedBox(height: 50),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20.0),
                 padding: const EdgeInsets.all(25.0),
@@ -121,43 +112,30 @@ class _SignUpPageState extends State<SignUpPage> {
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        // Ensure this matches the darker gradient color for consistency
                         color: Color.fromARGB(255, 0, 0, 0),
                       ),
                     ),
                     const SizedBox(height: 30),
 
-                    // Education Field
                     const Text(
-                      'Education',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
+                      'Education *',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                     const SizedBox(height: 8),
-                    _buildPurpleTextField(_educationController),
+                    _buildPurpleTextField(_educationController, hint: 'Education'),
                     const SizedBox(height: 25),
 
-                    // Certificates Section (no direct text input)
                     const Text(
-                      'Certificates',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
+                      'Certificates *',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                     const SizedBox(height: 8),
                     _buildCertificatesField(),
                     const SizedBox(height: 25),
 
-                    // Are you currently working? Radio Buttons
                     const Text(
-                      'Are you currently working?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
+                      'Are you currently working? *',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                     Row(
                       children: [
@@ -169,13 +147,9 @@ class _SignUpPageState extends State<SignUpPage> {
                               _currentWorkingStatus = value;
                             });
                           },
-                          // Ensure activeColor matches the darker gradient color
                           activeColor: const Color(0xFF6A0DAD),
                         ),
-                        const Text(
-                          'Yes',
-                          style: TextStyle(color: Colors.black87),
-                        ),
+                        const Text('Yes', style: TextStyle(color: Colors.black87)),
                         const SizedBox(width: 20),
                         Radio<String>(
                           value: 'No',
@@ -185,99 +159,68 @@ class _SignUpPageState extends State<SignUpPage> {
                               _currentWorkingStatus = value;
                             });
                           },
-                          // Ensure activeColor matches the darker gradient color
-                          activeColor: const Color.fromARGB(255, 154, 13, 173),
+                          activeColor: Color.fromARGB(255, 154, 13, 173),
                         ),
-                        const Text(
-                          'No',
-                          style: TextStyle(color: Colors.black87),
-                        ),
+                        const Text('No', style: TextStyle(color: Colors.black87)),
                       ],
                     ),
                     const SizedBox(height: 25),
 
-                    // Profession Field
                     const Text(
-                      'Profession',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
+                      'Profession *',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                     const SizedBox(height: 8),
-                    _buildPurpleTextField(_professionController),
+                    _buildPurpleTextField(_professionController, hint: 'Profession'),
                     const SizedBox(height: 25),
 
-                    // Skills Required Field
                     const Text(
                       'Skills Required',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                     const SizedBox(height: 8),
-                    _buildPurpleTextField(_skillsRequiredController),
+                    _buildPurpleTextField(_skillsRequiredController, hint: 'Skills you want to learn'),
                     const SizedBox(height: 25),
 
-                    // Skills Offered Field
                     const Text(
                       'Skills offered',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                     const SizedBox(height: 8),
-                    _buildPurpleTextField(_skillsOfferedController),
+                    _buildPurpleTextField(_skillsOfferedController, hint: 'Skills you can teach'),
                     const SizedBox(height: 50),
+
                     Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                           ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpScreen()));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF4B014B),
-                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpScreen()));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF4B014B),
+                              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                             ),
+                            child: const Text("PREV", style: TextStyle(color: Colors.white)),
                           ),
-                          child: const Text("PREV", style: TextStyle(color: Colors.white)),
-                        ),
-                        
                           ElevatedButton(
                             onPressed: () {
                               print('SKIP button pressed');
                               print('Education: ${_educationController.text}');
                               print('Profession: ${_professionController.text}');
-                              print(
-                                'Skills Required: ${_skillsRequiredController.text}',
-                              );
-                              print(
-                                'Skills Offered: ${_skillsOfferedController.text}',
-                              );
-                              print(
-                                'Currently Working: ${_currentWorkingStatus ?? 'Not selected'}',
-                              );
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SelectCommunitiesPage()));
+                              print('Skills Required: ${_skillsRequiredController.text}');
+                              print('Skills Offered: ${_skillsOfferedController.text}');
+                              print('Currently Working: ${_currentWorkingStatus ?? 'Not selected'}');
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => SelectCommunitiesPage()));
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFF4B014B),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                             ),
-                            child: const Text("NEXT",
-                                style: TextStyle(color: Colors.white)),
+                            child: const Text("NEXT", style: TextStyle(color: Colors.white)),
                           ),
                         ],
                       ),
@@ -293,31 +236,30 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  // Helper method to build the purple text fields - now accepts a controller
-  Widget _buildPurpleTextField(TextEditingController controller) {
+  // Updated to accept hint text
+  Widget _buildPurpleTextField(TextEditingController controller, {String hint = ''}) {
     return TextFormField(
-      controller: controller, // Attach the controller
+      controller: controller,
       decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.black45),
         filled: true,
-        fillColor: const Color(0xFFE8CFF7), // Lavender color for input fields
+        fillColor: const Color(0xFFE8CFF7),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(30),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 15,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       ),
     );
   }
 
-  // Helper method for the Certificates field with icons (no direct text input)
   Widget _buildCertificatesField() {
     return Container(
+      height: 55,
       decoration: BoxDecoration(
-        color: const Color(0xFFE8CFF7), // Lavender color
-        borderRadius: BorderRadius.circular(15),
+        color: const Color(0xFFE8CFF7),
+        borderRadius: BorderRadius.circular(30),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: const Row(
@@ -336,5 +278,3 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 }
-
-// Dummy page for navigation - Renamed to SelectCommunitiesPage as per import
