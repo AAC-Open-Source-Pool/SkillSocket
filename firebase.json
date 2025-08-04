@@ -1,0 +1,31 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "skillswap-e757d",
+          "appId": "1:882741093557:android:5c8023566161190d4d4afc",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "skillswap-e757d",
+          "configurations": {
+            "android": "1:882741093557:android:5c8023566161190d4d4afc",
+            "ios": "1:882741093557:ios:283bf590876b55294d4afc",
+            "macos": "1:882741093557:ios:283bf590876b55294d4afc",
+            "web": "1:882741093557:web:7305c0bb93c67fd94d4afc",
+            "windows": "1:882741093557:web:18ec01782fd2c4184d4afc"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-south1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}
