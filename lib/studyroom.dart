@@ -65,18 +65,19 @@ class _StudyRoomState extends State<StudyRoom> {
                 ),
               ],
             )),
-            
             ListTile(
               leading: Icon(
                 Icons.history,
                 color: Color.fromARGB(255, 255, 255, 255),
               ),
-              title: Text('History',
+              title: Text(
+                'History',
                 style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
               ),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => History()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => History()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
@@ -91,7 +92,8 @@ class _StudyRoomState extends State<StudyRoom> {
               ),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Communities()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Communities()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
@@ -106,24 +108,25 @@ class _StudyRoomState extends State<StudyRoom> {
               ),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Reviews()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Reviews()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
             ListTile(
-              leading: Icon(
-                Icons.logout,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text(
-                'Sign Out',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
-              }
-            ),
+                leading: Icon(
+                  Icons.logout,
+                  color: Color.fromARGB(255, 255, 255, 255),
+                ),
+                title: Text(
+                  'Sign Out',
+                  style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()));
+                }),
             Divider(color: Colors.white, thickness: 1),
           ],
         ),
@@ -233,7 +236,10 @@ class _StudyRoomState extends State<StudyRoom> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20)),
                           ),
-                          child: const Text("Join",style: TextStyle(color: Colors.white),),
+                          child: const Text(
+                            "Join",
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
@@ -244,75 +250,80 @@ class _StudyRoomState extends State<StudyRoom> {
           ],
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            onPressed: () {
-              _showCreateDialog();
-            },
-            label: const Text("Create",style: TextStyle(color: Colors.white),),
-            icon: const Icon(Icons.add,color: Colors.white,),
-            backgroundColor: const Color(0xFF4B014B),
+      floatingActionButton:
+          Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+        FloatingActionButton.extended(
+          onPressed: () {
+            _showCreateDialog();
+          },
+          label: const Text(
+            "Create",
+            style: TextStyle(color: Colors.white),
           ),
-          const SizedBox(height: 16),
-          FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => ChatbotPage()));
-        },
-        child: Icon(Icons.android),)
-        ]
-      ),
+          icon: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          backgroundColor: const Color(0xFF4B014B),
+        ),
+      ]),
       bottomNavigationBar: Container(
-  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-  decoration: const BoxDecoration(
-    color: Color(0xFF56195B),
-    borderRadius: BorderRadius.only(
-      topLeft: Radius.circular(25),
-      topRight: Radius.circular(25),
-    ),
-  ),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: List.generate(5, (index) {
-      final List<IconData> icons = [
-        Icons.home,
-        Icons.chat_bubble_rounded,
-        Icons.add_circle_outlined,
-        Icons.groups_rounded,
-        Icons.menu_book_rounded,
-      ];
-      final List<String> labels = ['Home', 'Chats', 'ADD', 'Community', 'Study Room'];
-      final isSelected = index == _selectedIndex;
-
-      return GestureDetector(
-        onTap: () => _onItemTapped(index),
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 250),
-          padding: EdgeInsets.symmetric(horizontal: isSelected ? 12 : 0, vertical: 8),
-          decoration: isSelected
-              ? BoxDecoration(
-                  color: Color(0xFFECC99EE),
-                  borderRadius: BorderRadius.circular(20),
-                )
-              : null,
-          child: Row(
-            children: [
-              Icon(icons[index], color: isSelected ? Colors.white : Colors.white70),
-              if (isSelected)
-                Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Text(labels[index], style: TextStyle(color: Colors.white)),
-                ),
-            ],
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: const BoxDecoration(
+          color: Color(0xFF56195B),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(25),
+            topRight: Radius.circular(25),
           ),
         ),
-      );
-    }),
-  ),
-),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(5, (index) {
+            final List<IconData> icons = [
+              Icons.home,
+              Icons.chat_bubble_rounded,
+              Icons.add_circle_outlined,
+              Icons.groups_rounded,
+              Icons.menu_book_rounded,
+            ];
+            final List<String> labels = [
+              'Home',
+              'Chats',
+              'ADD',
+              'Community',
+              'Study Room'
+            ];
+            final isSelected = index == _selectedIndex;
 
+            return GestureDetector(
+              onTap: () => _onItemTapped(index),
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 250),
+                padding: EdgeInsets.symmetric(
+                    horizontal: isSelected ? 12 : 0, vertical: 8),
+                decoration: isSelected
+                    ? BoxDecoration(
+                        color: Color(0xFFECC99EE),
+                        borderRadius: BorderRadius.circular(20),
+                      )
+                    : null,
+                child: Row(
+                  children: [
+                    Icon(icons[index],
+                        color: isSelected ? Colors.white : Colors.white70),
+                    if (isSelected)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: Text(labels[index],
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
     );
   }
 

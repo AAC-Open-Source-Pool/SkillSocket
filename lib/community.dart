@@ -314,44 +314,9 @@ class _CommunityState extends State<Community> {
               icon: Icon(Icons.person_rounded)),
         ],
       ),
-      body: Column(
+      body: ListView(
+        padding: EdgeInsets.zero,
         children: [
-          // Write a post / Create post trigger
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(0xFFECC9EE),
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: TextField(
-                onTap: _navigateToCreatePost,
-                readOnly: true,
-                decoration: InputDecoration(
-                  hintText: 'write a post',
-                  hintStyle:
-                      TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-                  prefixIcon: Container(
-                    margin: const EdgeInsets.all(8),
-                    width: 30,
-                    height: 30,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF56195B),
-                      shape: BoxShape.circle,
-                    ),
-                    child:
-                        const Icon(Icons.edit, color: Colors.white, size: 16),
-                  ),
-                  border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                ),
-              ),
-            ),
-          ),
           // Search Input Field
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -376,268 +341,320 @@ class _CommunityState extends State<Community> {
             ),
           ),
           // Posts List
-          Expanded(
-            child: filteredPosts.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off,
-                            size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No posts found',
-                          style:
-                              TextStyle(fontSize: 18, color: Colors.grey[600]),
-                        ),
-                        Text(
-                          'Try searching for "java", "flutter", or "python"',
-                          style: TextStyle(color: Colors.grey[500]),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filteredPosts.length,
-                    itemBuilder: (context, index) {
-                      final post = filteredPosts[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE1BEE7),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Account details header
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFF56195B),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.person,
-                                        color: Colors.white),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        post.username,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      Text(
-                                        _formatTimestamp(post.timestamp),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Post content text
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              child: Text(
-                                post.content,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                            // Post image (if available) - positioned below text
-                            if (post.imageUrl != null)
-                              GestureDetector(
-                                onTap: () => _openPostViewer(post,
-                                    initialShowComments:
-                                        false), // Open viewer on image tap
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 200,
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      post.imageUrl!,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Container(
-                                          color: Colors.grey[200],
-                                          child: const Center(
-                                            child: Icon(Icons.broken_image,
-                                                color: Colors.grey),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            // Action buttons
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                    top: BorderSide(color: Colors.grey[300]!)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  // Like Button
-                                  _buildActionButton(
-                                    post.isLiked
-                                        ? Icons.thumb_up
-                                        : Icons.thumb_up_outlined,
-                                    '${post.likes}',
-                                    post.isLiked
-                                        ? const Color(0xFF56195B)
-                                        : Colors.grey[700]!,
-                                    () {
-                                      setState(() {
-                                        if (post.isLiked) {
-                                          post.likes--;
-                                        } else {
-                                          post.likes++;
-                                        }
-                                        post.isLiked = !post.isLiked;
-                                      });
-                                    },
-                                  ),
-                                  // Comment Button
-                                  _buildActionButton(
-                                    Icons.comment_outlined,
-                                    '${post.comments.length}',
-                                    Colors.grey[700]!,
-                                    () {
-                                      // Open viewer to show comments, with comments panel initially open
-                                      _openPostViewer(post,
-                                          initialShowComments: true);
-                                    },
-                                  ),
-                                  // Share Button
-                                  _buildActionButton(
-                                    Icons.share_outlined,
-                                    '${post.shares}', // Still show count, but do not increment
-                                    Colors.grey[700]!,
-                                    () {
-                                      // Trigger native share sheet using share_plus package
-                                      Share.share(
-                                          'Check out this post: ${post.content}\n\n'
-                                          '${post.imageUrl != null ? 'Image: ${post.imageUrl}\n' : ''}'
-                                          '#${post.tags.join(' #')}');
-                                      // Note: Share count is NOT incremented as per your request
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+
+          if (filteredPosts.isEmpty)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No posts found',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
-          ),
+                  Text(
+                    'Try searching for "java", "flutter", or "python"',
+                    style: TextStyle(color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            )
+          else
+            ...filteredPosts.map(
+              (post) {
+                return Container(
+                  margin:
+                      const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE1BEE7),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Account details header
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF56195B),
+                                shape: BoxShape.circle,
+                              ),
+                              child:
+                                  const Icon(Icons.person, color: Colors.white),
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  post.username,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  _formatTimestamp(post.timestamp),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Post content text
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Text(
+                          post.content,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      // Post image (if available) - positioned below text
+                      if (post.imageUrl != null)
+                        GestureDetector(
+                          onTap: () => _openPostViewer(post,
+                              initialShowComments:
+                                  false), // Open viewer on image tap
+                          child: Container(
+                            width: double.infinity,
+                            height: 200,
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                post.imageUrl!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[200],
+                                    child: const Center(
+                                      child: Icon(Icons.broken_image,
+                                          color: Colors.grey),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      // Action buttons
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border:
+                              Border(top: BorderSide(color: Colors.grey[300]!)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Like Button
+                            _buildActionButton(
+                              post.isLiked
+                                  ? Icons.thumb_up
+                                  : Icons.thumb_up_outlined,
+                              '${post.likes}',
+                              post.isLiked
+                                  ? const Color(0xFF56195B)
+                                  : Colors.grey[700]!,
+                              () {
+                                setState(() {
+                                  if (post.isLiked) {
+                                    post.likes--;
+                                  } else {
+                                    post.likes++;
+                                  }
+                                  post.isLiked = !post.isLiked;
+                                });
+                              },
+                            ),
+                            // Comment Button
+                            _buildActionButton(
+                              Icons.comment_outlined,
+                              '${post.comments.length}',
+                              Colors.grey[700]!,
+                              () {
+                                // Open viewer to show comments, with comments panel initially open
+                                _openPostViewer(post,
+                                    initialShowComments: true);
+                              },
+                            ),
+                            // Share Button
+                            _buildActionButton(
+                              Icons.share_outlined,
+                              '${post.shares}', // Still show count, but do not increment
+                              Colors.grey[700]!,
+                              () {
+                                // Trigger native share sheet using share_plus package
+                                Share.share(
+                                    'Check out this post: ${post.content}\n\n'
+                                    '${post.imageUrl != null ? 'Image: ${post.imageUrl}\n' : ''}'
+                                    '#${post.tags.join(' #')}');
+                                // Note: Share count is NOT incremented as per your request
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
-      floatingActionButton: Container(
-        width: 56,
-        height: 56,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-        ),
-        child: FloatingActionButton(
-          onPressed: _navigateToCreateCommunity, // New functionality
-          elevation: 0,
-          child: const Icon(
-            Icons.add,
-            size: 28,
-          ),
-        ),
+      floatingActionButton: Builder(
+        builder: (context) {
+          return FloatingActionButton(
+            //backgroundColor: const Color(0xFF56195B),
+            child: const Icon(Icons.add),
+            onPressed: () {
+              final RenderBox button = context.findRenderObject() as RenderBox;
+              final RenderBox overlay =
+                  Overlay.of(context).context.findRenderObject() as RenderBox;
+
+              final Offset buttonTopCenter = button.localToGlobal(
+                Offset(button.size.width / 2, 0),
+                ancestor: overlay,
+              );
+
+              final RelativeRect position = RelativeRect.fromLTRB(
+                buttonTopCenter.dx,
+                buttonTopCenter.dy - 120, // adjust to move further up
+                overlay.size.width - buttonTopCenter.dx,
+                overlay.size.height - buttonTopCenter.dy,
+              );
+
+              showMenu(
+                context: context,
+                position: position,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                items: [
+                  PopupMenuItem(
+                    child: const ListTile(
+                      leading: Icon(Icons.post_add, color: Color(0xFF56195B)),
+                      title: Text("Create Post"),
+                    ),
+                    onTap: () {
+                      Future.delayed(Duration.zero, () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const CreatePostPage()),
+                        );
+                      });
+                    },
+                  ),
+                  PopupMenuItem(
+                    child: const ListTile(
+                      leading: Icon(Icons.group_add, color: Color(0xFF56195B)),
+                      title: Text("Create Community"),
+                    ),
+                    onTap: () {
+                      Future.delayed(Duration.zero, () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const CreateCommunityPage()),
+                        );
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
       bottomNavigationBar: Container(
-  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-  decoration: const BoxDecoration(
-    color: Color(0xFF56195B),
-    borderRadius: BorderRadius.only(
-      topLeft: Radius.circular(25),
-      topRight: Radius.circular(25),
-    ),
-  ),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: List.generate(5, (index) {
-      final List<IconData> icons = [
-        Icons.home,
-        Icons.chat_bubble_rounded,
-        Icons.add_circle_outlined,
-        Icons.groups_rounded,
-        Icons.menu_book_rounded,
-      ];
-      final List<String> labels = ['Home', 'Chats', 'ADD', 'Community', 'Study Room'];
-      final isSelected = index == _selectedIndex;
-
-      return GestureDetector(
-        onTap: () => _onItemTapped(index),
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 250),
-          padding: EdgeInsets.symmetric(horizontal: isSelected ? 12 : 0, vertical: 8),
-          decoration: isSelected
-              ? BoxDecoration(
-                  color: Color(0xFFECC99EE),
-                  borderRadius: BorderRadius.circular(20),
-                )
-              : null,
-          child: Row(
-            children: [
-              Icon(icons[index], color: isSelected ? Colors.white : Colors.white70),
-              if (isSelected)
-                Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Text(labels[index], style: TextStyle(color: Colors.white)),
-                ),
-            ],
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: const BoxDecoration(
+          color: Color(0xFF56195B),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(25),
+            topRight: Radius.circular(25),
           ),
         ),
-      );
-    }),
-  ),
-),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(5, (index) {
+            final List<IconData> icons = [
+              Icons.home,
+              Icons.chat_bubble_rounded,
+              Icons.add_circle_outlined,
+              Icons.groups_rounded,
+              Icons.menu_book_rounded,
+            ];
+            final List<String> labels = [
+              'Home',
+              'Chats',
+              'ADD',
+              'Community',
+              'Study Room'
+            ];
+            final isSelected = index == _selectedIndex;
 
+            return GestureDetector(
+              onTap: () => _onItemTapped(index),
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 250),
+                padding: EdgeInsets.symmetric(
+                    horizontal: isSelected ? 12 : 0, vertical: 8),
+                decoration: isSelected
+                    ? BoxDecoration(
+                        color: Color(0xFFECC99EE),
+                        borderRadius: BorderRadius.circular(20),
+                      )
+                    : null,
+                child: Row(
+                  children: [
+                    Icon(icons[index],
+                        color: isSelected ? Colors.white : Colors.white70),
+                    if (isSelected)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: Text(labels[index],
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
     );
   }
 
@@ -1335,11 +1352,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color.fromARGB(255, 209, 123, 213), Color(0xFF56195B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: const Color(0xFFECC9EE),
         borderRadius: BorderRadius.circular(16),
       ),
       child: TextField(
