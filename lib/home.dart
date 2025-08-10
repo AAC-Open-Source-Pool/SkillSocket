@@ -3,12 +3,7 @@ import 'package:barter_system/communities.dart';
 import 'package:barter_system/history.dart';
 import 'package:barter_system/login.dart';
 import 'package:barter_system/profile.dart';
-//import 'package:barter_system/add.dart';
-import 'package:barter_system/chats.dart';
 import 'package:barter_system/reviews.dart';
-import 'package:barter_system/skillpopup.dart';
-import 'package:barter_system/studyroom.dart';
-import 'package:barter_system/community.dart';
 import 'package:barter_system/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -105,30 +100,11 @@ class _MyHomePageState extends State<MyHomePage> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   final TextEditingController _todoController = TextEditingController();
   final TextEditingController _eventController = TextEditingController();
-  final int _selectedIndex = 0;
-
   final Map<DateTime, List<Map<String, dynamic>>> _todos = {};
   final Map<DateTime, List<String>> _events = {};
 
   DateTime _getDateKey(DateTime date) {
     return DateTime(date.year, date.month, date.day);
-  }
-
-  final List<Widget> _pages = [
-    MyHomePage(
-      title: 'App name',
-    ),
-    Chats(),
-    SkillMatchApp(),
-    Community(),
-    StudyRoom(),
-  ];
-
-  void _onItemTapped(int index) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => _pages[index]),
-    );
   }
 
   void _showAddEventDialog() {
@@ -294,133 +270,180 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       body: SingleChildScrollView(
-          child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: TableCalendar(
-                      focusedDay: _focusedDay,
-                      firstDay: DateTime.utc(1970, 1, 1),
-                      lastDay: DateTime.utc(2100, 12, 31),
-                      selectedDayPredicate: (day) =>
-                          isSameDay(_selectedDay, day),
-                      onDaySelected: (selectedDay, focusedDay) {
-                        setState(() {
-                          _selectedDay = selectedDay;
-                          _focusedDay = focusedDay;
-                        });
-                      },
-                      eventLoader: (day) {
-                        return _events[_getDateKey(day)] ?? [];
-                      },
-                      calendarFormat: _calendarFormat,
-                      onFormatChanged: (format) {
-                        setState(() {
-                          _calendarFormat = format;
-                        });
-                      },
-                      availableCalendarFormats: const {
-                        CalendarFormat.month: 'Month',
-                        CalendarFormat.week: 'Week',
-                      },
-                      calendarStyle: const CalendarStyle(
-                        selectedDecoration: BoxDecoration(
-                          color: Color(0xFFECC9EE),
-                          shape: BoxShape.circle,
-                        ),
-                        todayDecoration: BoxDecoration(
-                          color: Color(0xFF56195B),
-                          shape: BoxShape.circle,
-                        ),
-                        markerDecoration: BoxDecoration(
-                          color: Color(0xFF56195B),
-                          shape: BoxShape.circle,
-                        ),
+        child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: TableCalendar(
+                    focusedDay: _focusedDay,
+                    firstDay: DateTime.utc(1970, 1, 1),
+                    lastDay: DateTime.utc(2100, 12, 31),
+                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                    eventLoader: (day) {
+                      return _events[_getDateKey(day)] ?? [];
+                    },
+                    calendarFormat: _calendarFormat,
+                    onFormatChanged: (format) {
+                      setState(() {
+                        _calendarFormat = format;
+                      });
+                    },
+                    availableCalendarFormats: const {
+                      CalendarFormat.month: 'Month',
+                      CalendarFormat.week: 'Week',
+                    },
+                    calendarStyle: const CalendarStyle(
+                      selectedDecoration: BoxDecoration(
+                        color: Color(0xFFECC9EE),
+                        shape: BoxShape.circle,
+                      ),
+                      todayDecoration: BoxDecoration(
+                        color: Color(0xFF56195B),
+                        shape: BoxShape.circle,
+                      ),
+                      markerDecoration: BoxDecoration(
+                        color: Color(0xFF56195B),
+                        shape: BoxShape.circle,
                       ),
                     ),
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Events on ${dateKey.toLocal().toString().split(' ')[0]}",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle,
+                            color: Colors.deepPurple),
+                        onPressed: _showAddEventDialog,
+                      ),
+                    ],
+                  ),
+                ),
+                if (todaysEvents.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Events on ${dateKey.toLocal().toString().split(' ')[0]}",
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle,
-                              color: Colors.deepPurple),
-                          onPressed: _showAddEventDialog,
-                        ),
-                      ],
+                    child: Column(
+                      children: todaysEvents
+                          .map((event) => ListTile(
+                                leading: const Icon(Icons.event),
+                                title: Text(event),
+                              ))
+                          .toList(),
                     ),
+                  )
+                else
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text("No events for today."),
                   ),
-                  if (todaysEvents.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Column(
-                        children: todaysEvents
-                            .map((event) => ListTile(
-                                  leading: const Icon(Icons.event),
-                                  title: Text(event),
-                                ))
-                            .toList(),
+                Divider(thickness: 1),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Events',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              TextEditingController eventController =
+                                  TextEditingController();
+                              return AlertDialog(
+                                title: const Text('Add Event'),
+                                content: TextField(
+                                  controller: eventController,
+                                  decoration: const InputDecoration(
+                                      labelText: 'Event title'),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      if (eventController.text.isNotEmpty) {
+                                        setState(() {
+                                          _events[dateKey] = [
+                                            ...todaysEvents,
+                                            eventController.text
+                                          ];
+                                        });
+                                      }
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Add'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                       ),
-                    )
-                  else
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text("No events for today."),
-                    ),
-                  Divider(thickness: 1),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0, vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    ],
+                  ),
+                ),
+                ...todaysEvents.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final event = entry.value;
+                  return ListTile(
+                    title: Text(event),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('Events',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold)),
                         IconButton(
-                          icon: const Icon(Icons.add),
+                          icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {
+                            TextEditingController editController =
+                                TextEditingController(text: event);
                             showDialog(
                               context: context,
                               builder: (context) {
-                                TextEditingController eventController =
-                                    TextEditingController();
                                 return AlertDialog(
-                                  title: const Text('Add Event'),
+                                  title: const Text('Edit Event'),
                                   content: TextField(
-                                    controller: eventController,
+                                    controller: editController,
                                     decoration: const InputDecoration(
-                                        labelText: 'Event title'),
+                                        labelText: 'Edit event'),
                                   ),
                                   actions: [
                                     TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
+                                      onPressed: () => Navigator.pop(context),
                                       child: const Text('Cancel'),
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        if (eventController.text.isNotEmpty) {
-                                          setState(() {
-                                            _events[dateKey] = [
-                                              ...todaysEvents,
-                                              eventController.text
-                                            ];
-                                          });
-                                        }
+                                        setState(() {
+                                          todaysEvents[index] =
+                                              editController.text;
+                                          _events[dateKey] = [...todaysEvents];
+                                        });
                                         Navigator.pop(context);
                                       },
-                                      child: const Text('Add'),
+                                      child: const Text('Save'),
                                     ),
                                   ],
                                 );
@@ -428,175 +451,66 @@ class _MyHomePageState extends State<MyHomePage> {
                             );
                           },
                         ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              todaysEvents.removeAt(index);
+                              _events[dateKey] = [...todaysEvents];
+                            });
+                          },
+                        ),
                       ],
                     ),
-                  ),
-                  ...todaysEvents.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final event = entry.value;
-                    return ListTile(
-                      title: Text(event),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () {
-                              TextEditingController editController =
-                                  TextEditingController(text: event);
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: const Text('Edit Event'),
-                                    content: TextField(
-                                      controller: editController,
-                                      decoration: const InputDecoration(
-                                          labelText: 'Edit event'),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            todaysEvents[index] =
-                                                editController.text;
-                                            _events[dateKey] = [
-                                              ...todaysEvents
-                                            ];
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('Save'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              setState(() {
-                                todaysEvents.removeAt(index);
-                                _events[dateKey] = [...todaysEvents];
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                  TodoList(
-                    selectedDate: dateKey,
-                    controller: _todoController,
-                    todos: todaysTodos,
-                    onAdd: () {
-                      if (_todoController.text.isNotEmpty) {
-                        setState(() {
-                          _todos[dateKey] = [
-                            ...todaysTodos,
-                            {"task": _todoController.text, "done": false}
-                          ];
-                          _todoController.clear();
-                        });
-                      }
-                    },
-                    onToggle: (index, value) {
+                  );
+                }),
+                TodoList(
+                  selectedDate: dateKey,
+                  controller: _todoController,
+                  todos: todaysTodos,
+                  onAdd: () {
+                    if (_todoController.text.isNotEmpty) {
                       setState(() {
-                        final updatedTodos = [...todaysTodos];
-                        updatedTodos[index] = {
-                          ...updatedTodos[index],
-                          'done': value,
-                        };
-                        _todos[dateKey] = updatedTodos;
+                        _todos[dateKey] = [
+                          ...todaysTodos,
+                          {"task": _todoController.text, "done": false}
+                        ];
+                        _todoController.clear();
                       });
-                    },
-                    onDelete: (index) {
-                      setState(() {
-                        final updatedTodos =
-                            List<Map<String, dynamic>>.from(todaysTodos);
-                        updatedTodos.removeAt(index);
-                        _todos[dateKey] = updatedTodos;
-                      });
-                    },
-                  ),
-                  Padding(
-                      padding: EdgeInsets.all(25.0),
-                    ),
-                ],
-                
-              )
-              ),
-              ),
+                    }
+                  },
+                  onToggle: (index, value) {
+                    setState(() {
+                      final updatedTodos = [...todaysTodos];
+                      updatedTodos[index] = {
+                        ...updatedTodos[index],
+                        'done': value,
+                      };
+                      _todos[dateKey] = updatedTodos;
+                    });
+                  },
+                  onDelete: (index) {
+                    setState(() {
+                      final updatedTodos =
+                          List<Map<String, dynamic>>.from(todaysTodos);
+                      updatedTodos.removeAt(index);
+                      _todos[dateKey] = updatedTodos;
+                    });
+                  },
+                ),
+                Padding(
+                  padding: EdgeInsets.all(25.0),
+                ),
+              ],
+            )),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => ChatbotPage()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => ChatbotScreen()));
         },
         child: Icon(Icons.android),
       ),
-      bottomNavigationBar: Container(
-  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-  decoration: const BoxDecoration(
-    color: Color(0xFF56195B),
-    borderRadius: BorderRadius.only(
-      topLeft: Radius.circular(25),
-      topRight: Radius.circular(25),
-    ),
-  ),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: List.generate(5, (index) {
-      final List<IconData> icons = [
-        Icons.home,
-        Icons.chat_bubble_rounded,
-        Icons.add_circle_outlined,
-        Icons.groups_rounded,
-        Icons.menu_book_rounded,
-      ];
-      final List<String> labels = ['Home', 'Chats', 'ADD', 'Community', 'Study Room'];
-      final isSelected = index == _selectedIndex;
-
-      return GestureDetector(
-        onTap: () => _onItemTapped(index),
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 250),
-          padding: EdgeInsets.symmetric(horizontal: isSelected ? 12 : 0, vertical: 8),
-          decoration: isSelected
-              ? BoxDecoration(
-                  color: Color(0xFFECC99EE),
-                  borderRadius: BorderRadius.circular(20),
-                )
-              : null,
-          child: Row(
-            children: [
-              Icon(icons[index], color: isSelected ? Colors.white : Colors.white70),
-              if (isSelected)
-                Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Text(labels[index], style: TextStyle(color: Colors.white)),
-                ),
-            ],
-          ),
-        ),
-      );
-    }),
-  ),
-),
-
-    );
-  }
-
-  ListTile _buildDrawerItem(IconData icon, String title) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.white),
-      title: Text(title, style: const TextStyle(color: Colors.white)),
-      onTap: () => Navigator.pop(context),
     );
   }
 }

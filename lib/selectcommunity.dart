@@ -1,17 +1,6 @@
 import 'package:barter_system/home.dart';
 import 'package:flutter/material.dart';
 
-// Entry widget
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: SelectCommunitiesPage(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
 // Model class for Community
 class Community {
   final String name;
@@ -22,6 +11,8 @@ class Community {
 
 // Main page for selecting communities
 class SelectCommunitiesPage extends StatefulWidget {
+  const SelectCommunitiesPage({super.key});
+
   @override
   _SelectCommunitiesPageState createState() => _SelectCommunitiesPageState();
 }
