@@ -3,26 +3,30 @@ import 'package:barter_system/communities.dart';
 import 'package:barter_system/history.dart';
 import 'package:barter_system/login.dart';
 import 'package:barter_system/profile.dart';
-import 'package:barter_system/chats.dart';
 import 'package:barter_system/reviews.dart';
-import 'package:barter_system/skillpopup.dart';
-import 'package:barter_system/studyroom.dart';
-import 'package:barter_system/home.dart';
 import 'package:barter_system/notification.dart';
-import 'package:image_picker/image_picker.dart'; // For image selection
-import 'package:share_plus/share_plus.dart'; // For share functionality
-import 'dart:io'; // For File operations (though we'll simulate URL for Post model)
+import 'package:barter_system/services/post_service.dart';
+import 'package:barter_system/models/backend_models.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class _CommunityState extends State<Community> {
   final TextEditingController _searchController = TextEditingController();
-  List<Post> allPosts = [];
-  List<Post> filteredPosts = [];
+  List<BackendPost> allPosts = [];
+  List<BackendPost> filteredPosts = [];
+  bool isLoading = true;
+  bool isLoadingMore = false;
+  int currentPage = 1;
+  bool hasMorePosts = true;
+  String? currentUserId;
 
   @override
   void initState() {
     super.initState();
-    _initializePosts();
-    filteredPosts = allPosts;
+    _loadCurrentUser();
+    _loadPosts();
     _searchController.addListener(() {
       _filterPosts(_searchController.text);
     });
@@ -34,112 +38,91 @@ class _CommunityState extends State<Community> {
     super.dispose();
   }
 
-  int _selectedIndex = 3;
-  final List<Widget> _pages = [
-    MyHomePage(
-      title: 'App name',
-    ),
-    Chats(),
-    SkillMatchApp(),
-    Community(),
-    StudyRoom(),
-  ];
-  void _onItemTapped(int index) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => _pages[index]),
-    );
+  Future<void> _loadCurrentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      currentUserId = prefs.getString('userId');
+    });
   }
 
-  void _initializePosts() {
-    allPosts = [
-      Post(
-        id: '1',
-        username: 'john_dev',
-        content:
-            'Just finished learning Java collections! The HashMap implementation is fascinating. Working on a new project using Spring Boot.',
-        imageUrl:
-            'https://via.placeholder.com/600x400/4CAF50/FFFFFF?text=Java+Code',
-        tags: ['java', 'programming', 'collections'],
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        likes: 15,
-        shares: 3,
-        comments: [
-          Comment(
-            username: 'sarah_coder',
-            content: 'Great post! HashMap is really powerful.',
-            timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-          ),
-          Comment(
-            username: 'mike_dev',
-            content: 'Have you tried LinkedHashMap?',
-            timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-          ),
-        ],
-      ),
-      Post(
-        id: '2',
-        username: 'flutter_fan',
-        content:
-            'Building my first Flutter app! The widget system is amazing and so intuitive.',
-        imageUrl:
-            'https://via.placeholder.com/600x400/2196F3/FFFFFF?text=Flutter+App',
-        tags: ['flutter', 'mobile', 'development'],
-        timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-        likes: 28,
-        shares: 7,
-        comments: [
-          Comment(
-            username: 'dart_master',
-            content: 'Flutter is the future of mobile development!',
-            timestamp: DateTime.now().subtract(const Duration(hours: 3)),
-          ),
-        ],
-      ),
-      Post(
-        id: '3',
-        username: 'python_guru',
-        content:
-            'Data science with Python is incredible. Just completed my machine learning project using TensorFlow!',
-        imageUrl:
-            'https://via.placeholder.com/600x400/FF9800/FFFFFF?text=Python+ML',
-        tags: ['python', 'datascience', 'machinelearning'],
-        timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-        likes: 42,
-        shares: 12,
-        comments: [
-          Comment(
-            username: 'data_analyst',
-            content: 'Which libraries did you use?',
-            timestamp: DateTime.now().subtract(const Duration(hours: 5)),
-          ),
-          Comment(
-            username: 'ai_enthusiast',
-            content: 'Pandas and NumPy are game changers!',
-            timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-          ),
-        ],
-      ),
-      Post(
-        id: '4',
-        username: 'react_developer',
-        content:
-            'Learning React hooks has been a game changer. The useState and useEffect hooks make state management so much easier.',
-        imageUrl:
-            'https://via.placeholder.com/600x400/61DAFB/000000?text=React+JS',
-        tags: ['react', 'javascript', 'frontend'],
-        timestamp: DateTime.now().subtract(const Duration(hours: 8)),
-        likes: 35,
-        shares: 8,
-        comments: [
-          Comment(
-            username: 'js_ninja',
-            content: 'React hooks are amazing for functional components!',
-            timestamp: DateTime.now().subtract(const Duration(hours: 7)),
-          ),
-        ],
-      ),
-    ];
+  Future<void> _loadPosts({bool refresh = false}) async {
+    if (refresh) {
+      setState(() {
+        currentPage = 1;
+        hasMorePosts = true;
+        isLoading = true;
+      });
+    }
+
+    try {
+      final response = await PostService.getPosts(
+        page: currentPage,
+        limit: 10,
+        search:
+            _searchController.text.isNotEmpty ? _searchController.text : null,
+      );
+
+      if (response != null) {
+        final postsResponse = PostsResponse.fromJson(response);
+
+        setState(() {
+          if (refresh || currentPage == 1) {
+            allPosts = postsResponse.posts;
+          } else {
+            allPosts.addAll(postsResponse.posts);
+          }
+          filteredPosts = allPosts;
+          hasMorePosts = postsResponse.pagination.hasNextPage;
+          isLoading = false;
+          isLoadingMore = false;
+        });
+      } else {
+        // Fallback to dummy data if API fails
+        _initializeDummyPosts();
+      }
+    } catch (e) {
+      print('Error loading posts: $e');
+      // Fallback to dummy data if API fails
+      _initializeDummyPosts();
+    }
+  }
+
+  Future<void> _loadMorePosts() async {
+    if (isLoadingMore || !hasMorePosts) return;
+
+    setState(() {
+      isLoadingMore = true;
+      currentPage++;
+    });
+
+    await _loadPosts();
+  }
+
+  void _initializeDummyPosts() {
+    // Fallback dummy data structure matching BackendPost
+    setState(() {
+      allPosts = [
+        BackendPost(
+          id: '1',
+          user: BackendUser(id: '1', name: 'john_dev'),
+          content:
+              'Just finished learning Java collections! The HashMap implementation is fascinating.',
+          image:
+              'https://via.placeholder.com/600x400/4CAF50/FFFFFF?text=Java+Code',
+          likes: ['user1', 'user2'],
+          comments: [
+            BackendComment(
+              user: BackendUser(id: '2', name: 'sarah_coder'),
+              content: 'Great post! HashMap is really powerful.',
+              createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+            ),
+          ],
+          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+        ),
+      ];
+      filteredPosts = allPosts;
+      isLoading = false;
+    });
   }
 
   void _filterPosts(String query) {
@@ -149,9 +132,7 @@ class _CommunityState extends State<Community> {
       } else {
         filteredPosts = allPosts.where((post) {
           return post.content.toLowerCase().contains(query.toLowerCase()) ||
-              post.tags.any(
-                  (tag) => tag.toLowerCase().contains(query.toLowerCase())) ||
-              post.username.toLowerCase().contains(query.toLowerCase());
+              post.user.name.toLowerCase().contains(query.toLowerCase());
         }).toList();
       }
     });
@@ -161,33 +142,62 @@ class _CommunityState extends State<Community> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CreatePostPage()),
-    ).then((newPost) {
-      if (newPost != null && newPost is Post) {
-        setState(() {
-          allPosts.insert(0, newPost);
-          _filterPosts(_searchController.text);
-        });
+    ).then((result) {
+      if (result != null && result == true) {
+        // Refresh posts when a new post is created
+        _loadPosts(refresh: true);
       }
     });
   }
 
-  // Modified to open PhotoViewerPage with `initialShowComments` flag
-  void _openPostViewer(Post post, {bool initialShowComments = false}) {
+  // Updated to handle BackendPost
+  void _openPostViewer(BackendPost post, {bool initialShowComments = false}) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PhotoViewerPage(
           post: post,
           initialShowComments: initialShowComments,
+          onUpdate: () {
+            // Refresh posts when returning from photo viewer
+            _loadPosts(refresh: true);
+          },
         ),
       ),
-    ).then((_) {
-      // Refresh the community feed when returning from PhotoViewerPage
-      // to reflect any changes like new comments or likes/unlikes
-      setState(() {
-        _filterPosts(_searchController.text); // Re-filter to update counts
-      });
-    });
+    );
+  }
+
+  Future<void> _toggleLike(BackendPost post) async {
+    try {
+      final result = await PostService.toggleLike(post.id);
+      if (result != null) {
+        // Update the post in the local list
+        setState(() {
+          final index = allPosts.indexWhere((p) => p.id == post.id);
+          if (index != -1) {
+            // Create a new post object with updated likes
+            final updatedPost = BackendPost(
+              id: post.id,
+              user: post.user,
+              content: post.content,
+              image: post.image,
+              likes: result['liked']
+                  ? [...post.likes, currentUserId!]
+                  : post.likes.where((id) => id != currentUserId).toList(),
+              comments: post.comments,
+              createdAt: post.createdAt,
+            );
+            allPosts[index] = updatedPost;
+            _filterPosts(_searchController.text);
+          }
+        });
+      }
+    } catch (e) {
+      print('Error toggling like: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to update like')),
+      );
+    }
   }
 
   void _navigateToCreateCommunity() {
@@ -377,200 +387,230 @@ class _CommunityState extends State<Community> {
           ),
           // Posts List
           Expanded(
-            child: filteredPosts.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off,
-                            size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No posts found',
-                          style:
-                              TextStyle(fontSize: 18, color: Colors.grey[600]),
-                        ),
-                        Text(
-                          'Try searching for "java", "flutter", or "python"',
-                          style: TextStyle(color: Colors.grey[500]),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filteredPosts.length,
-                    itemBuilder: (context, index) {
-                      final post = filteredPosts[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE1BEE7),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : filteredPosts.isEmpty
+                    ? Center(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Account details header
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFF56195B),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.person,
-                                        color: Colors.white),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        post.username,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      Text(
-                                        _formatTimestamp(post.timestamp),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey[400]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No posts found',
+                              style: TextStyle(
+                                  fontSize: 18, color: Colors.grey[600]),
                             ),
-                            // Post content text
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              child: Text(
-                                post.content,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                            // Post image (if available) - positioned below text
-                            if (post.imageUrl != null)
-                              GestureDetector(
-                                onTap: () => _openPostViewer(post,
-                                    initialShowComments:
-                                        false), // Open viewer on image tap
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 200,
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      post.imageUrl!,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Container(
-                                          color: Colors.grey[200],
-                                          child: const Center(
-                                            child: Icon(Icons.broken_image,
-                                                color: Colors.grey),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            // Action buttons
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                    top: BorderSide(color: Colors.grey[300]!)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  // Like Button
-                                  _buildActionButton(
-                                    post.isLiked
-                                        ? Icons.thumb_up
-                                        : Icons.thumb_up_outlined,
-                                    '${post.likes}',
-                                    post.isLiked
-                                        ? const Color(0xFF56195B)
-                                        : Colors.grey[700]!,
-                                    () {
-                                      setState(() {
-                                        if (post.isLiked) {
-                                          post.likes--;
-                                        } else {
-                                          post.likes++;
-                                        }
-                                        post.isLiked = !post.isLiked;
-                                      });
-                                    },
-                                  ),
-                                  // Comment Button
-                                  _buildActionButton(
-                                    Icons.comment_outlined,
-                                    '${post.comments.length}',
-                                    Colors.grey[700]!,
-                                    () {
-                                      // Open viewer to show comments, with comments panel initially open
-                                      _openPostViewer(post,
-                                          initialShowComments: true);
-                                    },
-                                  ),
-                                  // Share Button
-                                  _buildActionButton(
-                                    Icons.share_outlined,
-                                    '${post.shares}', // Still show count, but do not increment
-                                    Colors.grey[700]!,
-                                    () {
-                                      // Trigger native share sheet using share_plus package
-                                      Share.share(
-                                          'Check out this post: ${post.content}\n\n'
-                                          '${post.imageUrl != null ? 'Image: ${post.imageUrl}\n' : ''}'
-                                          '#${post.tags.join(' #')}');
-                                      // Note: Share count is NOT incremented as per your request
-                                    },
-                                  ),
-                                ],
-                              ),
+                            Text(
+                              'Try searching for different terms',
+                              style: TextStyle(color: Colors.grey[500]),
                             ),
                           ],
                         ),
-                      );
-                    },
-                  ),
+                      )
+                    : NotificationListener<ScrollNotification>(
+                        onNotification: (ScrollNotification scrollInfo) {
+                          if (!isLoadingMore &&
+                              hasMorePosts &&
+                              scrollInfo.metrics.pixels ==
+                                  scrollInfo.metrics.maxScrollExtent) {
+                            _loadMorePosts();
+                          }
+                          return false;
+                        },
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount:
+                              filteredPosts.length + (hasMorePosts ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == filteredPosts.length) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+
+                            final post = filteredPosts[index];
+                            final isLiked = currentUserId != null &&
+                                post.likes.contains(currentUserId);
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE1BEE7),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Account details header
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFF56195B),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: post.user.profileImage != null
+                                              ? ClipOval(
+                                                  child: Image.network(
+                                                    post.user.profileImage!,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                            error,
+                                                            stackTrace) =>
+                                                        const Icon(Icons.person,
+                                                            color:
+                                                                Colors.white),
+                                                  ),
+                                                )
+                                              : const Icon(Icons.person,
+                                                  color: Colors.white),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              post.user.name,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                            Text(
+                                              _formatTimestamp(post.createdAt),
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey[600],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Post content text
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    child: Text(
+                                      post.content,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                  // Post image (if available)
+                                  if (post.image != null)
+                                    GestureDetector(
+                                      onTap: () => _openPostViewer(post,
+                                          initialShowComments: false),
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 200,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.3),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: Image.network(
+                                            post.image!,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Container(
+                                                color: Colors.grey[200],
+                                                child: const Center(
+                                                  child: Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.grey),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  // Action buttons
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                          top: BorderSide(
+                                              color: Colors.grey[300]!)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        // Like Button
+                                        _buildActionButton(
+                                          isLiked
+                                              ? Icons.thumb_up
+                                              : Icons.thumb_up_outlined,
+                                          '${post.likes.length}',
+                                          isLiked
+                                              ? const Color(0xFF56195B)
+                                              : Colors.grey[700]!,
+                                          () => _toggleLike(post),
+                                        ),
+                                        // Comment Button
+                                        _buildActionButton(
+                                          Icons.comment_outlined,
+                                          '${post.comments.length}',
+                                          Colors.grey[700]!,
+                                          () {
+                                            _openPostViewer(post,
+                                                initialShowComments: true);
+                                          },
+                                        ),
+                                        // Share Button
+                                        _buildActionButton(
+                                          Icons.share_outlined,
+                                          '',
+                                          Colors.grey[700]!,
+                                          () {
+                                            Share.share(
+                                                'Check out this post: ${post.content}\n\n'
+                                                '${post.image != null ? 'Image: ${post.image}\n' : ''}'
+                                                'Shared from Community App');
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
           ),
         ],
       ),
@@ -589,55 +629,6 @@ class _CommunityState extends State<Community> {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-  decoration: const BoxDecoration(
-    color: Color(0xFF56195B),
-    borderRadius: BorderRadius.only(
-      topLeft: Radius.circular(25),
-      topRight: Radius.circular(25),
-    ),
-  ),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: List.generate(5, (index) {
-      final List<IconData> icons = [
-        Icons.home,
-        Icons.chat_bubble_rounded,
-        Icons.add_circle_outlined,
-        Icons.groups_rounded,
-        Icons.menu_book_rounded,
-      ];
-      final List<String> labels = ['Home', 'Chats', 'ADD', 'Community', 'Study Room'];
-      final isSelected = index == _selectedIndex;
-
-      return GestureDetector(
-        onTap: () => _onItemTapped(index),
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 250),
-          padding: EdgeInsets.symmetric(horizontal: isSelected ? 12 : 0, vertical: 8),
-          decoration: isSelected
-              ? BoxDecoration(
-                  color: Color(0xFFECC99EE),
-                  borderRadius: BorderRadius.circular(20),
-                )
-              : null,
-          child: Row(
-            children: [
-              Icon(icons[index], color: isSelected ? Colors.white : Colors.white70),
-              if (isSelected)
-                Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Text(labels[index], style: TextStyle(color: Colors.white)),
-                ),
-            ],
-          ),
-        ),
-      );
-    }),
-  ),
-),
-
     );
   }
 
@@ -727,14 +718,15 @@ class Comment {
 }
 
 class PhotoViewerPage extends StatefulWidget {
-  final Post post;
-  final bool
-      initialShowComments; // New: to control initial comments panel visibility
+  final BackendPost post;
+  final bool initialShowComments;
+  final VoidCallback? onUpdate;
 
   const PhotoViewerPage({
     Key? key,
     required this.post,
-    this.initialShowComments = false, // Default to false
+    this.initialShowComments = false,
+    this.onUpdate,
   }) : super(key: key);
 
   @override
@@ -742,14 +734,15 @@ class PhotoViewerPage extends StatefulWidget {
 }
 
 class _PhotoViewerPageState extends State<PhotoViewerPage> {
-  late bool showComments; // Changed to late to initialize in initState
+  late bool showComments;
   final TextEditingController _commentController = TextEditingController();
+  late BackendPost currentPost;
 
   @override
   void initState() {
     super.initState();
-    showComments =
-        widget.initialShowComments; // Initialize with the passed flag
+    showComments = widget.initialShowComments;
+    currentPost = widget.post;
   }
 
   @override
@@ -758,20 +751,39 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
     super.dispose();
   }
 
-  void _addComment() {
+  Future<void> _addComment() async {
     if (_commentController.text.trim().isNotEmpty) {
-      setState(() {
-        // Add new comment to the post's comments list
-        widget.post.comments.add(
-          Comment(
-            username: 'You', // Assuming the current user is 'You'
-            content: _commentController.text.trim(),
-            timestamp: DateTime.now(),
-          ),
+      try {
+        final newComments = await PostService.addComment(
+          currentPost.id,
+          _commentController.text.trim(),
         );
-        _commentController.clear(); // Clear the input field
-      });
-      // In a real app, you might also send this comment to a backend server.
+
+        if (newComments != null) {
+          setState(() {
+            // Update the current post with new comments
+            currentPost = BackendPost(
+              id: currentPost.id,
+              user: currentPost.user,
+              content: currentPost.content,
+              image: currentPost.image,
+              likes: currentPost.likes,
+              comments:
+                  newComments.map((c) => BackendComment.fromJson(c)).toList(),
+              createdAt: currentPost.createdAt,
+            );
+            _commentController.clear();
+          });
+
+          // Notify parent to update
+          widget.onUpdate?.call();
+        }
+      } catch (e) {
+        print('Error adding comment: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to add comment')),
+        );
+      }
     }
   }
 
@@ -818,7 +830,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                         ),
                         Expanded(
                           child: Text(
-                            widget.post.username,
+                            currentPost.user.name,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -832,9 +844,9 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                 ),
                 Expanded(
                   child: Center(
-                    child: widget.post.imageUrl != null
+                    child: currentPost.image != null
                         ? Image.network(
-                            widget.post.imageUrl!,
+                            currentPost.image!,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
@@ -849,7 +861,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                         : Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Text(
-                              widget.post.content,
+                              currentPost.content,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                   color: Colors.white, fontSize: 20),
@@ -864,9 +876,9 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                     children: [
                       // Only show text content if an image is present,
                       // otherwise the content is already displayed prominently above.
-                      if (widget.post.imageUrl != null)
+                      if (currentPost.image != null)
                         Text(
-                          widget.post.content,
+                          currentPost.content,
                           style: const TextStyle(
                               color: Colors.white, fontSize: 16),
                         ),
@@ -918,19 +930,19 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                     ),
                     Expanded(
                       child: ListView.builder(
-                        itemCount: widget.post.comments.length,
+                        itemCount: currentPost.comments.length,
                         itemBuilder: (context, index) {
-                          final comment = widget.post.comments[index];
+                          final comment = currentPost.comments[index];
                           return ListTile(
                             leading: CircleAvatar(
                               backgroundColor: const Color(0xFF56195B),
                               child: Text(
-                                comment.username[0].toUpperCase(),
+                                comment.user.name[0].toUpperCase(),
                                 style: const TextStyle(color: Colors.white),
                               ),
                             ),
                             title: Text(
-                              comment.username,
+                              comment.user.name,
                               style:
                                   const TextStyle(fontWeight: FontWeight.bold),
                             ),
@@ -940,7 +952,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                                 Text(comment.content),
                                 const SizedBox(height: 4),
                                 Text(
-                                  _formatTimestamp(comment.timestamp),
+                                  _formatTimestamp(comment.createdAt),
                                   style: TextStyle(
                                       color: Colors.grey[500], fontSize: 12),
                                 ),
@@ -1024,14 +1036,12 @@ class CreatePostPage extends StatefulWidget {
 
 class _CreatePostPageState extends State<CreatePostPage> {
   final TextEditingController _contentController = TextEditingController();
-  final TextEditingController _tagsController = TextEditingController();
-  XFile? _selectedImage; // To hold the selected image file
-  final ImagePicker _picker = ImagePicker(); // Image picker instance
+  XFile? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void dispose() {
     _contentController.dispose();
-    _tagsController.dispose();
     super.dispose();
   }
 
@@ -1043,7 +1053,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     });
   }
 
-  void _createPost() {
+  void _createPost() async {
     if (_contentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1052,30 +1062,54 @@ class _CreatePostPageState extends State<CreatePostPage> {
       return;
     }
 
-    final tags = _tagsController.text
-        .split(',')
-        .map((tag) => tag.trim().toLowerCase())
-        .where((tag) => tag.isNotEmpty)
-        .toList();
-
-    // For demonstration, if an image is selected, we'll use a generic placeholder URL.
-    // In a real application, you would upload _selectedImage to a server
-    // and get a real URL back to store in the Post object.
-    final String? imageUrlForPost = _selectedImage != null
-        ? 'https://via.placeholder.com/600x400/CCCCCC/FFFFFF?text=User+Selected+Image' // Placeholder URL
-        : null;
-
-    final newPost = Post(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      username: 'You',
-      content: _contentController.text.trim(),
-      imageUrl: imageUrlForPost, // Use the simulated URL or null
-      tags: tags,
-      timestamp: DateTime.now(),
-      comments: [],
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Creating post..."),
+            ],
+          ),
+        );
+      },
     );
 
-    Navigator.pop(context, newPost);
+    try {
+      final result = await PostService.createPost(
+        content: _contentController.text.trim(),
+        imageFile: _selectedImage != null ? File(_selectedImage!.path) : null,
+      );
+
+      // Hide loading indicator
+      Navigator.of(context).pop();
+
+      if (result != null) {
+        // Post created successfully
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Post created successfully!')),
+        );
+        Navigator.pop(context, true); // Return true to indicate success
+      } else {
+        // Post creation failed
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Failed to create post. Please try again.')),
+        );
+      }
+    } catch (e) {
+      // Hide loading indicator
+      Navigator.of(context).pop();
+
+      print('Error creating post: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred. Please try again.')),
+      );
+    }
   }
 
   @override
@@ -1161,24 +1195,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   ),
                 ),
               ),
-            const SizedBox(height: 20),
-            const Text(
-              'Tags (optional)',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _tagsController,
-              decoration: InputDecoration(
-                hintText: 'e.g., java, flutter, programming (comma separated)',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: Colors.grey[50],
-                prefixIcon: const Icon(Icons.tag),
-              ),
-            ),
             const SizedBox(height: 24),
           ],
         ),

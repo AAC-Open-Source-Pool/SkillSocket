@@ -1,277 +1,333 @@
-import 'package:barter_system/communities.dart';
-import 'package:barter_system/history.dart';
-import 'package:barter_system/home.dart';
-import 'package:barter_system/login.dart';
-import 'package:barter_system/reviews.dart';
 import 'package:flutter/material.dart';
-import 'package:barter_system/profile.dart';
-import 'package:barter_system/skillpopup.dart';
-import 'package:barter_system/studyroom.dart';
-import 'package:barter_system/community.dart';
-import 'package:barter_system/notification.dart';
-import 'package:barter_system/chat.dart';
+import 'chat.dart';
+import 'new_chat_screen.dart';
+import 'package:barter_system/services/chat_service.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class Chats extends StatefulWidget {
   const Chats({super.key});
+
   @override
   State<Chats> createState() => _ChatsState();
 }
 
 class _ChatsState extends State<Chats> {
-  int _selectedIndex = 1;
-  final List<Map<String, String>> chats = List.generate(10, (index) {
-    return {
-      'name': 'Name',
-      'message': 'last message',
-      'time': 'Time',
-    };
-  });
+  List<Map<String, dynamic>> chats = [];
+  bool _isLoading = true;
+  String? currentUserId;
+  late IO.Socket socket;
 
-  final List<Widget> _pages = [
-    MyHomePage(title: 'App name',),
-    Chats(),
-    SkillMatchApp(),
-    Community(),
-    StudyRoom(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _initializeChats();
+  }
 
-  void _onItemTapped(int index) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => _pages[index]),
+  Future<void> _initializeChats() async {
+    // Get current user ID
+    currentUserId = await ChatService.getCurrentUserId();
+
+    if (currentUserId != null) {
+      await _loadChats();
+      _connectToSocket();
+    } else {
+      await _loadChats();
+    }
+  }
+
+  void _connectToSocket() {
+    socket = IO.io(
+      "http://localhost:3000",
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .disableAutoConnect()
+          .build(),
     );
+
+    socket.connect();
+
+    socket.onConnect((_) {
+      print("Connected to socket server");
+      if (currentUserId != null) {
+        socket.emit("joinRoom", currentUserId);
+      }
+    });
+
+    socket.on("receiveMessage", (data) {
+      if (mounted) {
+        _updateChatWithNewMessage(data);
+      }
+    });
+
+    socket.onError((error) {
+      print("Socket error: $error");
+    });
+
+    socket.onDisconnect((_) {
+      print("Disconnected from socket server");
+    });
+  }
+
+  void _updateChatWithNewMessage(dynamic messageData) {
+    setState(() {
+      // Find the chat with the sender/receiver
+      String partnerId;
+      if (messageData['from']['_id'] == currentUserId) {
+        partnerId = messageData['to']['_id'];
+      } else {
+        partnerId = messageData['from']['_id'];
+      }
+
+      // Update existing chat or add new one
+      int chatIndex =
+          chats.indexWhere((chat) => chat['participant']['_id'] == partnerId);
+
+      if (chatIndex != -1) {
+        // Update existing chat
+        chats[chatIndex]['lastMessage'] = {
+          'content': messageData['content'],
+          'createdAt': messageData['createdAt'],
+          'from': messageData['from']['_id'],
+          'seen': messageData['seen'] ?? false
+        };
+        // Move to top
+        var updatedChat = chats.removeAt(chatIndex);
+        chats.insert(0, updatedChat);
+      } else {
+        // Add new chat
+        final partner = messageData['from']['_id'] == currentUserId
+            ? messageData['to']
+            : messageData['from'];
+        chats.insert(0, {
+          '_id': '${currentUserId}_$partnerId',
+          'participant': {
+            '_id': partner['_id'],
+            'name': partner['name'],
+            'email': partner['email'],
+            'profileImage': partner['profileImage']
+          },
+          'lastMessage': {
+            'content': messageData['content'],
+            'createdAt': messageData['createdAt'],
+            'from': messageData['from']['_id'],
+            'seen': messageData['seen'] ?? false
+          }
+        });
+      }
+    });
+  }
+
+  Future<void> _loadChats() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final chatData = await ChatService.getUserChats();
+      if (chatData != null) {
+        setState(() {
+          chats = chatData;
+        });
+      } else {
+        // Fallback to sample data if no chats found or API fails
+        setState(() {
+          chats = [
+            {
+              '_id': '1',
+              'participant': {
+                '_id': 'user1',
+                'name': 'Alice',
+                'email': 'alice@example.com'
+              },
+              'lastMessage': {
+                'content': 'Hey! How are you?',
+                'createdAt': DateTime.now()
+                    .subtract(const Duration(hours: 1))
+                    .toIso8601String(),
+              }
+            },
+            {
+              '_id': '2',
+              'participant': {
+                '_id': 'user2',
+                'name': 'Bob',
+                'email': 'bob@example.com'
+              },
+              'lastMessage': {
+                'content': 'What\'s up?',
+                'createdAt': DateTime.now()
+                    .subtract(const Duration(days: 1))
+                    .toIso8601String(),
+              }
+            },
+          ];
+        });
+      }
+    } catch (e) {
+      print('Error loading chats: $e');
+      // Show sample data on error
+      setState(() {
+        chats = [
+          {
+            '_id': '1',
+            'participant': {
+              '_id': 'user1',
+              'name': 'Alice',
+              'email': 'alice@example.com'
+            },
+            'lastMessage': {
+              'content': 'Hey! How are you?',
+              'createdAt': DateTime.now()
+                  .subtract(const Duration(hours: 1))
+                  .toIso8601String(),
+            }
+          },
+        ];
+      });
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  String _formatLastMessageTime(String timestamp) {
+    try {
+      final messageTime = DateTime.parse(timestamp);
+      final now = DateTime.now();
+      final difference = now.difference(messageTime);
+
+      if (difference.inDays > 0) {
+        return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
+      } else if (difference.inHours > 0) {
+        return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes} min ago';
+      } else {
+        return 'Just now';
+      }
+    } catch (e) {
+      return 'Recently';
+    }
+  }
+
+  @override
+  void dispose() {
+    if (currentUserId != null) {
+      socket.dispose();
+    }
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(
-        backgroundColor: const Color(0xFF7E4682),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-                child: Row(
-              children: [
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'App Name',
-                      style: TextStyle(
-                          color: Color.fromARGB(255, 255, 255, 255),
-                          fontSize: 45),
-                    ),
-                  ),
-                ),
-              ],
-            )),
-            
-            ListTile(
-              leading: Icon(
-                Icons.history,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text('History',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => History()));
-              },
-            ),
-            Divider(color: Colors.white, thickness: 1),
-            ListTile(
-              leading: Icon(
-                Icons.groups,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text(
-                'Communities',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Communities()));
-              },
-            ),
-            Divider(color: Colors.white, thickness: 1),
-            ListTile(
-              leading: Icon(
-                Icons.reviews,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text(
-                'Reviews',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Reviews()));
-              },
-            ),
-            Divider(color: Colors.white, thickness: 1),
-            ListTile(
-              leading: Icon(
-                Icons.logout,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text(
-                'Sign Out',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
-              }
-            ),
-            Divider(color: Colors.white, thickness: 1),
-          ],
-        ),
-      ),
       appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'Chats',
-          style: TextStyle(
-              fontSize: 32,
-              fontStyle: FontStyle.italic,
-              color: Color.fromARGB(255, 255, 255, 255)),
+        title: const Text(
+          "Chats",
+          style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Color(0xFF56195B),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
-        ),
-        iconTheme:
-            IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Notifications()));
-              },
-              icon: Icon(Icons.notifications)),
-          IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Profile()));
-              },
-              icon: Icon(Icons.person_rounded)),
-        ],
+        backgroundColor: const Color(0xFF56195B),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(12),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search',
-                prefixIcon: Icon(Icons.search, color: Color(0xFF56195B)),
-                filled: true,
-                fillColor: Color(0xFFECC9EE),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(25)),
-                  borderSide: BorderSide.none,
-                ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF56195B),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Wrap(
-              spacing: 10,
-              children: const [
-                Chip(label: Text("All")),
-                Chip(label: Text("Unread")),
-                Chip(label: Text("Groups")),
-                Chip(label: Icon(Icons.add)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: ListView.separated(
-              itemCount: chats.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final chat = chats[index];
-                return ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0xFFECC9EE),
-                    child: Icon(Icons.person, color: Colors.white),
-                  ),
-                  title: Text(
-                    chat['name']!,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(chat['message']!),
-                  trailing: Text(chat['time']!),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Chat(name: chat['name']!),
+            )
+          : chats.isEmpty
+              ? const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 64,
+                        color: Colors.grey,
                       ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-  decoration: const BoxDecoration(
-    color: Color(0xFF56195B),
-    borderRadius: BorderRadius.only(
-      topLeft: Radius.circular(25),
-      topRight: Radius.circular(25),
-    ),
-  ),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: List.generate(5, (index) {
-      final List<IconData> icons = [
-        Icons.home,
-        Icons.chat_bubble_rounded,
-        Icons.add_circle_outlined,
-        Icons.groups_rounded,
-        Icons.menu_book_rounded,
-      ];
-      final List<String> labels = ['Home', 'Chats', 'ADD', 'Community', 'Study Room'];
-      final isSelected = index == _selectedIndex;
-
-      return GestureDetector(
-        onTap: () => _onItemTapped(index),
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 250),
-          padding: EdgeInsets.symmetric(horizontal: isSelected ? 12 : 0, vertical: 8),
-          decoration: isSelected
-              ? BoxDecoration(
-                  color: Color(0xFFECC99EE),
-                  borderRadius: BorderRadius.circular(20),
+                      SizedBox(height: 16),
+                      Text(
+                        'No chats yet',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Start a conversation with someone!',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
                 )
-              : null,
-          child: Row(
-            children: [
-              Icon(icons[index], color: isSelected ? Colors.white : Colors.white70),
-              if (isSelected)
-                Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Text(labels[index], style: TextStyle(color: Colors.white)),
-                ),
-            ],
-          ),
-        ),
-      );
-    }),
-  ),
-),
+              : RefreshIndicator(
+                  onRefresh: _loadChats,
+                  child: ListView.separated(
+                    itemCount: chats.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final chat = chats[index];
+                      final participant = chat['participant'];
+                      final lastMessage = chat['lastMessage'];
 
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: const Color(0xFFECC9EE),
+                          child: Text(
+                            participant['name'][0].toUpperCase(),
+                            style: const TextStyle(
+                              color: Color(0xFF56195B),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          participant['name'],
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        subtitle: Text(
+                          lastMessage['content'],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Text(
+                          _formatLastMessageTime(lastMessage['createdAt']),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Chat(
+                                chatId: chat['_id'],
+                                recipientId: participant['_id'],
+                                name: participant['name'],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NewChatScreen()),
+          );
+        },
+        backgroundColor: const Color(0xFF56195B),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 }
