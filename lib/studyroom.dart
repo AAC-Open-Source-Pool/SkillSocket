@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:barter_system/notification.dart';
 import 'package:barter_system/chatbot.dart';
 import 'package:barter_system/profile.dart';
+import 'package:barter_system/home.dart';
+import 'package:barter_system/chats.dart';
 import 'package:barter_system/reviews.dart';
 import 'package:barter_system/communities.dart';
 import 'package:barter_system/history.dart';
 import 'package:barter_system/login.dart';
+import 'community.dart';
+import 'skillpopup.dart';
 
 class StudyRoom extends StatefulWidget {
-  const StudyRoom({super.key});
-
   @override
   _StudyRoomState createState() => _StudyRoomState();
 }
@@ -17,6 +19,23 @@ class StudyRoom extends StatefulWidget {
 class _StudyRoomState extends State<StudyRoom> {
   List<String> roomNames = ["Focus Room", "Deep Work", "Pomodoro Group"];
   String searchQuery = "";
+
+  int _selectedIndex = 4;
+  final List<Widget> _pages = [
+    MyHomePage(
+      title: 'App name',
+    ),
+    Chats(),
+    SkillMatchApp(),
+    Community(),
+    StudyRoom(),
+  ];
+  void _onItemTapped(int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => _pages[index]),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -247,14 +266,6 @@ class _StudyRoomState extends State<StudyRoom> {
           ),
           backgroundColor: const Color(0xFF4B014B),
         ),
-        const SizedBox(height: 16),
-        FloatingActionButton(
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ChatbotScreen()));
-          },
-          child: Icon(Icons.android),
-        )
       ]),
     );
   }

@@ -1,54 +1,52 @@
+import 'package:flutter/material.dart';
 import 'package:barter_system/notification.dart';
 import 'package:barter_system/popup.dart';
 import 'package:barter_system/profile.dart';
-import 'package:flutter/material.dart';
 
 class SkillMatchApp extends StatelessWidget {
   const SkillMatchApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return HomeScreen();
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
-
-  final TextEditingController requireController = TextEditingController();
-  final TextEditingController offerController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'APP NAME',
-          style: TextStyle(
-              fontSize: 32,
-              fontStyle: FontStyle.italic,
-              color: Color.fromARGB(255, 255, 255, 255)),
+    final requireController = TextEditingController();
+    final offerController = TextEditingController();
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
-        backgroundColor: Color(0xFF56195B),
-        iconTheme:
-            IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Notifications()));
-              },
-              icon: Icon(Icons.notifications)),
-          IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Profile()));
-              },
-              icon: Icon(Icons.person_rounded)),
-        ],
       ),
-      body: Container(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text(
+            'APP NAME',
+            style: TextStyle(
+                fontSize: 32,
+                fontStyle: FontStyle.italic,
+                color: Color.fromARGB(255, 255, 255, 255)),
+          ),
+          backgroundColor: const Color(0xFF56195B),
+          iconTheme:
+              const IconThemeData(color: Color.fromARGB(255, 255, 255, 255)),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Notifications()));
+                },
+                icon: const Icon(Icons.notifications)),
+            IconButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Profile()));
+                },
+                icon: const Icon(Icons.person_rounded)),
+          ],
+        ),
+        body: Container(
           width: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -59,8 +57,8 @@ class HomeScreen extends StatelessWidget {
           ),
           child: Center(
             child: Container(
-              padding: EdgeInsets.all(20),
-              margin: EdgeInsets.symmetric(horizontal: 30),
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.symmetric(horizontal: 30),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -72,12 +70,10 @@ class HomeScreen extends StatelessWidget {
                     'Enter to Match!',
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
-                  SizedBox(
-                    height: 25,
-                  ),
+                  const SizedBox(height: 25),
                   Row(
-                    children: [
-                      const Text(
+                    children: const [
+                      Text(
                         'Skill Required',
                         style: TextStyle(fontSize: 16, color: Colors.black87),
                       ),
@@ -88,17 +84,17 @@ class HomeScreen extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: 'Skill you require',
                       filled: true,
-                      fillColor: const Color(0xFFE8CFF7),
+                      fillColor: Color(0xFFE8CFF7),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
                         borderSide: BorderSide.none,
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
-                    children: [
-                      const Text(
+                    children: const [
+                      Text(
                         'Skill Offered',
                         style: TextStyle(fontSize: 16, color: Colors.black87),
                       ),
@@ -109,19 +105,19 @@ class HomeScreen extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: 'Skill you offer',
                       filled: true,
-                      fillColor: const Color(0xFFE8CFF7),
+                      fillColor: Color(0xFFE8CFF7),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
                         borderSide: BorderSide.none,
                       ),
                     ),
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF5D1A6A),
+                        backgroundColor: const Color(0xFF5D1A6A),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -133,16 +129,16 @@ class HomeScreen extends StatelessWidget {
                             MaterialPageRoute(
                                 builder: (context) => ProfileEditScreen()));
                       },
-                      child: Text(
-                        "NEXT",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      child: const Text("NEXT",
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
               ),
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }

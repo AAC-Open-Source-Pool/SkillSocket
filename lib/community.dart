@@ -324,52 +324,15 @@ class _CommunityState extends State<Community> {
               icon: Icon(Icons.person_rounded)),
         ],
       ),
-      body: Column(
+      body: ListView(
+        padding: EdgeInsets.zero,
         children: [
-          // Write a post / Create post trigger
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(0xFFECC9EE),
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: TextField(
-                onTap: _navigateToCreatePost,
-                readOnly: true,
-                decoration: InputDecoration(
-                  hintText: 'write a post',
-                  hintStyle:
-                      TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-                  prefixIcon: Container(
-                    margin: const EdgeInsets.all(8),
-                    width: 30,
-                    height: 30,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF56195B),
-                      shape: BoxShape.circle,
-                    ),
-                    child:
-                        const Icon(Icons.edit, color: Colors.white, size: 16),
-                  ),
-                  border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                ),
-              ),
-            ),
-          ),
           // Search Input Field
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
-              controller:
-                  _searchController, // Linked to controller for filtering
-              onChanged:
-                  _filterPosts, // This TextField handles the actual filtering
+              controller: _searchController,
+              onChanged: _filterPosts,
               decoration: InputDecoration(
                 hintText: 'Search posts... (e.g., "java", "flutter", "python")',
                 prefixIcon: Icon(Icons.search,
@@ -386,248 +349,248 @@ class _CommunityState extends State<Community> {
             ),
           ),
           // Posts List
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : filteredPosts.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+          if (filteredPosts.isEmpty)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No posts found',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                  ),
+                  Text(
+                    'Try searching for "java", "flutter", or "python"',
+                    style: TextStyle(color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            )
+          else
+            ...filteredPosts.map(
+              (post) {
+                final isLiked =
+                    currentUserId != null && post.likes.contains(currentUserId);
+                return Container(
+                  margin:
+                      const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE1BEE7),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Account details header
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
                           children: [
-                            Icon(Icons.search_off,
-                                size: 64, color: Colors.grey[400]),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No posts found',
-                              style: TextStyle(
-                                  fontSize: 18, color: Colors.grey[600]),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF56195B),
+                                shape: BoxShape.circle,
+                              ),
+                              child: post.user.profileImage != null
+                                  ? ClipOval(
+                                      child: Image.network(
+                                        post.user.profileImage!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(Icons.person,
+                                                    color: Colors.white),
+                                      ),
+                                    )
+                                  : const Icon(Icons.person,
+                                      color: Colors.white),
                             ),
-                            Text(
-                              'Try searching for different terms',
-                              style: TextStyle(color: Colors.grey[500]),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  post.user.name,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  _formatTimestamp(post.createdAt),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      )
-                    : NotificationListener<ScrollNotification>(
-                        onNotification: (ScrollNotification scrollInfo) {
-                          if (!isLoadingMore &&
-                              hasMorePosts &&
-                              scrollInfo.metrics.pixels ==
-                                  scrollInfo.metrics.maxScrollExtent) {
-                            _loadMorePosts();
-                          }
-                          return false;
-                        },
-                        child: ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount:
-                              filteredPosts.length + (hasMorePosts ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index == filteredPosts.length) {
-                              return const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
-
-                            final post = filteredPosts[index];
-                            final isLiked = currentUserId != null &&
-                                post.likes.contains(currentUserId);
-
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE1BEE7),
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    spreadRadius: 2,
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Account details header
-                                  Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFF56195B),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: post.user.profileImage != null
-                                              ? ClipOval(
-                                                  child: Image.network(
-                                                    post.user.profileImage!,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (context,
-                                                            error,
-                                                            stackTrace) =>
-                                                        const Icon(Icons.person,
-                                                            color:
-                                                                Colors.white),
-                                                  ),
-                                                )
-                                              : const Icon(Icons.person,
-                                                  color: Colors.white),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              post.user.name,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.black87,
-                                              ),
-                                            ),
-                                            Text(
-                                              _formatTimestamp(post.createdAt),
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey[600],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Post content text
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
-                                    child: Text(
-                                      post.content,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ),
-                                  // Post image (if available)
-                                  if (post.image != null)
-                                    GestureDetector(
-                                      onTap: () => _openPostViewer(post,
-                                          initialShowComments: false),
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: 200,
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.3),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          child: Image.network(
-                                            post.image!,
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return Container(
-                                                color: Colors.grey[200],
-                                                child: const Center(
-                                                  child: Icon(
-                                                      Icons.broken_image,
-                                                      color: Colors.grey),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  // Action buttons
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                          top: BorderSide(
-                                              color: Colors.grey[300]!)),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        // Like Button
-                                        _buildActionButton(
-                                          isLiked
-                                              ? Icons.thumb_up
-                                              : Icons.thumb_up_outlined,
-                                          '${post.likes.length}',
-                                          isLiked
-                                              ? const Color(0xFF56195B)
-                                              : Colors.grey[700]!,
-                                          () => _toggleLike(post),
-                                        ),
-                                        // Comment Button
-                                        _buildActionButton(
-                                          Icons.comment_outlined,
-                                          '${post.comments.length}',
-                                          Colors.grey[700]!,
-                                          () {
-                                            _openPostViewer(post,
-                                                initialShowComments: true);
-                                          },
-                                        ),
-                                        // Share Button
-                                        _buildActionButton(
-                                          Icons.share_outlined,
-                                          '',
-                                          Colors.grey[700]!,
-                                          () {
-                                            Share.share(
-                                                'Check out this post: ${post.content}\n\n'
-                                                '${post.image != null ? 'Image: ${post.image}\n' : ''}'
-                                                'Shared from Community App');
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                      ),
+                      // Post content text
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Text(
+                          post.content,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
-          ),
+                      // Post image (if available)
+                      if (post.image != null)
+                        GestureDetector(
+                          onTap: () =>
+                              _openPostViewer(post, initialShowComments: false),
+                          child: Container(
+                            width: double.infinity,
+                            height: 200,
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                post.image!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[200],
+                                    child: const Center(
+                                      child: Icon(Icons.broken_image,
+                                          color: Colors.grey),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      // Action buttons
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border:
+                              Border(top: BorderSide(color: Colors.grey[300]!)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Like Button
+                            _buildActionButton(
+                              isLiked
+                                  ? Icons.thumb_up
+                                  : Icons.thumb_up_outlined,
+                              '${post.likes.length}',
+                              isLiked
+                                  ? const Color(0xFF56195B)
+                                  : Colors.grey[700]!,
+                              () => _toggleLike(post),
+                            ),
+                            // Comment Button
+                            _buildActionButton(
+                              Icons.comment_outlined,
+                              '${post.comments.length}',
+                              Colors.grey[700]!,
+                              () {
+                                _openPostViewer(post,
+                                    initialShowComments: true);
+                              },
+                            ),
+                            // Share Button
+                            _buildActionButton(
+                              Icons.share_outlined,
+                              '',
+                              Colors.grey[700]!,
+                              () {
+                                Share.share(
+                                    'Check out this post: ${post.content}\n\n'
+                                    '${post.image != null ? 'Image: ${post.image}\n' : ''}'
+                                    'Shared from Community App');
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
-      floatingActionButton: Container(
-        width: 56,
-        height: 56,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-        ),
-        child: FloatingActionButton(
-          onPressed: _navigateToCreateCommunity, // New functionality
-          elevation: 0,
-          child: const Icon(
-            Icons.add,
-            size: 28,
-          ),
-        ),
+      floatingActionButton: Builder(
+        builder: (context) {
+          return FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () {
+              final RenderBox button = context.findRenderObject() as RenderBox;
+              final RenderBox overlay =
+                  Overlay.of(context).context.findRenderObject() as RenderBox;
+              final Offset buttonTopCenter = button.localToGlobal(
+                Offset(button.size.width / 2, 0),
+                ancestor: overlay,
+              );
+              final RelativeRect position = RelativeRect.fromLTRB(
+                buttonTopCenter.dx,
+                buttonTopCenter.dy - 120,
+                overlay.size.width - buttonTopCenter.dx,
+                overlay.size.height - buttonTopCenter.dy,
+              );
+              showMenu(
+                context: context,
+                position: position,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                items: [
+                  PopupMenuItem(
+                    child: const ListTile(
+                      leading: Icon(Icons.post_add, color: Color(0xFF56195B)),
+                      title: Text("Create Post"),
+                    ),
+                    onTap: () {
+                      Future.delayed(Duration.zero, () {
+                        _navigateToCreatePost();
+                      });
+                    },
+                  ),
+                  PopupMenuItem(
+                    child: const ListTile(
+                      leading: Icon(Icons.group_add, color: Color(0xFF56195B)),
+                      title: Text("Create Community"),
+                    ),
+                    onTap: () {
+                      Future.delayed(Duration.zero, () {
+                        _navigateToCreateCommunity();
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -754,28 +717,35 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
   Future<void> _addComment() async {
     if (_commentController.text.trim().isNotEmpty) {
       try {
-        final newComments = await PostService.addComment(
+        final response = await PostService.addComment(
           currentPost.id,
           _commentController.text.trim(),
         );
 
-        if (newComments != null) {
+        if (response != null) {
+          List<BackendComment> updatedComments = [];
+          if (response is List) {
+            // Backend returned a list of comments
+            updatedComments = response
+                .map((c) => BackendComment.fromJson(c as Map<String, dynamic>))
+                .toList();
+          } else if (response is Map<String, dynamic>) {
+            // Backend returned a single comment object
+            updatedComments = List<BackendComment>.from(currentPost.comments)
+              ..add(BackendComment.fromJson(response as Map<String, dynamic>));
+          }
           setState(() {
-            // Update the current post with new comments
             currentPost = BackendPost(
               id: currentPost.id,
               user: currentPost.user,
               content: currentPost.content,
               image: currentPost.image,
               likes: currentPost.likes,
-              comments:
-                  newComments.map((c) => BackendComment.fromJson(c)).toList(),
+              comments: updatedComments,
               createdAt: currentPost.createdAt,
             );
             _commentController.clear();
           });
-
-          // Notify parent to update
           widget.onUpdate?.call();
         }
       } catch (e) {
