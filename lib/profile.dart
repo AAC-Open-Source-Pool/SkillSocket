@@ -22,10 +22,17 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _dobController =
       TextEditingController(); // For Date of Birth
-  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController();
   final TextEditingController _skillsController = TextEditingController();
+
+  // New controllers for additional fields
+  final TextEditingController _educationController = TextEditingController();
+  final TextEditingController _professionController = TextEditingController();
+  final TextEditingController _skillsRequiredController =
+      TextEditingController();
+  final TextEditingController _skillsOfferedController =
+      TextEditingController();
+  String? _currentlyWorkingStatus;
 
   @override
   void initState() {
@@ -45,9 +52,23 @@ class _ProfileState extends State<Profile> {
       if (userProfile != null) {
         setState(() {
           _nameController.text = userProfile['name'] ?? '';
-          _phoneController.text = userProfile['phone'] ?? '';
+
           _locationController.text = userProfile['location'] ?? '';
-          _bioController.text = userProfile['bio'] ?? '';
+
+          // New fields
+          _educationController.text = userProfile['education'] ?? '';
+          _professionController.text = userProfile['profession'] ?? '';
+          _currentlyWorkingStatus = userProfile['currentlyWorking'];
+          if (userProfile['skillsRequired'] != null &&
+              userProfile['skillsRequired'] is List) {
+            _skillsRequiredController.text =
+                (userProfile['skillsRequired'] as List).join(', ');
+          }
+          if (userProfile['skillsOffered'] != null &&
+              userProfile['skillsOffered'] is List) {
+            _skillsOfferedController.text =
+                (userProfile['skillsOffered'] as List).join(', ');
+          }
 
           // Handle date of birth
           if (userProfile['dateOfBirth'] != null) {
@@ -60,7 +81,6 @@ class _ProfileState extends State<Profile> {
             _skillsController.text = (userProfile['skills'] as List).join(', ');
           }
 
-          // Handle profile image
           if (userProfile['profileImage'] != null) {
             // You can implement network image loading here if needed
           }
@@ -82,11 +102,14 @@ class _ProfileState extends State<Profile> {
   // Initialize profile with default values (fallback)
   void _initializeDefaultProfile() {
     _nameController.text = "";
-    _phoneController.text = "";
     _locationController.text = "";
-    _bioController.text = "";
     _dobController.text = "";
     _skillsController.text = "";
+    _educationController.text = "";
+    _professionController.text = "";
+    _skillsRequiredController.text = "";
+    _skillsOfferedController.text = "";
+    _currentlyWorkingStatus = null;
   }
 
   // This function will be called when the Save button is clicked.
@@ -118,15 +141,41 @@ class _ProfileState extends State<Profile> {
             .toList();
       }
 
+      // Parse new fields
+      List<String>? skillsRequired;
+      if (_skillsRequiredController.text.isNotEmpty) {
+        skillsRequired = _skillsRequiredController.text
+            .split(',')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+      }
+      List<String>? skillsOffered;
+      if (_skillsOfferedController.text.isNotEmpty) {
+        skillsOffered = _skillsOfferedController.text
+            .split(',')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+      }
+
       final updatedUser = await UserService.updateUserProfile(
         name: _nameController.text.isEmpty ? null : _nameController.text,
-        phone: _phoneController.text.isEmpty ? null : _phoneController.text,
+
         location:
             _locationController.text.isEmpty ? null : _locationController.text,
-        bio: _bioController.text.isEmpty ? null : _bioController.text,
         dateOfBirth: dateOfBirth,
         skills: skills,
         // profileImage: // Add image upload functionality later
+        education: _educationController.text.isEmpty
+            ? null
+            : _educationController.text,
+        profession: _professionController.text.isEmpty
+            ? null
+            : _professionController.text,
+        currentlyWorking: _currentlyWorkingStatus,
+        skillsRequired: skillsRequired,
+        skillsOffered: skillsOffered,
       );
 
       if (updatedUser != null) {
@@ -134,7 +183,6 @@ class _ProfileState extends State<Profile> {
           const SnackBar(
             content: Text('Profile saved successfully!'),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
           ),
         );
       } else {
@@ -179,10 +227,13 @@ class _ProfileState extends State<Profile> {
     _usernameController.dispose();
     _nameController.dispose();
     _dobController.dispose();
-    _phoneController.dispose();
     _locationController.dispose();
-    _bioController.dispose();
+
     _skillsController.dispose();
+    _educationController.dispose();
+    _professionController.dispose();
+    _skillsRequiredController.dispose();
+    _skillsOfferedController.dispose();
     super.dispose();
   }
 
@@ -327,9 +378,63 @@ class _ProfileState extends State<Profile> {
                     controller: _nameController,
                   ),
                   _buildProfileInputField(
-                    label: 'Phone',
-                    controller: _phoneController,
+                    label: 'Education',
+                    controller: _educationController,
                   ),
+                  _buildProfileInputField(
+                    label: 'Profession',
+                    controller: _professionController,
+                  ),
+                  // Currently Working status dropdown
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25.0, vertical: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Currently Working',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: _currentlyWorkingStatus,
+                          items: const [
+                            DropdownMenuItem(value: 'Yes', child: Text('Yes')),
+                            DropdownMenuItem(value: 'No', child: Text('No')),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _currentlyWorkingStatus = value;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Color(0xFFC0A2C2),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 14.0, horizontal: 16.0),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _buildProfileInputField(
+                    label: 'Skills Required (comma-separated)',
+                    controller: _skillsRequiredController,
+                  ),
+                  _buildProfileInputField(
+                    label: 'Skills Offered (comma-separated)',
+                    controller: _skillsOfferedController,
+                  ),
+                  // Phone field removed
 
                   // Date of Birth field with date picker
                   _buildProfileInputField(
@@ -410,10 +515,6 @@ class _ProfileState extends State<Profile> {
                   _buildProfileInputField(
                     label: 'Location',
                     controller: _locationController,
-                  ),
-                  _buildProfileInputField(
-                    label: 'Bio',
-                    controller: _bioController,
                   ),
                   _buildProfileInputField(
                     label: 'Skills (comma-separated)',

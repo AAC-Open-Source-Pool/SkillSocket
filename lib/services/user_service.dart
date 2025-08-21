@@ -65,6 +65,11 @@ class UserService {
     String? dateOfBirth,
     List<String>? skills,
     String? profileImage,
+    String? education,
+    String? profession,
+    String? currentlyWorking,
+    List<String>? skillsRequired,
+    List<String>? skillsOffered,
   }) async {
     try {
       final headers = await _getHeaders();
@@ -78,6 +83,12 @@ class UserService {
       if (dateOfBirth != null) updateData['dateOfBirth'] = dateOfBirth;
       if (skills != null) updateData['skills'] = skills;
       if (profileImage != null) updateData['profileImage'] = profileImage;
+      if (education != null) updateData['education'] = education;
+      if (profession != null) updateData['profession'] = profession;
+      if (currentlyWorking != null)
+        updateData['currentlyWorking'] = currentlyWorking;
+      if (skillsRequired != null) updateData['skillsRequired'] = skillsRequired;
+      if (skillsOffered != null) updateData['skillsOffered'] = skillsOffered;
 
       print('Making PUT request to: $baseUrl/user/profile'); // Debug log
       print('With headers: $headers'); // Debug log

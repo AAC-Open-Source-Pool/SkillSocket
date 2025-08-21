@@ -162,7 +162,7 @@ class PostService {
       final response = await http.post(
         Uri.parse('$baseUrl/posts/$postId/comment'),
         headers: headers,
-        body: json.encode({'content': content}),
+        body: json.encode({'text': content}),
       );
 
       if (response.statusCode == 200) {
