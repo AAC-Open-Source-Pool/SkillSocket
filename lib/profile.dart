@@ -185,6 +185,8 @@ class _ProfileState extends State<Profile> {
             backgroundColor: Colors.green,
           ),
         );
+        // Reload profile data from backend to ensure UI is up to date
+        await _loadUserProfile();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
