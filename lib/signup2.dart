@@ -84,7 +84,7 @@ class _SignUpPageState extends State<SignUpPage> {
       print('Sending signup data: $signupData');
 
       final response = await http.post(
-        Uri.parse('http://localhost:3000/api/auth/signup'),
+        Uri.parse('https://app-backend-latest-vzas.onrender.com/api/auth/signup'),
         headers: {
           'Content-Type': 'application/json',
         },
