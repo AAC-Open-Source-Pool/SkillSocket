@@ -63,7 +63,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     try {
       print('Sending message to bot: $message');
       final response = await http.post(
-        Uri.parse('http://localhost:3000/api/chat'),
+        Uri.parse('https://app-backend-latest-vzas.onrender.com/api/chat'),
         headers: {
           'Content-Type': 'application/json',
         },

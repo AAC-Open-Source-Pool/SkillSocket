@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   static const String baseUrl =
-      'http://localhost:3000/api'; // Change to your backend URL
+      'https://app-backend-latest-vzas.onrender.com/api'; // Change to your backend URL
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
