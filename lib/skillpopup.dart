@@ -3,12 +3,23 @@ import 'package:barter_system/notification.dart';
 import 'package:barter_system/popup.dart';
 import 'package:barter_system/profile.dart';
 
-class SkillMatchApp extends StatelessWidget {
+class SkillMatchApp extends StatefulWidget {
   const SkillMatchApp({super.key});
+
+  @override
+  State<SkillMatchApp> createState() => _SkillMatchAppState();
+}
+
+class _SkillMatchAppState extends State<SkillMatchApp> {
+  final _formKey = GlobalKey<FormState>();
+  final requireController = TextEditingController();
+  final offerController = TextEditingController();
+
+  // Regex allows alphabets, spaces, +, -, .
+  final RegExp skillRegex = RegExp(r"^[a-zA-Z\s\+\-\.]{2,}$");
+
   @override
   Widget build(BuildContext context) {
-    final requireController = TextEditingController();
-    final offerController = TextEditingController();
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -24,26 +35,28 @@ class SkillMatchApp extends StatelessWidget {
           title: const Text(
             'APP NAME',
             style: TextStyle(
-                fontSize: 32,
-                fontStyle: FontStyle.italic,
-                color: Color.fromARGB(255, 255, 255, 255)),
+              fontSize: 32,
+              fontStyle: FontStyle.italic,
+              color: Colors.white,
+            ),
           ),
           backgroundColor: const Color(0xFF56195B),
-          iconTheme:
-              const IconThemeData(color: Color.fromARGB(255, 255, 255, 255)),
+          iconTheme: const IconThemeData(color: Colors.white),
           actions: [
             IconButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Notifications()));
-                },
-                icon: const Icon(Icons.notifications)),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Notifications()));
+              },
+              icon: const Icon(Icons.notifications),
+            ),
             IconButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Profile()));
-                },
-                icon: const Icon(Icons.person_rounded)),
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Profile()));
+              },
+              icon: const Icon(Icons.person_rounded),
+            ),
           ],
         ),
         body: Container(
@@ -63,77 +76,108 @@ class SkillMatchApp extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Enter to Match!',
-                    style: TextStyle(fontSize: 16, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 25),
-                  Row(
-                    children: const [
-                      Text(
-                        'Skill Required',
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                    ],
-                  ),
-                  TextField(
-                    controller: requireController,
-                    decoration: InputDecoration(
-                      hintText: 'Skill you require',
-                      filled: true,
-                      fillColor: Color(0xFFE8CFF7),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide.none,
-                      ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Enter to Match!',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: const [
-                      Text(
-                        'Skill Offered',
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                    ],
-                  ),
-                  TextField(
-                    controller: offerController,
-                    decoration: InputDecoration(
-                      hintText: 'Skill you offer',
-                      filled: true,
-                      fillColor: Color(0xFFE8CFF7),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5D1A6A),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                    const SizedBox(height: 25),
+
+                    // Skill Required
+                    Row(
+                      children: const [
+                        Text(
+                          'Skill Required',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
                         ),
-                        elevation: 6,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ProfileEditScreen()));
-                      },
-                      child: const Text("NEXT",
-                          style: TextStyle(color: Colors.white)),
+                      ],
                     ),
-                  ),
-                ],
+                    TextFormField(
+                      controller: requireController,
+                      decoration: const InputDecoration(
+                        hintText: 'Skill you require',
+                        filled: true,
+                        fillColor: Color(0xFFE8CFF7),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return "Please enter a required skill";
+                        } else if (!skillRegex.hasMatch(value.trim())) {
+                          return "Enter a valid skill (letters, +, -, . allowed)";
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Skill Offered
+                    Row(
+                      children: const [
+                        Text(
+                          'Skill Offered',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
+                      ],
+                    ),
+                    TextFormField(
+                      controller: offerController,
+                      decoration: const InputDecoration(
+                        hintText: 'Skill you offer',
+                        filled: true,
+                        fillColor: Color(0xFFE8CFF7),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return "Please enter a skill you offer";
+                        } else if (!skillRegex.hasMatch(value.trim())) {
+                          return "Enter a valid skill (letters, +, -, . allowed)";
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF5D1A6A),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          elevation: 6,
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            // ✅ Only navigate if valid
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfileEditScreen(),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text("NEXT",
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
