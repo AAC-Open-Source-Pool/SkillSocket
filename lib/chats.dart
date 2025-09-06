@@ -3,6 +3,7 @@ import 'chat.dart';
 import 'new_chat_screen.dart';
 import 'package:barter_system/services/chat_service.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'notification_helper.dart';
 
 class Chats extends StatefulWidget {
   const Chats({super.key});
@@ -20,6 +21,7 @@ class _ChatsState extends State<Chats> {
   @override
   void initState() {
     super.initState();
+    NotificationHelper.initialize();
     _initializeChats();
   }
 
@@ -56,6 +58,13 @@ class _ChatsState extends State<Chats> {
     socket.on("receiveMessage", (data) {
       if (mounted) {
         _updateChatWithNewMessage(data);
+        // Show notification if message is from another user
+        if (data['from'] != null && data['from']['_id'] != currentUserId) {
+          NotificationHelper.showNotification(
+            'New Message from ${data['from']['name'] ?? 'Someone'}',
+            data['content'] ?? '',
+          );
+        }
       }
     });
 
@@ -274,6 +283,8 @@ class _ChatsState extends State<Chats> {
                       final chat = chats[index];
                       final participant = chat['participant'];
                       final lastMessage = chat['lastMessage'];
+                      final bool isUnseen = lastMessage['seen'] == false &&
+                          lastMessage['from'] != currentUserId;
 
                       return ListTile(
                         leading: CircleAvatar(
@@ -294,6 +305,11 @@ class _ChatsState extends State<Chats> {
                           lastMessage['content'],
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: isUnseen ? Colors.green : Colors.black,
+                            fontWeight:
+                                isUnseen ? FontWeight.bold : FontWeight.normal,
+                          ),
                         ),
                         trailing: Text(
                           _formatLastMessageTime(lastMessage['createdAt']),
