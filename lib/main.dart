@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       title: 'Barter System',
       theme: ThemeData(
         primarySwatch: Colors.purple,
-        primaryColor: const Color(0xFF56195B),
+        primaryColor: const Color.fromARGB(255, 177, 66, 116),
       ),
       home: const LoginScreen(),
     );
