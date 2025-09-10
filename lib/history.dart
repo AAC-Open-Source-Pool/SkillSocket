@@ -41,7 +41,7 @@ class History extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Color(0xFF56195B),
+        backgroundColor: Color(0xFF123b53),
         iconTheme: IconThemeData(color: Colors.white),
       ),
       body: ListView.builder(

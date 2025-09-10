@@ -1,5 +1,4 @@
 import 'package:barter_system/chatbot.dart';
-import 'package:barter_system/communities.dart';
 import 'package:barter_system/history.dart';
 import 'package:barter_system/login.dart';
 import 'package:barter_system/profile.dart';
@@ -149,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       drawer: Drawer(
-        backgroundColor: const Color(0xFF7E4682),
+        backgroundColor: const Color(0xFF123b53),
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
@@ -167,10 +166,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      'App Name',
+                      'SkillSocket',
                       style: TextStyle(
                           color: Color.fromARGB(255, 255, 255, 255),
-                          fontSize: 45),
+                          fontSize: 39),
                     ),
                   ),
                 ),
@@ -189,22 +188,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pop(context);
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => History()));
-              },
-            ),
-            Divider(color: Colors.white, thickness: 1),
-            ListTile(
-              leading: Icon(
-                Icons.groups,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text(
-                'Communities',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Communities()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
@@ -245,13 +228,13 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'APP NAME',
+          'SkillSocket',
           style: TextStyle(
-              fontSize: 32,
-              fontStyle: FontStyle.italic,
+              fontSize: 20,
+             // fontStyle: FontStyle.italic,
               color: Color.fromARGB(255, 255, 255, 255)),
         ),
-        backgroundColor: Color(0xFF56195B),
+        backgroundColor: Color(0xFF123b53),
         iconTheme:
             IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
         actions: [
@@ -303,15 +286,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                     calendarStyle: const CalendarStyle(
                       selectedDecoration: BoxDecoration(
-                        color: Color(0xFFECC9EE),
+                        color: Color.fromARGB(255, 178, 211, 240),
                         shape: BoxShape.circle,
                       ),
                       todayDecoration: BoxDecoration(
-                        color: Color(0xFF56195B),
+                        color: Color(0xFF123b53),
                         shape: BoxShape.circle,
                       ),
                       markerDecoration: BoxDecoration(
-                        color: Color(0xFF56195B),
+                        color: Colors.deepPurple,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -415,7 +398,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          icon: const Icon(Icons.edit, color: Colors.deepPurple),
                           onPressed: () {
                             TextEditingController editController =
                                 TextEditingController(text: event);

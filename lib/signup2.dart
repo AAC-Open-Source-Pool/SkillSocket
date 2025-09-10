@@ -1,8 +1,7 @@
+import 'package:barter_system/home.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:barter_system/selectcommunity.dart';
-
 class SignUpPage extends StatefulWidget {
   final Map<String, String>? userData;
 
@@ -109,7 +108,7 @@ class _SignUpPageState extends State<SignUpPage> {
           // Navigate to community selection
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => SelectCommunitiesPage()),
+            MaterialPageRoute(builder: (context) => MyHomePage(title: 'SkillSocket')),
           );
         }
       } else {

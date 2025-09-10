@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:barter_system/communities.dart';
 import 'package:barter_system/history.dart';
 import 'package:barter_system/login.dart';
 import 'package:barter_system/profile.dart';
@@ -10,8 +9,6 @@ import 'package:barter_system/models/backend_models.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:barter_system/models/communityb.dart';
-import 'community_detail.dart';
 
 import 'dart:io';
 
@@ -203,7 +200,7 @@ class _CommunityState extends State<Community> {
     }
   }
 
-  void _navigateToCreateCommunity() {
+  /*void _navigateToCreateCommunity() {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -219,13 +216,13 @@ class _CommunityState extends State<Community> {
         );
       }
     });
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Drawer(
-        backgroundColor: const Color(0xFF7E4682),
+        backgroundColor: Color(0xFF123b53),
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
@@ -236,10 +233,10 @@ class _CommunityState extends State<Community> {
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      'App Name',
+                      'SkillSocket',
                       style: TextStyle(
                           color: Color.fromARGB(255, 255, 255, 255),
-                          fontSize: 45),
+                          fontSize: 39),
                     ),
                   ),
                 ),
@@ -258,22 +255,6 @@ class _CommunityState extends State<Community> {
                 Navigator.pop(context);
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => History()));
-              },
-            ),
-            Divider(color: Colors.white, thickness: 1),
-            ListTile(
-              leading: Icon(
-                Icons.groups,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text(
-                'Communities',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Communities()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
@@ -314,13 +295,13 @@ class _CommunityState extends State<Community> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'COMMUNITY',
+          'SkillSocket',
           style: TextStyle(
-              fontSize: 32,
-              fontStyle: FontStyle.italic,
+              fontSize: 20,
+              //fontStyle: FontStyle.italic,
               color: Color.fromARGB(255, 255, 255, 255)),
         ),
-        backgroundColor: Color(0xFF56195B),
+        backgroundColor: Color(0xFF123b53),
         iconTheme:
             IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
         actions: [
@@ -349,12 +330,13 @@ class _CommunityState extends State<Community> {
               onChanged: _filterPosts,
               decoration: InputDecoration(
                 hintText: 'Search posts... (e.g., "java", "flutter", "python")',
+                hintStyle: TextStyle(color: Colors.white),
                 prefixIcon: Icon(Icons.search,
-                    color: const Color.fromARGB(255, 133, 56, 125)),
+                    color:  Colors.white),
                 filled: true,
-                fillColor: Color(0xFFECC9EE),
+                fillColor: Color(0xFF66B7D2),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide.none,
                 ),
                 contentPadding:
@@ -390,7 +372,7 @@ class _CommunityState extends State<Community> {
                   margin:
                       const EdgeInsets.only(bottom: 16, left: 16, right: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE1BEE7),
+                    color: const Color.fromARGB(215, 195, 219, 236),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -413,7 +395,7 @@ class _CommunityState extends State<Community> {
                               width: 40,
                               height: 40,
                               decoration: const BoxDecoration(
-                                color: Color(0xFF56195B),
+                                color: Color(0xFF123b53),
                                 shape: BoxShape.circle,
                               ),
                               child: post.user.profileImage != null
@@ -517,7 +499,7 @@ class _CommunityState extends State<Community> {
                                   : Icons.thumb_up_outlined,
                               '${post.likes.length}',
                               isLiked
-                                  ? const Color(0xFF56195B)
+                                  ? const Color(0xFF123b53)
                                   : Colors.grey[700]!,
                               () => _toggleLike(post),
                             ),
@@ -580,7 +562,7 @@ class _CommunityState extends State<Community> {
                 items: [
                   PopupMenuItem(
                     child: const ListTile(
-                      leading: Icon(Icons.post_add, color: Color(0xFF56195B)),
+                      leading: Icon(Icons.post_add, color: Color(0xFF123b53)),
                       title: Text("Create Post"),
                     ),
                     onTap: () {
@@ -589,7 +571,7 @@ class _CommunityState extends State<Community> {
                       });
                     },
                   ),
-                  PopupMenuItem(
+                 /* PopupMenuItem(
                     child: const ListTile(
                       leading: Icon(Icons.group_add, color: Color(0xFF56195B)),
                       title: Text("Create Community"),
@@ -599,7 +581,7 @@ class _CommunityState extends State<Community> {
                         _navigateToCreateCommunity();
                       });
                     },
-                  ),
+                  ),*/
                 ],
               );
             },
@@ -919,7 +901,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                           final comment = currentPost.comments[index];
                           return ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: const Color(0xFF56195B),
+                              backgroundColor: const Color(0xFF123b53),
                               child: Text(
                                 comment.user.name[0].toUpperCase(),
                                 style: const TextStyle(color: Colors.white),
@@ -978,7 +960,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                           FloatingActionButton(
                             onPressed: _addComment,
                             mini: true,
-                            backgroundColor: const Color(0xFF56195B),
+                            backgroundColor: const Color(0xFF123b53),
                             child: const Icon(Icons.send,
                                 color: Colors.white, size: 20),
                           ),
@@ -1101,7 +1083,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Post'),
-        backgroundColor: const Color(0xFF56195B),
+        backgroundColor: const Color(0xFF123b53),
         foregroundColor: Colors.white,
         actions: [
           TextButton(
@@ -1150,7 +1132,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
               label: const Text('Select Image from Gallery'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: const Color(0xFF56195B), // Text and icon color
+                backgroundColor: const Color(0xFF123b53), // Text and icon color
                 minimumSize:
                     const Size(double.infinity, 50), // Make button wider
                 shape: RoundedRectangleBorder(
@@ -1189,7 +1171,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
 // Placeholder for CreateCommunityPage
 
-class CreateCommunityPage extends StatefulWidget {
+/*class CreateCommunityPage extends StatefulWidget {
   const CreateCommunityPage({super.key});
 
   @override
@@ -1222,7 +1204,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     }
   }
 
-  void _validateAndSubmit() {
+ void _validateAndSubmit() {
     final name = nameController.text.trim();
     final bio = bioController.text.trim();
     final tags = tagsController.text
@@ -1427,4 +1409,4 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       ),
     );
   }
-}
+}*/

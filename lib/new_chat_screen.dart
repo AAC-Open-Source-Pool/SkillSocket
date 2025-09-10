@@ -85,7 +85,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
           'New Chat',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF56195B),
+        backgroundColor: const Color(0xFF123b53),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
@@ -107,7 +107,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search users by name or email...',
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF56195B)),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF123b53)),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
@@ -119,12 +119,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
-                  borderSide: const BorderSide(color: Color(0xFF56195B)),
+                  borderSide: const BorderSide(color: Color(0xFF123b53)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
                   borderSide:
-                      const BorderSide(color: Color(0xFF56195B), width: 2),
+                      const BorderSide(color: Color(0xFF123b53), width: 2),
                 ),
               ),
               onChanged: (value) {
@@ -145,7 +145,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
             child: _isSearching
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFF56195B),
+                      color: Color(0xFF123b53),
                     ),
                   )
                 : !_hasSearched
@@ -218,11 +218,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 ),
                                 child: ListTile(
                                   leading: CircleAvatar(
-                                    backgroundColor: const Color(0xFFECC9EE),
+                                    backgroundColor: const Color(0xFFB6E1F0),
                                     child: Text(
                                       user['name'][0].toUpperCase(),
                                       style: const TextStyle(
-                                        color: Color(0xFF56195B),
+                                        color: Color(0xFF123b53),
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -242,7 +242,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   trailing: ElevatedButton(
                                     onPressed: () => _startChat(user),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF56195B),
+                                      backgroundColor: const Color(0xFF123b53),
                                       foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(20),

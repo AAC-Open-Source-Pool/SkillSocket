@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Barter System',
+      title: 'SkillSocket',
       theme: ThemeData(
         primarySwatch: Colors.purple,
         primaryColor: const Color.fromARGB(255, 177, 66, 116),

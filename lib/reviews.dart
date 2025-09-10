@@ -15,7 +15,7 @@ class Reviews extends StatelessWidget {
         "dislikes": "0",
         "comments": "2",
         "shares": "0",
-        "color": Color(0xFFECC9EE),
+        "color": Color.fromARGB(215, 195, 219, 236),
         "rating": 4,
       },
       {
@@ -27,7 +27,7 @@ class Reviews extends StatelessWidget {
         "dislikes": "1",
         "comments": "1",
         "shares": "0",
-        "color": Color(0xFFA86D9F),
+        "color": Color.fromARGB(215, 195, 219, 236),
         "rating": 5,
       },
     ];
@@ -42,7 +42,7 @@ class Reviews extends StatelessWidget {
         "dislikes": "0",
         "comments": "3",
         "shares": "1",
-        "color": Color(0xFF7E4682),
+        "color": Color.fromARGB(215, 195, 219, 236),
         "rating": 5,
       },
       {
@@ -54,7 +54,7 @@ class Reviews extends StatelessWidget {
         "dislikes": "2",
         "comments": "2",
         "shares": "0",
-        "color": Color(0xFFECC9EE),
+        "color": Color.fromARGB(215, 195, 219, 236),
         "rating": 4,
       },
     ];
@@ -67,15 +67,17 @@ class Reviews extends StatelessWidget {
           title: Text(
             'Reviews',
             style: TextStyle(
-              fontSize: 28,
-              fontStyle: FontStyle.italic,
+              fontSize: 25,
+              //fontStyle: FontStyle.italic,
               color: Colors.white,
             ),
           ),
-          backgroundColor: Color(0xFF56195B),
+          backgroundColor:Color(0xFF123b53),
           iconTheme: IconThemeData(color: Colors.white),
           bottom: const TabBar(
             indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
             tabs: [
               Tab(text: "Given Reviews"),
               Tab(text: "Received Reviews"),
@@ -106,7 +108,7 @@ class Reviews extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.shade300,
+                  color: const Color.fromARGB(184, 4, 2, 2),
                   blurRadius: 6,
                   offset: Offset(0, 4),
                 ),
@@ -161,7 +163,7 @@ class Reviews extends StatelessWidget {
                   post['title'],
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 14,
                     color: Colors.black,
                   ),
                 ),
