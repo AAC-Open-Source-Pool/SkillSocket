@@ -10,6 +10,9 @@ import 'package:barter_system/models/backend_models.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:barter_system/models/communityb.dart';
+import 'community_detail.dart';
+
 import 'dart:io';
 
 class _CommunityState extends State<Community> {
@@ -203,8 +206,19 @@ class _CommunityState extends State<Community> {
   void _navigateToCreateCommunity() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CreateCommunityPage()),
-    );
+      MaterialPageRoute(
+        builder: (context) => const CreateCommunityPage(),
+      ),
+    ).then((newCommunity) {
+      if (newCommunity != null && newCommunity is BackendCommunity) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CommunityDetailPage(community: newCommunity),
+          ),
+        );
+      }
+    });
   }
 
   @override
@@ -1189,6 +1203,11 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
 
   File? _selectedImage;
 
+  // Add error variables
+  String? nameError;
+  String? bioError;
+  String? tagsError;
+
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(
@@ -1201,6 +1220,36 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
         _selectedImage = File(image.path);
       });
     }
+  }
+
+  void _validateAndSubmit() {
+    final name = nameController.text.trim();
+    final bio = bioController.text.trim();
+    final tags = tagsController.text
+        .split(',')
+        .map((tag) => tag.trim())
+        .where((tag) => tag.isNotEmpty)
+        .toList();
+
+    setState(() {
+      nameError = name.isEmpty ? 'Please enter a community name.' : null;
+      bioError = bio.isEmpty ? 'Please enter a community bio.' : null;
+      tagsError = tags.isEmpty ? 'Please enter at least one tag.' : null;
+    });
+
+    if (nameError != null || bioError != null || tagsError != null) {
+      return;
+    }
+
+    final newCommunity = BackendCommunity(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      bio: bio,
+      tags: tags,
+      iconUrl: _selectedImage?.path,
+    );
+
+    Navigator.pop(context, newCommunity);
   }
 
   @override
@@ -1251,23 +1300,68 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                       ),
                       const SizedBox(height: 24),
 
+                      // Community Name Field + Error
                       _buildGradientTextField(
                         controller: nameController,
                         hintText: 'Community Name',
                       ),
+                      if (nameError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4, left: 8),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              nameError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 24),
 
+                      // Community Bio Field + Error
                       _buildGradientTextField(
                         controller: bioController,
                         hintText: 'Community Bio',
-                        maxLines: 6, // Increased size
+                        maxLines: 6,
                       ),
+                      if (bioError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4, left: 8),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              bioError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 24),
 
+                      // Tags Field + Error
                       _buildGradientTextField(
                         controller: tagsController,
                         hintText: 'Tags (comma separated)',
                       ),
+                      if (tagsError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4, left: 8),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              tagsError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -1281,15 +1375,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const Community(), // Your real page
-                          ),
-                        );
-                      },
+                      onPressed: _validateAndSubmit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF56195B),
                         foregroundColor: Colors.white,
