@@ -474,13 +474,12 @@ class _ProfileState extends State<Profile> {
                         },
                       );
                       if (pickedDate != null) {
-                        setState(() {
-                          // Format the date as DD/MM/YYYY
-                          _dobController.text =
-                              "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                        });
-                      }
-                    },
+  setState(() {
+    _dobController.text =
+        "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+  });
+}
+                                        },
                   ),
 
                   // Ratings section (Static as per image, no input field)
