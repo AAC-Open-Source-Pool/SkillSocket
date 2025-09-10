@@ -91,6 +91,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
     }
   }
+  void _goToLoginPage() {
+  Navigator.pop(context); // or Navigator.pushNamed(context, '/login');
+}
 
   // Navigate to next page with form data
   void _goToNextPage() {
@@ -266,31 +269,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             _locationController, "Location"),
 
                         const SizedBox(height: 30),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _goToNextPage,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4B014B),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
-                                    ),
-                                  )
-                                : const Text("NEXT",
-                                    style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
+                       Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    ElevatedButton(
+      onPressed: _isLoading ? null : _goToNextPage,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF4B014B),
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      child: _isLoading
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : const Text("NEXT", style: TextStyle(color: Colors.white)),
+    ),
+    const SizedBox(width: 20),
+    ElevatedButton(
+      onPressed: _goToLoginPage,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF4B014B),
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      child: const Text("BACK TO LOGIN", style: TextStyle(color: Colors.white)),
+    ),
+  ],
+),
                       ],
                     ),
                   ),
