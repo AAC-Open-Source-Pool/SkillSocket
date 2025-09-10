@@ -40,7 +40,7 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
               color: Colors.white,
             ),
           ),
-          backgroundColor: const Color(0xFF56195B),
+          backgroundColor: const Color(0xFF123b53),
           iconTheme: const IconThemeData(color: Colors.white),
           actions: [
             IconButton(
@@ -62,18 +62,19 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
         body: Container(
           width: double.infinity,
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
+            color: Colors.white
+            /*: LinearGradient(
+              colors: [Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-            ),
+            ),*/
           ),
           child: Center(
             child: Container(
               padding: const EdgeInsets.all(20),
               margin: const EdgeInsets.symmetric(horizontal: 30),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Color(0xFFB6E1F0),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Form(
@@ -101,7 +102,7 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
                       decoration: const InputDecoration(
                         hintText: 'Skill you require',
                         filled: true,
-                        fillColor: Color(0xFFE8CFF7),
+                        fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(20)),
                           borderSide: BorderSide.none,
@@ -133,7 +134,7 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
                       decoration: const InputDecoration(
                         hintText: 'Skill you offer',
                         filled: true,
-                        fillColor: Color(0xFFE8CFF7),
+                        fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(20)),
                           borderSide: BorderSide.none,
@@ -155,7 +156,7 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF5D1A6A),
+                          backgroundColor: const Color(0xFF123b53),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),

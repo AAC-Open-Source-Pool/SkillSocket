@@ -46,7 +46,7 @@ class _MainNavigationState extends State<MainNavigation> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: const BoxDecoration(
-          color: Color(0xFF56195B),
+          color: Color(0xFF123b53),
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(25),
             topRight: Radius.circular(25),
@@ -79,19 +79,19 @@ class _MainNavigationState extends State<MainNavigation> {
                     horizontal: isSelected ? 12 : 0, vertical: 8),
                 decoration: isSelected
                     ? BoxDecoration(
-                        color: Color(0xFFECC9EE),
+                        color: Color.fromARGB(255, 178, 211, 240),
                         borderRadius: BorderRadius.circular(20),
                       )
                     : null,
                 child: Row(
                   children: [
                     Icon(icons[index],
-                        color: isSelected ? Colors.white : Colors.white70),
+                        color: isSelected ? const Color.fromARGB(255, 67, 65, 65) : Colors.white),
                     if (isSelected)
                       Padding(
                         padding: const EdgeInsets.only(left: 6),
                         child: Text(labels[index],
-                            style: TextStyle(color: Colors.white)),
+                            style: TextStyle(color: Colors.black)),
                       ),
                   ],
                 ),

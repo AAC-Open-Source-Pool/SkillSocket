@@ -298,11 +298,12 @@ class _ChatState extends State<Chat> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF56195B),
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor:const Color(0xFF123b53),
         title: Row(
           children: [
             const CircleAvatar(
-              backgroundColor: Color(0xFFECC9EE),
+              backgroundColor: Color(0xFFB6E1F0),
               child: Icon(Icons.person, color: Colors.white),
             ),
             const SizedBox(width: 8),
@@ -333,7 +334,7 @@ class _ChatState extends State<Chat> {
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
-                color: Color(0xFF56195B),
+                color: Color(0xFF123b53),
               ),
             )
           : Column(
@@ -358,8 +359,8 @@ class _ChatState extends State<Chat> {
                                 margin: const EdgeInsets.symmetric(vertical: 4),
                                 decoration: BoxDecoration(
                                   color: msg['isMe']
-                                      ? const Color(0xFF7E4682)
-                                      : const Color(0xFFECC9EE),
+                                      ? const Color.fromARGB(255, 58, 137, 164)
+                                      : const Color(0xFFB6E1F0),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Column(
@@ -435,7 +436,7 @@ class _ChatState extends State<Chat> {
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  color: const Color(0xFF56195B),
+                  color:Color(0xFF123b53),
                   child: Row(
                     children: [
                       Expanded(

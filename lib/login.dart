@@ -131,9 +131,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 12),
               const Text(
-                "BARTER SYSTEM",
+                "SkillSocket",
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 30,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
