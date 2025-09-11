@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
+            colors: [Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -171,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         validator: _validateEmail,
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Color(0xFFE8CFF7),
+                          fillColor: Color(0xFFB6E1F0),
                           prefixIcon: Icon(Icons.person),
                           hintText: "Username/Email",
                           border: OutlineInputBorder(
@@ -189,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         validator: _validatePassword,
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Color(0xFFE8CFF7),
+                          fillColor: Color(0xFFB6E1F0),
                           prefixIcon: Icon(Icons.lock),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -244,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 40, vertical: 12),
-                            backgroundColor: Color(0xFF4B014B),
+                            backgroundColor: Color(0xFF123b53),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
@@ -279,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account? "),
+                  const Text("Don't have an account? ",style: TextStyle(color: Colors.white)),
                   TextButton(
                     onPressed: () {
                       Navigator.push(

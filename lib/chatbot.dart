@@ -158,10 +158,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Color(0xFF56195B),
+        backgroundColor: Color(0xFF123b53),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white,),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -169,7 +169,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             CircleAvatar(
               radius: 20,
               backgroundColor: Colors.white,
-              child: Icon(Icons.smart_toy, color: Color(0xFF56195B)),
+              child: Icon(Icons.smart_toy, color: Color(0xFF123b53)),
             ),
             SizedBox(width: 12),
             Column(
@@ -222,7 +222,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFF56195B),
+                              Color(0xFF123b53),
                             ),
                           ),
                         ),
@@ -230,7 +230,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         Text(
                           'AI is thinking...',
                           style: TextStyle(
-                            color: Color(0xFF56195B),
+                            color: Color(0xFF123b53),
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -254,7 +254,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       if (message['isBot']) ...[
                         CircleAvatar(
                           radius: 16,
-                          backgroundColor: Color(0xFF56195B),
+                          backgroundColor: Color(0xFF123b53),
                           child: Icon(Icons.smart_toy,
                               color: Colors.white, size: 16),
                         ),
@@ -268,8 +268,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                           padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: message['isBot']
-                                ? Color(0xFF56195B).withOpacity(0.1)
-                                : Color(0xFF56195B),
+                                ? Color.fromARGB(255, 141, 204, 226).withOpacity(0.1)
+                                : Color.fromARGB(255, 141, 204, 226),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
@@ -277,7 +277,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                             style: TextStyle(
                               color: message['isBot']
                                   ? Colors.black87
-                                  : Colors.white,
+                                  : const Color.fromARGB(255, 57, 51, 51),
                               fontSize: 14,
                             ),
                           ),
@@ -287,7 +287,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         SizedBox(width: 8),
                         CircleAvatar(
                           radius: 16,
-                          backgroundColor: Color(0xFF56195B),
+                          backgroundColor: Color(0xFF123b53),
                           child:
                               Icon(Icons.person, color: Colors.white, size: 16),
                         ),
@@ -361,7 +361,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: _isLoading ? Colors.grey[400] : Color(0xFF56195B),
+                      color: _isLoading ? Colors.grey[400] : Color(0xFF123b53),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -389,7 +389,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         width: double.infinity,
         padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
-          color: Color(0xFF56195B).withOpacity(0.1),
+          color: Color(0xFF123b53).withOpacity(0.1),
           borderRadius: BorderRadius.circular(25),
           border: Border.all(color: Color(0xFF56195B).withOpacity(0.3)),
         ),

@@ -36,8 +36,8 @@ class History extends StatelessWidget {
         title: Text(
           'History',
           style: TextStyle(
-            fontSize: 32,
-            fontStyle: FontStyle.italic,
+            fontSize: 30,
+            //fontStyle: FontStyle.italic,
             color: Colors.white,
           ),
         ),

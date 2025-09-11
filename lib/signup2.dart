@@ -137,7 +137,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
+            colors: [Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -147,40 +147,21 @@ class _SignUpPageState extends State<SignUpPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 60.0, left: 20.0),
-                child: Row(
+                child: Column(
                   children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.3),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'LOGO',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    const Text(
-                      'APP NAME',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                  ],
+                    const CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white70,
+                  child: Text("LOGO", style: TextStyle(color: Colors.black)),
+                ),
+                const SizedBox(height: 8),
+                const Text("SkillSocket",
+                    style:
+                        TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  ]
                 ),
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 30),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20.0),
                 padding: const EdgeInsets.all(25.0),
@@ -281,7 +262,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 _currentWorkingStatus = value;
                               });
                             },
-                            activeColor: Color.fromARGB(255, 154, 13, 173),
+                            activeColor:  Color(0xFF123b53),
                           ),
                           const Text('No',
                               style: TextStyle(color: Colors.black87)),
@@ -329,7 +310,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                       Navigator.pop(context);
                                     },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF4B014B),
+                                backgroundColor: const  Color(0xFF123b53),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 40, vertical: 12),
                                 shape: RoundedRectangleBorder(
@@ -341,7 +322,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ElevatedButton(
                               onPressed: _isLoading ? null : _submitSignup,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF4B014B),
+                                backgroundColor: const  Color(0xFF123b53),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 40, vertical: 12),
                                 shape: RoundedRectangleBorder(
@@ -386,7 +367,7 @@ class _SignUpPageState extends State<SignUpPage> {
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.black45),
         filled: true,
-        fillColor: const Color(0xFFE8CFF7),
+        fillColor: const Color(0xFFB6E1F0),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
           borderSide: BorderSide.none,
@@ -409,7 +390,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return Container(
       height: 55,
       decoration: BoxDecoration(
-        color: const Color(0xFFE8CFF7),
+        color: const Color(0xFFB6E1F0),
         borderRadius: BorderRadius.circular(30),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

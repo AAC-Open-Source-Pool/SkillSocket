@@ -23,7 +23,7 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
+          colors: [Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
