@@ -141,7 +141,8 @@ class _StudyRoomState extends State<StudyRoom> {
               icon: Icon(Icons.person_rounded)),
         ],
       ),
-      body: Column(
+      body: 
+      Column(
         children: [
           // Search bar at the top
           Container(

@@ -90,7 +90,7 @@ class _NotificationsState extends State<Notifications> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: const Color(0xFF56195B),
+        backgroundColor: const Color(0xFF123b53),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ListView(
@@ -123,7 +123,7 @@ class _NotificationsState extends State<Notifications> {
                         children: [
                           CircleAvatar(
                             radius: 28,
-                            backgroundColor: const Color(0xFF56195B),
+                            backgroundColor: const Color(0xFF123b53),
                             child: Icon(notif["icon"], color: Colors.white),
                           ),
                           const SizedBox(width: 12),
@@ -195,7 +195,7 @@ class _NotificationsState extends State<Notifications> {
                       children: [
                         CircleAvatar(
                           radius: 24,
-                          backgroundColor: const Color(0xFF56195B),
+                          backgroundColor: const Color(0xFF123b53),
                           child: Icon(notif["icon"], color: Colors.white),
                         ),
                         const SizedBox(width: 10),

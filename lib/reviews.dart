@@ -15,7 +15,7 @@ class Reviews extends StatelessWidget {
         "dislikes": "0",
         "comments": "2",
         "shares": "0",
-        "color": Color.fromARGB(215, 195, 219, 236),
+        "color": Color.fromARGB(255, 150, 198, 229),
         "rating": 4,
       },
       {
@@ -27,7 +27,7 @@ class Reviews extends StatelessWidget {
         "dislikes": "1",
         "comments": "1",
         "shares": "0",
-        "color": Color.fromARGB(215, 195, 219, 236),
+        "color": Color.fromARGB(255, 150, 198, 229),
         "rating": 5,
       },
     ];
@@ -42,7 +42,7 @@ class Reviews extends StatelessWidget {
         "dislikes": "0",
         "comments": "3",
         "shares": "1",
-        "color": Color.fromARGB(215, 195, 219, 236),
+        "color": Color.fromARGB(255, 150, 198, 229),
         "rating": 5,
       },
       {
@@ -54,7 +54,7 @@ class Reviews extends StatelessWidget {
         "dislikes": "2",
         "comments": "2",
         "shares": "0",
-        "color": Color.fromARGB(215, 195, 219, 236),
+        "color": Color.fromARGB(255, 150, 198, 229),
         "rating": 4,
       },
     ];
@@ -67,7 +67,7 @@ class Reviews extends StatelessWidget {
           title: Text(
             'Reviews',
             style: TextStyle(
-              fontSize: 25,
+              fontSize: 30,
               //fontStyle: FontStyle.italic,
               color: Colors.white,
             ),

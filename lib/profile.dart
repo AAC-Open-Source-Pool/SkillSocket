@@ -245,7 +245,7 @@ class _ProfileState extends State<Profile> {
     required TextEditingController controller,
     bool readOnly = false, // To make Date of Birth field read-only
     VoidCallback? onTap, // For Date of Birth picker
-    Color fillColor = const Color(0xFFC0A2C2), // Default light purple
+    Color fillColor = const Color(0xFFB6E1F0), // Default light purple
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
@@ -272,7 +272,7 @@ class _ProfileState extends State<Profile> {
               filled: true,
               fillColor: fillColor, // Background color of the text field
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(20.0),
                 borderSide: BorderSide.none, // No border line
               ),
               contentPadding:
@@ -299,7 +299,7 @@ class _ProfileState extends State<Profile> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: const Color(0xFF56195B), // AppBar background color
+        backgroundColor: const Color(0xFF123b53), // AppBar background color
         iconTheme: const IconThemeData(color: Colors.white), // Icons on AppBar
         actions: [
           IconButton(
@@ -319,7 +319,7 @@ class _ProfileState extends State<Profile> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(
-                    color: Color(0xFF56195B),
+                    color: Color(0xFF123b53),
                   ),
                   SizedBox(height: 16),
                   Text(
@@ -363,7 +363,7 @@ class _ProfileState extends State<Profile> {
                               ),
                               child: const Icon(
                                 Icons.camera_alt,
-                                color: Color(0xFF56195B), // Camera icon color
+                                color: Color(0xFF123b53), // Camera icon color
                                 size: 26,
                               ),
                             ),
@@ -416,9 +416,9 @@ class _ProfileState extends State<Profile> {
                           },
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Color(0xFFC0A2C2),
+                            fillColor: Color(0xFFB6E1F0),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
+                              borderRadius: BorderRadius.circular(20.0),
                               borderSide: BorderSide.none,
                             ),
                             contentPadding: EdgeInsets.symmetric(
@@ -443,8 +443,7 @@ class _ProfileState extends State<Profile> {
                     label: 'Date of Birth',
                     controller: _dobController,
                     readOnly: true, // Make it read-only
-                    fillColor: const Color.fromARGB(
-                        255, 214, 164, 214), // Darker purple for DOB
+                    fillColor: const Color(0xFFB6E1F0), // Darker purple for DOB
                     onTap: () async {
                       DateTime? pickedDate = await showDatePicker(
                         context: context,
@@ -455,8 +454,7 @@ class _ProfileState extends State<Profile> {
                           return Theme(
                             data: Theme.of(context).copyWith(
                               colorScheme: const ColorScheme.light(
-                                primary: Color(
-                                    0xFF56195B), // Header background color of date picker
+                                primary: Color(0xFF123b53), // Header background color of date picker
                                 onPrimary: Colors
                                     .white, // Header text color of date picker
                                 onSurface: Colors
@@ -464,8 +462,7 @@ class _ProfileState extends State<Profile> {
                               ),
                               textButtonTheme: TextButtonThemeData(
                                 style: TextButton.styleFrom(
-                                  foregroundColor: const Color(
-                                      0xFF56195B), // Button text color in date picker
+                                  foregroundColor: const Color(0xFF123b53), // Button text color in date picker
                                 ),
                               ),
                             ),
@@ -534,12 +531,11 @@ class _ProfileState extends State<Profile> {
                             ? null
                             : _saveProfileData, // Disable when saving
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(
-                              0xFF56195B), // Button background color
+                          backgroundColor:Color(0xFF123b53), // Button background color
                           foregroundColor: Colors.white, // Button text color
                           shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.circular(10.0), // Rounded corners
+                                BorderRadius.circular(30.0), // Rounded corners
                           ),
                           elevation: 5, // Add a little shadow
                           minimumSize:

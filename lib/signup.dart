@@ -129,7 +129,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
+            colors: [Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -145,7 +145,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Text("LOGO", style: TextStyle(color: Colors.black)),
                 ),
                 const SizedBox(height: 8),
-                const Text("BARTER SYSTEM",
+                const Text("SkillSocket",
                     style:
                         TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 30),
@@ -269,13 +269,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             _locationController, "Location"),
 
                         const SizedBox(height: 30),
-                       Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
+                        Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly, // <-- evenly spaced
+  children: [    
+    ElevatedButton(
+      onPressed: _goToLoginPage,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF123b53),
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      child: const Text("BACK", style: TextStyle(color: Colors.white)),
+    ),
     ElevatedButton(
       onPressed: _isLoading ? null : _goToNextPage,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF4B014B),
+        backgroundColor: const Color(0xFF123b53),
         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
@@ -292,18 +303,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             )
           : const Text("NEXT", style: TextStyle(color: Colors.white)),
     ),
-    const SizedBox(width: 20),
-    ElevatedButton(
-      onPressed: _goToLoginPage,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF4B014B),
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-      ),
-      child: const Text("BACK TO LOGIN", style: TextStyle(color: Colors.white)),
-    ),
+    
   ],
 ),
                       ],
@@ -336,7 +336,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           obscureText: obscureText,
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFE8CFF7),
+            fillColor: const Color(0xFFB6E1F0),
             hintText: hint,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             border: OutlineInputBorder(
@@ -374,7 +374,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           },
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFE8CFF7),
+            fillColor: const Color(0xFFB6E1F0),
             hintText: "Select Date of Birth",
             suffixIcon: const Icon(Icons.calendar_today),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),

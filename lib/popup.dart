@@ -129,8 +129,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           children: [
             const CircleAvatar(
               radius: 60,
-              backgroundColor: Color(0xFFE1BEE7),
-            ),
+              backgroundColor: Color(0xFFB6E1F0),),
             const SizedBox(height: 16),
 
             // Name & Profession
@@ -171,7 +170,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.purple,
+                  color: Color(0xFF123b53),
                 ),
               ),
             ),
@@ -193,7 +192,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.purple,
+                  color: Color(0xFF123b53),
                 ),
               ),
             ),
@@ -235,7 +234,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.purple,
+                    color: Color(0xFF123b53),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -377,7 +376,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFD6A4A4), Color(0xFF5C1A82)],
+            colors:[Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
