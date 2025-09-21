@@ -46,7 +46,7 @@ class _ChatsState extends State<Chats> {
 
   void _connectToSocket() {
     socket = IO.io(
-      "https://app-backend-latest-vzas.onrender.com/",
+      "http://localhost:3000/",
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -329,7 +329,7 @@ class _ChatsState extends State<Chats> {
           'SkillSocket',
           style: TextStyle(
               fontSize: 20,
-             // fontStyle: FontStyle.italic,
+              // fontStyle: FontStyle.italic,
               color: Color.fromARGB(255, 255, 255, 255)),
         ),
         backgroundColor: Color(0xFF123b53),
@@ -420,8 +420,9 @@ class _ChatsState extends State<Chats> {
                             final chat = filteredChats[index];
                             final participant = chat['participant'];
                             final lastMessage = chat['lastMessage'];
-                            final bool isUnseen = lastMessage['seen'] == false &&
-                                lastMessage['from'] != currentUserId;
+                            final bool isUnseen =
+                                lastMessage['seen'] == false &&
+                                    lastMessage['from'] != currentUserId;
 
                             return ListTile(
                               leading: CircleAvatar(
@@ -436,7 +437,8 @@ class _ChatsState extends State<Chats> {
                               ),
                               title: Text(
                                 participant['name'],
-                                style: const TextStyle(fontWeight: FontWeight.w500),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500),
                               ),
                               subtitle: Text(
                                 lastMessage['content'],
@@ -444,12 +446,14 @@ class _ChatsState extends State<Chats> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: isUnseen ? Colors.green : Colors.black,
-                                  fontWeight:
-                                      isUnseen ? FontWeight.bold : FontWeight.normal,
+                                  fontWeight: isUnseen
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                                 ),
                               ),
                               trailing: Text(
-                                _formatLastMessageTime(lastMessage['createdAt']),
+                                _formatLastMessageTime(
+                                    lastMessage['createdAt']),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey,
