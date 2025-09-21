@@ -23,7 +23,7 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
+          colors: [Color(0xFFB6E1F0), Color(0xFF66B7D2), Color(0xFF123b53)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -52,8 +52,8 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
             ),
             IconButton(
               onPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Profile()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Profile()));
               },
               icon: const Icon(Icons.person_rounded),
             ),
@@ -61,14 +61,13 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
         ),
         body: Container(
           width: double.infinity,
-          decoration: const BoxDecoration(
-            color: Colors.white
-            /*: LinearGradient(
+          decoration: const BoxDecoration(color: Colors.white
+              /*: LinearGradient(
               colors: [Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),*/
-          ),
+              ),
           child: Center(
             child: Container(
               padding: const EdgeInsets.all(20),
@@ -164,11 +163,13 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            // ✅ Only navigate if valid
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ProfileEditScreen(),
+                                builder: (context) => ProfileEditScreen(
+                                  requiredSkill: requireController.text.trim(),
+                                  offeredSkill: offerController.text.trim(),
+                                ),
                               ),
                             );
                           }
