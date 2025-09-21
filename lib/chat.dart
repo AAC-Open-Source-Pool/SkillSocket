@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:barter_system/services/chat_service.dart';
+import 'package:barter_system/profilepage.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 
@@ -298,7 +299,7 @@ class _ChatState extends State<Chat> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: const Color(0xFF123b53),
         title: Row(
           children: [
@@ -308,24 +309,39 @@ class _ChatState extends State<Chat> {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.name,
-                    style: const TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                  if (_isTyping)
-                    const Text(
-                      'typing...',
-                      style: TextStyle(fontSize: 12, color: Colors.white70),
-                    )
-                  else
-                    const Text(
-                      'online',
-                      style: TextStyle(fontSize: 12, color: Colors.white70),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserProfilePage(
+                        userId: widget.recipientId,
+                        name: widget.name,
+                      ),
                     ),
-                ],
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        decoration:
+                            TextDecoration.underline, // clickable effect
+                      ),
+                    ),
+                    if (_isTyping)
+                      const Text("typing...",
+                          style: TextStyle(fontSize: 12, color: Colors.white70))
+                    else
+                      const Text("online",
+                          style:
+                              TextStyle(fontSize: 12, color: Colors.white70)),
+                  ],
+                ),
               ),
             ),
           ],

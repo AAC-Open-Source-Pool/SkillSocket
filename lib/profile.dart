@@ -47,7 +47,7 @@ class _ProfileState extends State<Profile> {
     });
 
     try {
-      final userProfile = await UserService.getUserProfile();
+     final userProfile = await UserService.getUserProfile();
 
       if (userProfile != null) {
         setState(() {
