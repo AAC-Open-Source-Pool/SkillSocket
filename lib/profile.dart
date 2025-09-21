@@ -18,7 +18,6 @@ class _ProfileState extends State<Profile> {
   bool _isSaving = false;
 
   // Declare TextEditingControllers for each input field
-  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _dobController =
       TextEditingController(); // For Date of Birth
@@ -33,6 +32,7 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _skillsOfferedController =
       TextEditingController();
   String? _currentlyWorkingStatus;
+  String? _userProfileImageUrl;
 
   @override
   void initState() {
@@ -81,8 +81,9 @@ class _ProfileState extends State<Profile> {
             _skillsController.text = (userProfile['skills'] as List).join(', ');
           }
 
+          // Handle profile image
           if (userProfile['profileImage'] != null) {
-            // You can implement network image loading here if needed
+            _userProfileImageUrl = userProfile['profileImage'];
           }
         });
       } else {
@@ -110,6 +111,7 @@ class _ProfileState extends State<Profile> {
     _skillsRequiredController.text = "";
     _skillsOfferedController.text = "";
     _currentlyWorkingStatus = null;
+    _userProfileImageUrl = null;
   }
 
   // This function will be called when the Save button is clicked.
@@ -159,6 +161,25 @@ class _ProfileState extends State<Profile> {
             .toList();
       }
 
+      // Upload profile image if a new one was selected
+      String? profileImageUrl = _userProfileImageUrl;
+      if (_imageFile != null) {
+        profileImageUrl = await UserService.uploadUserLogo(_imageFile!);
+        if (profileImageUrl == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content:
+                  Text('Failed to upload profile image. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          setState(() {
+            _isSaving = false;
+          });
+          return;
+        }
+      }
+
       final updatedUser = await UserService.updateUserProfile(
         name: _nameController.text.isEmpty ? null : _nameController.text,
 
@@ -176,6 +197,7 @@ class _ProfileState extends State<Profile> {
         currentlyWorking: _currentlyWorkingStatus,
         skillsRequired: skillsRequired,
         skillsOffered: skillsOffered,
+        profileImage: profileImageUrl,
       );
 
       if (updatedUser != null) {
@@ -218,15 +240,13 @@ class _ProfileState extends State<Profile> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
-      // In a real app, you'd likely save this image to a persistent storage
-      // (e.g., local storage, cloud storage) and update a data model.
+      // The logo will be uploaded when the user clicks Save
     }
   }
 
   @override
   void dispose() {
     // Dispose all controllers to prevent memory leaks
-    _usernameController.dispose();
     _nameController.dispose();
     _dobController.dispose();
     _locationController.dispose();
@@ -344,11 +364,15 @@ class _ProfileState extends State<Profile> {
                           backgroundColor: Colors.grey[300],
                           backgroundImage: _imageFile != null
                               ? FileImage(_imageFile!)
-                              : null,
-                          child: _imageFile == null
-                              ? const Icon(Icons.person,
-                                  size: 70, color: Colors.white70)
-                              : null,
+                              : _userProfileImageUrl != null
+                                  ? NetworkImage(_userProfileImageUrl!)
+                                      as ImageProvider
+                                  : null,
+                          child:
+                              _imageFile == null && _userProfileImageUrl == null
+                                  ? const Icon(Icons.person,
+                                      size: 70, color: Colors.white70)
+                                  : null,
                         ),
                         Positioned(
                           bottom: 0,
@@ -454,7 +478,8 @@ class _ProfileState extends State<Profile> {
                           return Theme(
                             data: Theme.of(context).copyWith(
                               colorScheme: const ColorScheme.light(
-                                primary: Color(0xFF123b53), // Header background color of date picker
+                                primary: Color(
+                                    0xFF123b53), // Header background color of date picker
                                 onPrimary: Colors
                                     .white, // Header text color of date picker
                                 onSurface: Colors
@@ -462,7 +487,8 @@ class _ProfileState extends State<Profile> {
                               ),
                               textButtonTheme: TextButtonThemeData(
                                 style: TextButton.styleFrom(
-                                  foregroundColor: const Color(0xFF123b53), // Button text color in date picker
+                                  foregroundColor: const Color(
+                                      0xFF123b53), // Button text color in date picker
                                 ),
                               ),
                             ),
@@ -471,12 +497,12 @@ class _ProfileState extends State<Profile> {
                         },
                       );
                       if (pickedDate != null) {
-  setState(() {
-    _dobController.text =
-        "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
-  });
-}
-                                        },
+                        setState(() {
+                          _dobController.text =
+                              "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+                        });
+                      }
+                    },
                   ),
 
                   // Ratings section (Static as per image, no input field)
@@ -531,7 +557,8 @@ class _ProfileState extends State<Profile> {
                             ? null
                             : _saveProfileData, // Disable when saving
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:Color(0xFF123b53), // Button background color
+                          backgroundColor:
+                              Color(0xFF123b53), // Button background color
                           foregroundColor: Colors.white, // Button text color
                           shape: RoundedRectangleBorder(
                             borderRadius:
