@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://app-backend-latest-vzas.onrender.com/api/auth/login'),
+        Uri.parse('http://localhost:3000/api/auth/login'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
+            colors: [Color(0xFFB6E1F0), Color(0xFF66B7D2), Color(0xFF123b53)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -279,7 +279,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account? ",style: TextStyle(color: Colors.white)),
+                  const Text("Don't have an account? ",
+                      style: TextStyle(color: Colors.white)),
                   TextButton(
                     onPressed: () {
                       Navigator.push(

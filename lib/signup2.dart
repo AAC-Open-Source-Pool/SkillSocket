@@ -2,8 +2,10 @@ import 'package:barter_system/home.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+
 class SignUpPage extends StatefulWidget {
-  final Map<String, String>? userData;
+  final Map<String, dynamic>? userData;
 
   const SignUpPage({super.key, this.userData});
 
@@ -40,6 +42,38 @@ class _SignUpPageState extends State<SignUpPage> {
     return null;
   }
 
+  Future<String?> _uploadProfileImageToCloudinary(File profileImageFile) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://localhost:3000/api/user/upload-logo'),
+      );
+
+      // Add the file to the request
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'logo',
+          profileImageFile.path,
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return responseData['logoUrl'];
+      } else {
+        print(
+            'Profile image upload error: ${response.statusCode} - ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Profile image upload exception: $e');
+      return null;
+    }
+  }
+
   Future<void> _submitSignup() async {
     if (!_formKey.currentState!.validate() || _currentWorkingStatus == null) {
       setState(() {
@@ -54,17 +88,45 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     try {
+      // Upload profile image first if provided
+      String? profileImageUrl;
+      if (widget.userData?['profileImageFile'] != null) {
+        final profileImageFile = widget.userData!['profileImageFile'] as File;
+        profileImageUrl =
+            await _uploadProfileImageToCloudinary(profileImageFile);
+        if (profileImageUrl == null) {
+          setState(() {
+            _errorMessage = 'Failed to upload profile image. Please try again.';
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+
+      // Parse date of birth from DD/MM/YYYY to ISO format
+      String? dateOfBirth;
+      if (widget.userData?['dateOfBirth'] != null &&
+          widget.userData!['dateOfBirth'].isNotEmpty) {
+        final parts = widget.userData!['dateOfBirth'].split('/');
+        if (parts.length == 3) {
+          final day = parts[0].padLeft(2, '0');
+          final month = parts[1].padLeft(2, '0');
+          final year = parts[2];
+          dateOfBirth = '$year-$month-$day';
+        }
+      }
+
       // Combine data from both pages
       final signupData = {
         'firstName': widget.userData?['firstName'] ?? '',
         'lastName': widget.userData?['lastName'] ?? '',
         'email': widget.userData?['email'] ?? '',
         'password': widget.userData?['password'] ?? '',
-        'dateOfBirth': widget.userData?['dateOfBirth'] ?? '',
+        'dateOfBirth': dateOfBirth,
         'gender': widget.userData?['gender'] ?? '',
         'location': widget.userData?['location'] ?? '',
         'education': _educationController.text.trim(),
-        'currentlyWorking': _currentWorkingStatus,
+        'currentlyWorking': _currentWorkingStatus ?? '',
         'profession': _professionController.text.trim(),
         'skillsRequired': _skillsRequiredController.text
             .trim()
@@ -78,12 +140,13 @@ class _SignUpPageState extends State<SignUpPage> {
             .map((s) => s.trim())
             .where((s) => s.isNotEmpty)
             .toList(),
+        'profileImage': profileImageUrl ?? '',
       };
 
       print('Sending signup data: $signupData');
 
       final response = await http.post(
-        Uri.parse('https://app-backend-latest-vzas.onrender.com/api/auth/signup'),
+        Uri.parse('http://localhost:3000/api/auth/signup'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -108,7 +171,8 @@ class _SignUpPageState extends State<SignUpPage> {
           // Navigate to community selection
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => MyHomePage(title: 'SkillSocket')),
+            MaterialPageRoute(
+                builder: (context) => MyHomePage(title: 'SkillSocket')),
           );
         }
       } else {
@@ -137,7 +201,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFB6E1F0),Color(0xFF66B7D2), Color(0xFF123b53)],
+            colors: [Color(0xFFB6E1F0), Color(0xFF66B7D2), Color(0xFF123b53)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -147,19 +211,17 @@ class _SignUpPageState extends State<SignUpPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 60.0, left: 20.0),
-                child: Column(
-                  children: [
-                    const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white70,
-                  child: Text("LOGO", style: TextStyle(color: Colors.black)),
-                ),
-                const SizedBox(height: 8),
-                const Text("SkillSocket",
-                    style:
-                        TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  ]
-                ),
+                child: Column(children: [
+                  const CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white70,
+                    child: Text("LOGO", style: TextStyle(color: Colors.black)),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text("SkillSocket",
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                ]),
               ),
               const SizedBox(height: 30),
               Container(
@@ -228,14 +290,6 @@ class _SignUpPageState extends State<SignUpPage> {
                       const SizedBox(height: 25),
 
                       const Text(
-                        'Certificates',
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildCertificatesField(),
-                      const SizedBox(height: 25),
-
-                      const Text(
                         'Are you currently working? *',
                         style: TextStyle(fontSize: 16, color: Colors.black87),
                       ),
@@ -262,7 +316,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 _currentWorkingStatus = value;
                               });
                             },
-                            activeColor:  Color(0xFF123b53),
+                            activeColor: Color(0xFF123b53),
                           ),
                           const Text('No',
                               style: TextStyle(color: Colors.black87)),
@@ -310,7 +364,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                       Navigator.pop(context);
                                     },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const  Color(0xFF123b53),
+                                backgroundColor: const Color(0xFF123b53),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 40, vertical: 12),
                                 shape: RoundedRectangleBorder(
@@ -322,7 +376,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ElevatedButton(
                               onPressed: _isLoading ? null : _submitSignup,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const  Color(0xFF123b53),
+                                backgroundColor: const Color(0xFF123b53),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 40, vertical: 12),
                                 shape: RoundedRectangleBorder(
@@ -382,30 +436,6 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      ),
-    );
-  }
-
-  Widget _buildCertificatesField() {
-    return Container(
-      height: 55,
-      decoration: BoxDecoration(
-        color: const Color(0xFFB6E1F0),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: const Row(
-        children: [
-          Icon(Icons.camera_alt_outlined, color: Colors.black54),
-          SizedBox(width: 15),
-          Expanded(
-            child: Text(
-              'Upload your certificates',
-              style: TextStyle(color: Colors.black54),
-            ),
-          ),
-          Icon(Icons.upload_file, color: Colors.black54),
-        ],
       ),
     );
   }

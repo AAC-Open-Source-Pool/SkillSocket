@@ -89,7 +89,7 @@ class _ChatState extends State<Chat> {
 
   void _connectToServer() {
     socket = IO.io(
-      "https://app-backend-latest-vzas.onrender.com/",
+      "http://localhost:3000/",
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -299,7 +299,7 @@ class _ChatState extends State<Chat> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        backgroundColor:const Color(0xFF123b53),
+        backgroundColor: const Color(0xFF123b53),
         title: Row(
           children: [
             const CircleAvatar(
@@ -436,7 +436,7 @@ class _ChatState extends State<Chat> {
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  color:Color(0xFF123b53),
+                  color: Color(0xFF123b53),
                   child: Row(
                     children: [
                       Expanded(

@@ -63,7 +63,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     try {
       print('Sending message to bot: $message');
       final response = await http.post(
-        Uri.parse('https://app-backend-latest-vzas.onrender.com/api/chat'),
+        Uri.parse('http://localhost:3000/api/chat'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -161,7 +161,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         backgroundColor: Color(0xFF123b53),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -268,7 +271,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                           padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: message['isBot']
-                                ? Color.fromARGB(255, 141, 204, 226).withOpacity(0.1)
+                                ? Color.fromARGB(255, 141, 204, 226)
+                                    .withOpacity(0.1)
                                 : Color.fromARGB(255, 141, 204, 226),
                             borderRadius: BorderRadius.circular(16),
                           ),

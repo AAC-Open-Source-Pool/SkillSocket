@@ -87,17 +87,6 @@ class _CommunityState extends State<Community> {
     }
   }
 
-  Future<void> _loadMorePosts() async {
-    if (isLoadingMore || !hasMorePosts) return;
-
-    setState(() {
-      isLoadingMore = true;
-      currentPage++;
-    });
-
-    await _loadPosts();
-  }
-
   void _initializeDummyPosts() {
     // Fallback dummy data structure matching BackendPost
     setState(() {
@@ -723,16 +712,10 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
 
         if (response != null) {
           List<BackendComment> updatedComments = [];
-          if (response is List) {
-            // Backend returned a list of comments
-            updatedComments = response
-                .map((c) => BackendComment.fromJson(c as Map<String, dynamic>))
-                .toList();
-          } else if (response is Map<String, dynamic>) {
-            // Backend returned a single comment object
-            updatedComments = List<BackendComment>.from(currentPost.comments)
-              ..add(BackendComment.fromJson(response as Map<String, dynamic>));
-          }
+          // Backend returned a list of comments
+          updatedComments = response
+              .map((c) => BackendComment.fromJson(c as Map<String, dynamic>))
+              .toList();
           setState(() {
             currentPost = BackendPost(
               id: currentPost.id,
