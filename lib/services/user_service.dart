@@ -56,6 +56,40 @@ class UserService {
       return null;
     }
   }
+  // in user_service.dart
+static Future<void> addReview(String userId, String review) async {
+  // TODO: implement backend call here
+}
+
+
+  // Get user profile by ID
+  static Future<Map<String, dynamic>?> getUserProfileById(String userId) async {
+    try {
+      final headers = await _getHeaders();
+
+      print('Making GET request to: $baseUrl/user/profile/$userId'); // Debug log
+      print('With headers: $headers'); // Debug log
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/profile/$userId'),
+        headers: headers,
+      );
+
+      print('Get profile by ID response status: ${response.statusCode}'); // Debug log
+      print('Get profile by ID response body: ${response.body}'); // Debug log
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['user']; // Return the user object
+      } else {
+        print('Get profile by ID error: ${response.statusCode} - ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Get profile by ID exception: $e');
+      return null;
+    }
+  }
 
   // Update user profile
   static Future<Map<String, dynamic>?> updateUserProfile({

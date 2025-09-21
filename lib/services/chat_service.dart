@@ -144,4 +144,5 @@ class ChatService {
       return false;
     }
   }
+
 }

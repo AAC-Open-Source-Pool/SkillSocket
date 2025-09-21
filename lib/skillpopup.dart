@@ -33,10 +33,10 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
         appBar: AppBar(
           centerTitle: true,
           title: const Text(
-            'APP NAME',
+            'SkillSocket',
             style: TextStyle(
-              fontSize: 32,
-              fontStyle: FontStyle.italic,
+              fontSize: 20,
+              //fontStyle: FontStyle.italic,
               color: Colors.white,
             ),
           ),

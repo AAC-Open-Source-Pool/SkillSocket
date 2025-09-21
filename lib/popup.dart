@@ -32,37 +32,49 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   Future<void> fetchMatchingProfiles() async {
     setState(() => isLoading = true);
-    final url = Uri.parse(
-        'http://localhost:3000/api/users/match?required=${widget.requiredSkill}&offered=${widget.offeredSkill}');
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      if (data.isNotEmpty) {
-        setState(() {
-          profiles = data
-              .map((u) => {
-                    "name": u["name"] ?? "",
-                    "profileImage": u["profileImage"],
-                    "skillsOffered":
-                        (u["skillsOffered"] as List?)?.join(', ') ?? "",
-                    "skillsRequired":
-                        (u["skillsRequired"] as List?)?.join(', ') ?? "",
-                    "education": u["education"] ?? "",
-                    "location": u["location"] ?? "",
-                    "profession": u["profession"] ?? "",
-                    "reviews": _staticReviews(),
-                  })
-              .toList();
-          isLoading = false;
-        });
+    try {
+      final url = Uri.parse(
+          'http://localhost:3000/api/users/match?required=${widget.requiredSkill}&offered=${widget.offeredSkill}');
+      final response = await http.get(url);
+      
+      if (response.statusCode == 200) {
+        final List data = jsonDecode(response.body);
+        if (data.isNotEmpty) {
+          setState(() {
+            profiles = data
+                .map((u) => {
+                      "name": u["name"] ?? "Unknown",
+                      "profileImage": u["profileImage"],
+                      "skillsOffered": (u["skillsOffered"] as List?)?.join(', ') ?? 
+                                     (u["skillsOffered"] as String?) ?? "",
+                      "skillsRequired": (u["skillsRequired"] as List?)?.join(', ') ?? 
+                                      (u["skillsRequired"] as String?) ?? "",
+                      "education": u["education"] ?? "",
+                      "location": u["location"] ?? "",
+                      "profession": u["profession"] ?? "",
+                      "ratingsValue": u["ratingsValue"] ?? 4.0,
+                      "reviews": u["reviews"] ?? _staticReviews(),
+                    })
+                .toList();
+            isLoading = false;
+          });
+        } else {
+          // Show random static profiles if no match found
+          setState(() {
+            profiles = _randomStaticProfiles();
+            isLoading = false;
+          });
+        }
       } else {
-        // Show random static profiles if no match found
+        // Fallback to static profiles on error
         setState(() {
           profiles = _randomStaticProfiles();
           isLoading = false;
         });
       }
-    } else {
+    } catch (e) {
+      print('Error fetching profiles: $e');
+      // Fallback to static profiles on error
       setState(() {
         profiles = _randomStaticProfiles();
         isLoading = false;
@@ -81,6 +93,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       }
     ];
   }
+
+  List<String> _getSkillsList(dynamic skills) {
+    if (skills == null) return [];
+    if (skills is List) {
+      return skills.map((e) => e.toString()).toList();
+    }
+    if (skills is String) {
+      return skills.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    }
+    return [];
+  }
+
 
   List<Map<String, dynamic>> _randomStaticProfiles() {
     return [
@@ -132,10 +156,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               CircleAvatar(
                 radius: 60,
                 backgroundColor: const Color(0xFFB6E1F0),
-                backgroundImage: profile["profileImage"] != null
+                backgroundImage: profile["profileImage"] != null && profile["profileImage"].toString().isNotEmpty
                     ? NetworkImage(profile["profileImage"])
                     : null,
-                child: profile["profileImage"] == null
+                child: profile["profileImage"] == null || profile["profileImage"].toString().isEmpty
                     ? const Icon(Icons.person, size: 60, color: Colors.white)
                     : null,
               ),
@@ -168,8 +192,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               const SizedBox(height: 8),
               Wrap(
                 spacing: 10,
-                children: (profile["skillsRequired"] as String)
-                    .split(",")
+                children: _getSkillsList(profile["skillsRequired"])
                     .map((skill) => Chip(label: Text(skill.trim())))
                     .toList(),
               ),
@@ -190,8 +213,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               const SizedBox(height: 8),
               Wrap(
                 spacing: 10,
-                children: (profile["skillsOffered"] as String)
-                    .split(",")
+                children: _getSkillsList(profile["skillsOffered"])
                     .map((skill) => Chip(label: Text(skill.trim())))
                     .toList(),
               ),
