@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatService {
   static const String baseUrl =
-      'https://app-backend-latest-vzas.onrender.com/api'; // Change to your backend URL
+      'http://localhost:3000/api'; // Local backend for development
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
