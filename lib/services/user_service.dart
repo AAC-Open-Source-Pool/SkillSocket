@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   static const String baseUrl =
-      'https://app-backend-latest-vzas.onrender.com/api'; // Change to your backend URL
+      'http://localhost:3000/api'; // Local backend for development
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
@@ -114,6 +115,45 @@ class UserService {
       }
     } catch (e) {
       print('Update profile exception: $e');
+      return null;
+    }
+  }
+
+  // Upload user logo
+  static Future<String?> uploadUserLogo(File logoFile) async {
+    try {
+      final token = await _getHeaders();
+
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/user/upload-logo'),
+      );
+
+      // Add authorization header
+      if (token['Authorization'] != null) {
+        request.headers['Authorization'] = token['Authorization']!;
+      }
+
+      // Add the file to the request
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'logo',
+          logoFile.path,
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return responseData['logoUrl'];
+      } else {
+        print('Logo upload error: ${response.statusCode} - ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Logo upload exception: $e');
       return null;
     }
   }
