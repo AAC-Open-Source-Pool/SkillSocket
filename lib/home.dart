@@ -231,7 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
           'SkillSocket',
           style: TextStyle(
               fontSize: 20,
-             // fontStyle: FontStyle.italic,
+              // fontStyle: FontStyle.italic,
               color: Color.fromARGB(255, 255, 255, 255)),
         ),
         backgroundColor: Color(0xFF123b53),
@@ -321,12 +321,64 @@ class _MyHomePageState extends State<MyHomePage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Column(
-                      children: todaysEvents
-                          .map((event) => ListTile(
-                                leading: const Icon(Icons.event),
-                                title: Text(event),
-                              ))
-                          .toList(),
+                      children: todaysEvents.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final event = entry.value;
+                        return ListTile(
+                          leading: const Icon(Icons.event),
+                          title: Text(event),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit,
+                                    color: Colors.deepPurple),
+                                onPressed: () {
+                                  TextEditingController editController =
+                                      TextEditingController(text: event);
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text("Edit Event"),
+                                      content:
+                                          TextField(controller: editController),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text("Cancel")),
+                                        TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              todaysEvents[index] =
+                                                  editController.text;
+                                              _events[dateKey] = [
+                                                ...todaysEvents
+                                              ];
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("Save"),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  setState(() {
+                                    todaysEvents.removeAt(index);
+                                    _events[dateKey] = [...todaysEvents];
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ),
                   )
                 else
@@ -334,119 +386,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: EdgeInsets.all(8.0),
                     child: Text("No events for today."),
                   ),
-                Divider(thickness: 1),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Events',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              TextEditingController eventController =
-                                  TextEditingController();
-                              return AlertDialog(
-                                title: const Text('Add Event'),
-                                content: TextField(
-                                  controller: eventController,
-                                  decoration: const InputDecoration(
-                                      labelText: 'Event title'),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      if (eventController.text.isNotEmpty) {
-                                        setState(() {
-                                          _events[dateKey] = [
-                                            ...todaysEvents,
-                                            eventController.text
-                                          ];
-                                        });
-                                      }
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Add'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                ...todaysEvents.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final event = entry.value;
-                  return ListTile(
-                    title: Text(event),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.deepPurple),
-                          onPressed: () {
-                            TextEditingController editController =
-                                TextEditingController(text: event);
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: const Text('Edit Event'),
-                                  content: TextField(
-                                    controller: editController,
-                                    decoration: const InputDecoration(
-                                        labelText: 'Edit event'),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          todaysEvents[index] =
-                                              editController.text;
-                                          _events[dateKey] = [...todaysEvents];
-                                        });
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text('Save'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              todaysEvents.removeAt(index);
-                              _events[dateKey] = [...todaysEvents];
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                }),
                 TodoList(
                   selectedDate: dateKey,
                   controller: _todoController,
