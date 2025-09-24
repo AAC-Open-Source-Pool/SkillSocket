@@ -32,16 +32,17 @@ class _NotificationsState extends State<Notifications> {
       // Load both connection requests and general notifications
       final requests = await ConnectionService.getReceivedRequests();
       final notificationsData = await NotificationService.getNotifications();
-      
+
       if (requests != null) {
         connectionRequests = requests;
       }
-      
+
       if (notificationsData != null) {
-        allNotifications = List<Map<String, dynamic>>.from(notificationsData['data'] ?? []);
+        allNotifications =
+            List<Map<String, dynamic>>.from(notificationsData['data'] ?? []);
         unreadCount = notificationsData['unreadCount'] ?? 0;
       }
-      
+
       _buildNotificationsMap();
     } catch (e) {
       print('Error loading notifications: $e');
@@ -61,13 +62,14 @@ class _NotificationsState extends State<Notifications> {
     for (var notification in allNotifications) {
       // Skip message notifications - they don't belong in notifications tab
       if (notification['type'] == 'message') continue;
-      
+
       tempNotifications["Today"]!.add({
         "id": notification['_id'],
         "type": notification['type'],
         "title": notification['title'],
         "body": notification['body'],
-        "time": NotificationService.formatNotificationTime(notification['createdAt']),
+        "time": NotificationService.formatNotificationTime(
+            notification['createdAt']),
         "icon": Icons.notifications,
         "profileImage": notification['sender']?['profileImage'],
         "read": notification['read'] ?? false,
@@ -82,7 +84,8 @@ class _NotificationsState extends State<Notifications> {
         "requestId": request["_id"],
         "user": request["from"]["name"],
         "userId": request["from"]["_id"],
-        "profileImage": request["from"]["profileImage"] ?? request["from"]["logo"],
+        "profileImage":
+            request["from"]["profileImage"] ?? request["from"]["logo"],
         "userEmail": request["from"]["email"],
         "action": "sent you a connection request",
         "message": request["message"] ?? "",
@@ -170,15 +173,16 @@ class _NotificationsState extends State<Notifications> {
     final userId = notification["userId"];
 
     try {
-      final success = await ConnectionService.acceptConnectionRequest(requestId);
-      
+      final success =
+          await ConnectionService.acceptConnectionRequest(requestId);
+
       if (success) {
         setState(() {
           notifications[section]?[index]["accepted"] = true;
         });
-        
+
         _showOverlayMessage("Connection request accepted!");
-        
+
         // Navigate to chat after a short delay
         Future.delayed(const Duration(seconds: 1), () {
           if (mounted) {
@@ -210,8 +214,9 @@ class _NotificationsState extends State<Notifications> {
     final requestId = notification["requestId"];
 
     try {
-      final success = await ConnectionService.rejectConnectionRequest(requestId);
-      
+      final success =
+          await ConnectionService.rejectConnectionRequest(requestId);
+
       if (success) {
         setState(() {
           notifications[section]?.removeAt(index);
@@ -219,7 +224,7 @@ class _NotificationsState extends State<Notifications> {
             notifications.remove(section);
           }
         });
-        
+
         _showOverlayMessage("Connection request rejected");
       } else {
         _showOverlayMessage("Failed to reject request");
@@ -228,15 +233,6 @@ class _NotificationsState extends State<Notifications> {
       print('Error rejecting connection request: $e');
       _showOverlayMessage("Error rejecting request");
     }
-  }
-
-  void _removeNotification(String section, int index) {
-    setState(() {
-      notifications[section]?.removeAt(index);
-      if (notifications[section]?.isEmpty ?? false) {
-        notifications.remove(section);
-      }
-    });
   }
 
   @override
@@ -289,179 +285,216 @@ class _NotificationsState extends State<Notifications> {
                   ),
                 )
               : ListView(
-        children: notifications.entries.map((entry) {
-          String section = entry.key;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Text(
-                  section,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-              ...entry.value.asMap().entries.map((notifEntry) {
-                int index = notifEntry.key;
-                Map<String, dynamic> notif = notifEntry.value;
-
-                if (notif["type"] == "connection_request") {
-                  bool isAccepted = notif["accepted"] ?? false;
-
-                  return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: const Color(0xFF123b53),
-                            backgroundImage: (notif["profileImage"] != null &&
-                                    (notif["profileImage"] as String).isNotEmpty)
-                                ? NetworkImage(notif["profileImage"])
-                                : null,
-                            child: (notif["profileImage"] == null ||
-                                    (notif["profileImage"] as String).isEmpty)
-                                ? Icon(notif["icon"], color: Colors.white)
-                                : null,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${notif["user"]} ${notif["action"]}",
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 4),
-                                if (notif["message"] != null && notif["message"].isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 4),
-                                    child: Text(
-                                      notif["message"],
-                                      style: const TextStyle(fontSize: 14, color: Colors.black87),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                Text(
-                                  notif["time"],
-                                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                                ),
-                                const SizedBox(height: 8),
-                                isAccepted
-                                    ? Row(
-                                        children: const [
-                                          Icon(Icons.check_circle, color: Colors.green),
-                                          SizedBox(width: 6),
-                                          Text(
-                                            "Accepted",
-                                            style: TextStyle(
-                                              color: Colors.green,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : Row(
-                                        children: [
-                                          ElevatedButton.icon(
-                                            onPressed: () {
-                                              _acceptConnectionRequest(section, index);
-                                            },
-                                            icon: const Icon(Icons.check),
-                                            label: const Text("Accept"),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.green,
-                                              foregroundColor: Colors.white,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 10),
-                                          OutlinedButton.icon(
-                                            onPressed: () {
-                                              _rejectConnectionRequest(section, index);
-                                            },
-                                            icon: const Icon(Icons.close),
-                                            label: const Text("Decline"),
-                                            style: OutlinedButton.styleFrom(
-                                              foregroundColor: Colors.red,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                } else {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-                    child: Row(
+                  children: notifications.entries.map((entry) {
+                    String section = entry.key;
+                    return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: const Color(0xFF123b53),
-                          child: Icon(notif["icon"], color: Colors.white),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            section,
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text.rich(
-                                TextSpan(
+                        ...entry.value.asMap().entries.map((notifEntry) {
+                          int index = notifEntry.key;
+                          Map<String, dynamic> notif = notifEntry.value;
+
+                          if (notif["type"] == "connection_request") {
+                            bool isAccepted = notif["accepted"] ?? false;
+
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
                                   children: [
-                                    TextSpan(
-                                      text: notif["user"],
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold, color: Colors.black),
+                                    CircleAvatar(
+                                      radius: 28,
+                                      backgroundColor: const Color(0xFF123b53),
+                                      backgroundImage: (notif["profileImage"] !=
+                                                  null &&
+                                              (notif["profileImage"] as String)
+                                                  .isNotEmpty)
+                                          ? NetworkImage(notif["profileImage"])
+                                          : null,
+                                      child: (notif["profileImage"] == null ||
+                                              (notif["profileImage"] as String)
+                                                  .isEmpty)
+                                          ? Icon(notif["icon"],
+                                              color: Colors.white)
+                                          : null,
                                     ),
-                                    TextSpan(
-                                      text: ' ${notif["action"]}',
-                                      style: const TextStyle(color: Colors.black),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "${notif["user"]} ${notif["action"]}",
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          if (notif["message"] != null &&
+                                              notif["message"].isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 4),
+                                              child: Text(
+                                                notif["message"],
+                                                style: const TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.black87),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          Text(
+                                            notif["time"],
+                                            style: const TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 12),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          isAccepted
+                                              ? Row(
+                                                  children: const [
+                                                    Icon(Icons.check_circle,
+                                                        color: Colors.green),
+                                                    SizedBox(width: 6),
+                                                    Text(
+                                                      "Accepted",
+                                                      style: TextStyle(
+                                                        color: Colors.green,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : Row(
+                                                  children: [
+                                                    ElevatedButton.icon(
+                                                      onPressed: () {
+                                                        _acceptConnectionRequest(
+                                                            section, index);
+                                                      },
+                                                      icon: const Icon(
+                                                          Icons.check),
+                                                      label:
+                                                          const Text("Accept"),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            Colors.green,
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 10),
+                                                    OutlinedButton.icon(
+                                                      onPressed: () {
+                                                        _rejectConnectionRequest(
+                                                            section, index);
+                                                      },
+                                                      icon: const Icon(
+                                                          Icons.close),
+                                                      label:
+                                                          const Text("Decline"),
+                                                      style: OutlinedButton
+                                                          .styleFrom(
+                                                        foregroundColor:
+                                                            Colors.red,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
-                                softWrap: true,
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                notif["time"] ?? '',
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            );
+                          } else {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12.0, vertical: 8),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 24,
+                                    backgroundColor: const Color(0xFF123b53),
+                                    child: Icon(notif["icon"],
+                                        color: Colors.white),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text.rich(
+                                          TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: notif["user"],
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black),
+                                              ),
+                                              TextSpan(
+                                                text: ' ${notif["action"]}',
+                                                style: const TextStyle(
+                                                    color: Colors.black),
+                                              ),
+                                            ],
+                                          ),
+                                          softWrap: true,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          notif["time"] ?? '',
+                                          style: const TextStyle(
+                                              fontSize: 12, color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (notif["showThumbnail"] == true)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[300],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: const Icon(Icons.image,
+                                            color: Colors.black54),
+                                      ),
+                                    ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                        if (notif["showThumbnail"] == true)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.image, color: Colors.black54),
-                            ),
-                          ),
+                            );
+                          }
+                        }).toList(),
                       ],
-                    ),
-                  );
-                }
-              }).toList(),
-            ],
-          );
-        }).toList(),
-      ),
+                    );
+                  }).toList(),
+                ),
     );
   }
 }

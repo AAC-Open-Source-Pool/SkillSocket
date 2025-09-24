@@ -104,8 +104,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel",
-                  style: TextStyle(color: Colors.black54)),
+              child:
+                  const Text("Cancel", style: TextStyle(color: Colors.black54)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -114,7 +114,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 final review = reviewController.text.trim();
                 if (review.isNotEmpty) {
                   // 🔹 Call backend to save review
-                  await UserService.addReview(widget.userId, review);
+                  await UserService.addReview(
+                    userId: widget.userId,
+                    rating: 4.0, // Default rating, could be made configurable
+                    title: "Review",
+                    comment: review,
+                  );
 
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -136,8 +141,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF123b53),
         icon: const Icon(Icons.rate_review, color: Colors.white),
-        label: const Text("Write Review",
-            style: TextStyle(color: Colors.white)),
+        label:
+            const Text("Write Review", style: TextStyle(color: Colors.white)),
         onPressed: _showReviewDialog,
       ),
       body: _isLoading
@@ -173,16 +178,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                   CircleAvatar(
                                     radius: 60,
                                     backgroundColor: const Color(0xFFB6E1F0),
-                                    backgroundImage: (_userProfile?[
-                                                    'profileImage'] is String &&
+                                    backgroundImage:
+                                        (_userProfile?['profileImage']
+                                                    is String &&
                                                 (_userProfile?['profileImage']
                                                         as String)
                                                     .isNotEmpty)
                                             ? NetworkImage(
                                                 _userProfile!['profileImage'])
                                             : null,
-                                    child: _userProfile?['profileImage'] ==
-                                            null
+                                    child: _userProfile?['profileImage'] == null
                                         ? const Icon(Icons.person,
                                             size: 70, color: Colors.white70)
                                         : null,
@@ -218,14 +223,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             _userProfile?['education']?.toString()),
                         _buildInfoCard(Icons.work, "Profession",
                             _userProfile?['profession']?.toString()),
-                        _buildInfoCard(Icons.business_center, "Currently Working",
+                        _buildInfoCard(
+                            Icons.business_center,
+                            "Currently Working",
                             _userProfile?['currentlyWorking']?.toString()),
-                        _buildInfoCard(Icons.lightbulb, "Skills Required",
+                        _buildInfoCard(
+                            Icons.lightbulb,
+                            "Skills Required",
                             (_userProfile?['skillsRequired'] is List)
                                 ? (_userProfile!['skillsRequired'] as List)
                                     .join(", ")
                                 : null),
-                        _buildInfoCard(Icons.handshake, "Skills Offered",
+                        _buildInfoCard(
+                            Icons.handshake,
+                            "Skills Offered",
                             (_userProfile?['skillsOffered'] is List)
                                 ? (_userProfile!['skillsOffered'] as List)
                                     .join(", ")
@@ -234,7 +245,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             _userProfile?['dateOfBirth']?.toString()),
                         _buildInfoCard(Icons.location_on, "Location",
                             _userProfile?['location']?.toString()),
-                        _buildInfoCard(Icons.star, "Skills",
+                        _buildInfoCard(
+                            Icons.star,
+                            "Skills",
                             (_userProfile?['skills'] is List)
                                 ? (_userProfile!['skills'] as List).join(", ")
                                 : null),

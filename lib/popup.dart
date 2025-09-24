@@ -54,7 +54,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     "education": u["education"] ?? "",
                     "location": u["location"] ?? "",
                     "profession": u["profession"] ?? "",
-                    "reviews": _staticReviews(),
+                    "ratingsValue": u["ratingsValue"] ?? 4.5,
+                    "reviews": u["reviews"] ?? _staticReviews(), // Use real reviews from backend
                   })
               .toList();
           isLoading = false;
