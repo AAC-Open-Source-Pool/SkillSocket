@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:swipable_stack/swipable_stack.dart';
+import 'package:barter_system/services/connection_service.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   final String requiredSkill;
@@ -23,6 +24,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Map<int, bool> expandedProfiles = {};
   List<Map<String, dynamic>> profiles = [];
   bool isLoading = true;
+  bool _isSending = false; // debounce flag to prevent multiple sends
+  final Set<String> _sentRequests = {}; // track already requested userIds in this session
 
   @override
   void initState() {
@@ -41,6 +44,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         setState(() {
           profiles = data
               .map((u) => {
+                    "id": u["_id"] ?? "", // Add user ID
                     "name": u["name"] ?? "",
                     "profileImage": u["profileImage"],
                     "skillsOffered":
@@ -85,6 +89,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   List<Map<String, dynamic>> _randomStaticProfiles() {
     return [
       {
+        "id": "demo_user_1", // Demo user ID
         "name": "Alara",
         "profileImage": null,
         "skillsOffered": widget.requiredSkill,
@@ -95,6 +100,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         "reviews": _staticReviews(),
       },
       {
+        "id": "demo_user_2", // Demo user ID
         "name": "Ethan",
         "profileImage": null,
         "skillsOffered": widget.requiredSkill,
@@ -105,6 +111,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         "reviews": _staticReviews(),
       },
       {
+        "id": "demo_user_3", // Demo user ID
         "name": "Sophia",
         "profileImage": null,
         "skillsOffered": widget.requiredSkill,
@@ -115,6 +122,85 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         "reviews": _staticReviews(),
       },
     ];
+  }
+
+  // Send connection request
+  Future<void> _sendConnectionRequest(Map<String, dynamic> profile) async {
+    final String toId = (profile["id"] ?? "").toString();
+    if (toId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid user"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    if (_isSending) {
+      return; // prevent overlapping requests
+    }
+
+    if (_sentRequests.contains(toId)) {
+      // Already requested in this session
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("You already sent a request to ${profile["name"]}"),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSending = true;
+    });
+    try {
+      final result = await ConnectionService.sendConnectionRequest(
+        toUserId: toId,
+        message: "Hi ${profile["name"]}, I'd like to connect and exchange skills: ${widget.requiredSkill} for ${widget.offeredSkill}!",
+      );
+
+      if (result != null && result['success'] == true) {
+        _sentRequests.add(toId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Connection request sent to ${profile["name"]}!"),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        // If backend returns duplicate (e.g., 400 already sent), treat as already sent to avoid spam
+        _sentRequests.add(toId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Request already sent or failed for ${profile["name"]}"),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error sending connection request: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error sending request to ${profile["name"]}"),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSending = false;
+        });
+      }
+    }
   }
 
   Widget _buildProfileCard(Map<String, dynamic> profile, int index) {
@@ -403,18 +489,24 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             return _buildProfileCard(profile, properties.index);
                           },
                           onSwipeCompleted: (index, direction) {
+                            // Swiping is now just for navigation/browsing
+                            // No actions are taken - users must explicitly click buttons
                             final profile = profiles[index % profiles.length];
                             if (direction == SwipeDirection.right) {
+                              // Just show a message that they swiped right
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text(
-                                        "${profile["name"]} marked as Interested")),
+                                  content: Text("Swiped right on ${profile["name"]}. Use the green button to send a connection request."),
+                                  duration: const Duration(seconds: 2),
+                                ),
                               );
                             } else if (direction == SwipeDirection.left) {
+                              // Just show a message that they swiped left
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text(
-                                        "${profile["name"]} marked as Rejected")),
+                                  content: Text("Swiped left on ${profile["name"]}"),
+                                  duration: const Duration(seconds: 1),
+                                ),
                               );
                             }
                           },
@@ -443,8 +535,17 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       child: FloatingActionButton(
                         heroTag: 'accept',
                         backgroundColor: Colors.green,
-                        onPressed: () => _controller.next(
-                            swipeDirection: SwipeDirection.right),
+                        onPressed: _isSending
+                            ? null
+                            : () {
+                                if (profiles.isNotEmpty) {
+                                  final currentIndex =
+                                      _controller.currentIndex % profiles.length;
+                                  final profile = profiles[currentIndex];
+                                  // Send connection request without swiping
+                                  _sendConnectionRequest(profile);
+                                }
+                              },
                         child: const Icon(Icons.check,
                             size: 28, color: Colors.white),
                       ),
