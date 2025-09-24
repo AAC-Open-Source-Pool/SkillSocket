@@ -257,7 +257,7 @@ class _NotificationsState extends State<Notifications> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadConnectionRequests,
+            onPressed: _loadNotifications,
           ),
         ],
       ),
