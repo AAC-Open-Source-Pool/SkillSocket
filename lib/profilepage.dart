@@ -14,11 +14,22 @@ class UserProfilePage extends StatefulWidget {
 class _UserProfilePageState extends State<UserProfilePage> {
   bool _isLoading = false;
   Map<String, dynamic>? _userProfile;
+  List<Map<String, dynamic>> _reviews = [];
+  String? _loggedInUserName;
 
   @override
   void initState() {
     super.initState();
+    _fetchLoggedInUserName();
     _loadUserProfile();
+
+  }
+
+  Future<void> _fetchLoggedInUserName() async {
+    final user = await UserService.getUserProfile();
+    setState(() {
+      _loggedInUserName = user?['name']?.toString();
+    });
   }
 
   Future<void> _loadUserProfile() async {
@@ -28,6 +39,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       final userProfile = await UserService.getUserProfileById(widget.userId);
       setState(() {
         _userProfile = userProfile;
+        _reviews = (userProfile?['reviews'] is List)
+            ? List<Map<String, dynamic>>.from(userProfile!['reviews'])
+            : [];
       });
     } catch (e) {
       print("Error loading user profile: $e");
@@ -83,39 +97,57 @@ class _UserProfilePageState extends State<UserProfilePage> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text(
             "Write a Review",
             style: TextStyle(
                 color: Color(0xFF123b53), fontWeight: FontWeight.bold),
           ),
-          content: TextField(
-            controller: reviewController,
-            maxLines: 4,
-            decoration: InputDecoration(
-              hintText: "Share your experience...",
-              filled: true,
-              fillColor: const Color(0xFFB6E1F0).withOpacity(0.3),
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_loggedInUserName != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person, color: Color(0xFF123b53)),
+                      const SizedBox(width: 8),
+                      Text(
+                        _loggedInUserName!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF123b53),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              TextField(
+                controller: reviewController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: "Share your experience...",
+                  filled: true,
+                  fillColor: const Color(0xFFB6E1F0).withOpacity(0.3),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel",
-                  style: TextStyle(color: Colors.black54)),
+              child: const Text("Cancel", style: TextStyle(color: Colors.black54)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF123b53)),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF123b53)),
               onPressed: () async {
                 final review = reviewController.text.trim();
-                if (review.isNotEmpty) {
-                  // 🔹 Call backend to save review
-                  await UserService.addReview(widget.userId, review);
-
+                if (review.isNotEmpty && _loggedInUserName != null) {
+                  // Call backend to save review with logged-in user's name
+                  await UserService.addReview(widget.userId, _loggedInUserName!, review);
+                  await _loadUserProfile(); // Reload profile to get new reviews
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text("Review submitted successfully")));
@@ -230,14 +262,105 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 ? (_userProfile!['skillsOffered'] as List)
                                     .join(", ")
                                 : null),
-                        _buildInfoCard(Icons.cake, "Date of Birth",
-                            _userProfile?['dateOfBirth']?.toString()),
+                        _buildInfoCard(
+                          Icons.cake,
+                          "Date of Birth",
+                          _userProfile?['dateOfBirth'] != null
+                              ? (() {
+                                  try {
+                                    final date = DateTime.parse(_userProfile!['dateOfBirth']);
+                                    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
+                                  } catch (e) {
+                                    return _userProfile!['dateOfBirth'].toString();
+                                  }
+                                })()
+                              : null,
+                        ),
                         _buildInfoCard(Icons.location_on, "Location",
                             _userProfile?['location']?.toString()),
                         _buildInfoCard(Icons.star, "Skills",
                             (_userProfile?['skills'] is List)
                                 ? (_userProfile!['skills'] as List).join(", ")
                                 : null),
+                        const SizedBox(height: 24),
+                        // --- Separate Reviews Area ---
+                        Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "Reviews",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF123b53),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                  ],
+                                ),
+                              ),
+                              if (_reviews.isEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: const Text(
+                                    "No reviews yet. Be the first to write one!",
+                                    style: TextStyle(fontSize: 15, color: Colors.grey),
+                                  ),
+                                ),
+                              if (_reviews.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Column(
+                                    children: [
+                                      ..._reviews.map((review) => Card(
+                                            color: const Color(0xFFECC9EE),
+                                            margin: const EdgeInsets.only(bottom: 12),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(12.0),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    review['reviewer']?.toString() ?? "Anonymous",
+                                                    style: const TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Color(0xFF123b53),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    review['comment']?.toString() ?? review['review']?.toString() ?? "",
+                                                    style: const TextStyle(fontSize: 15),
+                                                  ),
+                                                  if (review['date'] != null)
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 4.0),
+                                                      child: Text(
+                                                        review['date'].toString(),
+                                                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          ))
+                                    ],
+                                  ),
+                                ),
+                              const SizedBox(height: 24),
+                            ],
+                          ),
+                        ),
+                        // --- End Reviews Area ---
                         const SizedBox(height: 80), // leave space for FAB
                       ]),
                     ),

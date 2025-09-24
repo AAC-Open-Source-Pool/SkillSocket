@@ -57,9 +57,29 @@ class UserService {
     }
   }
   // in user_service.dart
-static Future<void> addReview(String userId, String review) async {
-  // TODO: implement backend call here
-}
+  static Future<bool> addReview(String userId, String reviewer, String comment) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl/user/profile/$userId/review';
+      final body = json.encode({
+        'reviewer': reviewer,
+        'comment': comment,
+      });
+      print('POST review to: $url');
+      print('Body: $body');
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: body,
+      );
+      print('Review response status: ${response.statusCode}');
+      print('Review response body: ${response.body}');
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Add review exception: $e');
+      return false;
+    }
+  }
 
 
   // Get user profile by ID
