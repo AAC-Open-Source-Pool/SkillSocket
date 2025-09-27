@@ -3,8 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatService {
-  static const String baseUrl =
-      'http://localhost:3000/api'; // Local backend for development
+  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
