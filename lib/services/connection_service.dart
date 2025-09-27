@@ -36,16 +36,31 @@ class ConnectionService {
       print('Send connection request response: ${response.statusCode}');
       print('Response body: ${response.body}');
 
+      // Parse response body for both success and error cases
+      final data = jsonDecode(response.body);
+
       if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        return data;
+        // Success case
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Connection request sent successfully',
+          'data': data['data']
+        };
       } else {
-        print('Error sending connection request: ${response.statusCode} - ${response.body}');
-        return null;
+        // Error case - return the error details from backend
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Failed to send connection request',
+          'statusCode': response.statusCode
+        };
       }
     } catch (e) {
       print('Exception sending connection request: $e');
-      return null;
+      return {
+        'success': false,
+        'message': 'Network error occurred. Please try again.',
+        'error': e.toString()
+      };
     }
   }
 
