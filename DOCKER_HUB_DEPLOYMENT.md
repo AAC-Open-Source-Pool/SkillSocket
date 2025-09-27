@@ -160,7 +160,7 @@ Add these **4 secrets**:
 cd lib/backend
 docker build -t skillsocket-backend .
 docker run -p 3000:3000 -e NODE_ENV=production skillsocket-backend
-curl http://localhost:3000/api/health
+curl https://skillsocket-backend.onrender.com/api/health
 ```
 
 **Check if image exists on Docker Hub:**

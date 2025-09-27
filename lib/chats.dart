@@ -46,7 +46,7 @@ class _ChatsState extends State<Chats> {
 
   void _connectToSocket() {
     socket = IO.io(
-      "http://localhost:3000/",
+      "https://skillsocket-backend.onrender.com/",
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()

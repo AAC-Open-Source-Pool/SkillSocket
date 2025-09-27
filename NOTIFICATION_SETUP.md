@@ -123,7 +123,7 @@ void main() async {
 ### Test API:
 ```bash
 # Send test notification
-curl -X POST http://localhost:3000/api/notifications/test \
+curl -X POST https://skillsocket-backend.onrender.com/api/notifications/test \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
