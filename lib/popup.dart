@@ -173,6 +173,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       );
 
       if (result != null && result['success'] == true) {
+        // Success case
         _sentRequests.add(toId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -183,13 +184,40 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             ),
           );
         }
+      } else if (result != null && result['success'] == false) {
+        // Handle specific error cases from backend
+        final errorMessage = result['message'] ?? 'Failed to send request';
+        
+        if (errorMessage.toLowerCase().contains('already sent')) {
+          // Connection request already sent
+          _sentRequests.add(toId);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Connection request already sent to ${profile["name"]}"),
+                backgroundColor: Colors.orange,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
+        } else {
+          // Other errors (network, validation, etc.)
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(errorMessage),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        }
       } else {
-        // If backend returns duplicate (e.g., 400 already sent), treat as already sent to avoid spam
-        _sentRequests.add(toId);
+        // Null result - unexpected error
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Request already sent or failed for ${profile["name"]}"),
+              content: Text("Unexpected error sending request to ${profile["name"]}"),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 2),
             ),
@@ -201,7 +229,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error sending request to ${profile["name"]}"),
+            content: Text("Network error sending request to ${profile["name"]}"),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -500,32 +528,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             return _buildProfileCard(profile, properties.index);
                           },
                           onSwipeCompleted: (index, direction) {
-                            // Swiping is now just for navigation/browsing
-                            // No actions are taken - users must explicitly click buttons
-                            final profile = profiles[index % profiles.length];
-                            if (direction == SwipeDirection.right) {
-                              // Just show a message that they swiped right
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Swiped right on ${profile["name"]}. Use the green button to send a connection request."),
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            } else if (direction == SwipeDirection.left) {
-                              // Just show a message that they swiped left
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Swiped left on ${profile["name"]}"),
-                                  duration: const Duration(seconds: 1),
-                                ),
-                              );
-                            }
+                            // Swiping is purely for navigation/browsing
+                            // No messages or actions - just silent navigation
+                            // Users must explicitly click buttons to send requests
                           },
                         ),
                       ),
                     ),
 
-                    // Reject button
+                    // Reject button - just move to next profile silently
                     Positioned(
                       bottom: 5,
                       left: (screenWidth / 2) - buttonSpacing - 28,
