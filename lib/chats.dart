@@ -425,15 +425,40 @@ class _ChatsState extends State<Chats> {
                                     lastMessage['from'] != currentUserId;
 
                             return ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: const Color(0xFFB6E1F0),
-                                child: Text(
-                                  participant['name'][0].toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Color(0xFF123b53),
-                                    fontWeight: FontWeight.bold,
+                              leading: Stack(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: const Color(0xFFB6E1F0),
+                                    child: Text(
+                                      participant['name'][0].toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Color(0xFF123b53),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  // Unread message indicator (like WhatsApp)
+                                  if (isUnseen)
+                                    Positioned(
+                                      right: 0,
+                                      top: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.green,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Text(
+                                          '1',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
                               title: Text(
                                 participant['name'],

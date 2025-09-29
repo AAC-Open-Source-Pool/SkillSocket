@@ -48,5 +48,37 @@ app.*.map.json
 lib/backend/node_modules/
 lib/backend/.env
 
-# General
+# Firebase Configuration Files (SECURITY CRITICAL)
+# These contain sensitive API keys and credentials
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/backend/config/firebase-service-account.json
+lib/backend/config/firebase-service-account*.json
+lib/backend/skillsocket-*-firebase-adminsdk-*.json
+
+# Environment Variables
 .env
+.env.local
+.env.production
+.env.development
+
+# API Keys and Secrets
+**/config/keys.json
+**/config/secrets.json
+**/*-key.json
+**/*-keys.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+lib/backend/logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
