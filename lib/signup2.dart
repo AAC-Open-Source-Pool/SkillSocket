@@ -46,7 +46,7 @@ class _SignUpPageState extends State<SignUpPage> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://localhost:3000/api/user/upload-logo'),
+        Uri.parse('https://skillsocket-backend.onrender.com/api/user/upload-logo'),
       );
 
       // Add the file to the request
@@ -146,7 +146,7 @@ class _SignUpPageState extends State<SignUpPage> {
       print('Sending signup data: $signupData');
 
       final response = await http.post(
-        Uri.parse('http://localhost:3000/api/auth/signup'),
+        Uri.parse('https://skillsocket-backend.onrender.com/api/auth/signup'),
         headers: {
           'Content-Type': 'application/json',
         },
