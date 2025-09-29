@@ -80,6 +80,51 @@ class UserService {
       return false;
     }
   }
+  // Add a review for a user
+  static Future<Map<String, dynamic>?> addReview({
+    required String userId,
+    required double rating,
+    required String title,
+    required String comment,
+    String? skillContext,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/reviews/add'),
+        headers: headers,
+        body: json.encode({
+          'revieweeId': userId,
+          'rating': rating,
+          'title': title,
+          'comment': comment,
+          if (skillContext != null) 'skillContext': skillContext,
+        }),
+      );
+
+      print('Add review response: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return data;
+      } else {
+        print('Error adding review: ${response.statusCode} - ${response.body}');
+        final errorData = json.decode(response.body);
+        return {
+          'success': false,
+          'message': errorData['message'] ?? 'Failed to add review'
+        };
+      }
+    } catch (e) {
+      print('Exception adding review: $e');
+      return {
+        'success': false,
+        'message': 'Network error occurred'
+      };
+    }
+  }
 
 
   // Get user profile by ID
