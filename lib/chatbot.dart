@@ -61,65 +61,206 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     });
 
     try {
-      print('Sending message to bot: $message');
-      final response = await http.post(
-        Uri.parse('https://skillsocket-backend.onrender.com/api/chat'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'message': message,
-        }),
-      );
+      // First try the deployed MCP Gateway
+      print('Sending message to MCP Gateway: $message');
+      try {
+        final mcpResponse = await http
+            .post(
+              Uri.parse('https://skill-socket-agents.onrender.com/mcp/invoke'),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: jsonEncode({
+                'query': message,
+              }),
+            )
+            .timeout(Duration(seconds: 10));
 
-      print('Response status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
+        print('MCP Gateway response status code: ${mcpResponse.statusCode}');
+        print('MCP Gateway response body: ${mcpResponse.body}');
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        print('Parsed response data: $responseData');
+        if (mcpResponse.statusCode == 200) {
+          final responseData = jsonDecode(mcpResponse.body);
+          print('Parsed MCP Gateway response data: $responseData');
 
-        String botReply;
-        if (responseData['success'] == true && responseData['reply'] != null) {
-          botReply = responseData['reply'];
-        } else if (responseData['reply'] != null) {
-          botReply = responseData['reply'];
-        } else {
-          botReply = 'Sorry, I received an empty response. Please try again.';
+          String botReply;
+
+          // Handle different response formats from MCP Gateway
+          if (responseData['response'] != null) {
+            // Direct response format
+            botReply = responseData['response'];
+          } else if (responseData['result'] != null) {
+            // Agent-based response format
+            final result = responseData['result'];
+
+            if (result is Map) {
+              // Check for different agent response formats
+              if (result['roadmap'] != null) {
+                // Roadmap agent response
+                botReply = result['roadmap'];
+              } else if (result['answer'] != null) {
+                // Perplexity agent response
+                botReply = result['answer'];
+
+                // Add sources if available
+                if (result['sources'] != null && result['sources'] is List) {
+                  final sources = result['sources'] as List;
+                  if (sources.isNotEmpty) {
+                    botReply += '\n\n📚 **Sources:**\n';
+                    for (int i = 0; i < sources.length && i < 3; i++) {
+                      final source = sources[i];
+                      if (source['title'] != null) {
+                        botReply += '• ${source['title']}\n';
+                      }
+                    }
+                  }
+                }
+              } else if (result['response'] != null) {
+                // SkillMatch agent response - use the formatted response
+                botReply = result['response'];
+
+                // Add additional match details if available
+                if (result['matches'] != null && result['matches'] is List) {
+                  final matches = result['matches'] as List;
+                  if (matches.isNotEmpty) {
+                    botReply += '\n\n🎯 **Match Details:**\n';
+                    for (var match in matches) {
+                      if (match is Map) {
+                        botReply +=
+                            '• **${match['name'] ?? match['email'] ?? 'User'}**\n';
+                        if (match['skillsOffered'] != null &&
+                            match['skillsOffered'] is List) {
+                          botReply +=
+                              '  💡 Offers: ${(match['skillsOffered'] as List).join(', ')}\n';
+                        }
+                        if (match['skillsRequired'] != null &&
+                            match['skillsRequired'] is List) {
+                          botReply +=
+                              '  🎯 Needs: ${(match['skillsRequired'] as List).join(', ')}\n';
+                        }
+                        botReply += '\n';
+                      }
+                    }
+                  }
+                }
+              } else if (result['matches'] != null) {
+                // Handle SkillMatch agent response with matches only
+                final matches = result['matches'];
+                if (matches is List && matches.isNotEmpty) {
+                  botReply =
+                      '🎯 **Skill Match Results:**\n\nI found ${matches.length} user(s) with complementary skills:\n\n';
+                  for (var match in matches) {
+                    if (match is Map) {
+                      botReply +=
+                          '� **${match['name'] ?? match['email'] ?? 'User'}**\n';
+                      if (match['skillsOffered'] != null &&
+                          match['skillsOffered'] is List) {
+                        botReply +=
+                            '💡 Offers: ${(match['skillsOffered'] as List).join(', ')}\n';
+                      }
+                      if (match['skillsRequired'] != null &&
+                          match['skillsRequired'] is List) {
+                        botReply +=
+                            '🎯 Needs: ${(match['skillsRequired'] as List).join(', ')}\n';
+                      }
+                      botReply += '\n';
+                    }
+                  }
+                } else {
+                  botReply =
+                      '🔍 No users found with complementary skills at the moment. Try expanding your skill requirements or check back later!';
+                }
+              } else if (result['error'] != null) {
+                // Handle error responses from agents
+                botReply =
+                    '❌ ${result['error']}\n\nPlease try rephrasing your request or contact support if the issue persists.';
+              } else {
+                // Generic result object - convert to string
+                botReply = result.toString();
+              }
+            } else {
+              // Result is a simple value
+              botReply = result.toString();
+            }
+          } else {
+            // Fallback for unexpected format
+            botReply = responseData.toString();
+          }
+
+          if (botReply.isNotEmpty) {
+            setState(() {
+              _messages.add({
+                'text': botReply,
+                'isBot': true,
+                'timestamp': DateTime.now(),
+              });
+              _isLoading = false;
+            });
+            return; // Successfully got response from MCP Gateway
+          }
         }
+        // If we reach here, MCP Gateway didn't return a valid response
+        throw Exception('MCP Gateway response not valid');
+      } catch (mcpError) {
+        // MCP Gateway failed, fall back to the original Gemini endpoint
+        print('MCP Gateway error, falling back to Gemini: $mcpError');
 
-        setState(() {
-          _messages.add({
-            'text': botReply,
-            'isBot': true,
-            'timestamp': DateTime.now(),
+        final response = await http.post(
+          Uri.parse('https://skillsocket-backend.onrender.com/api/chat'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'message': message,
+          }),
+        );
+
+        print('Fallback response status code: ${response.statusCode}');
+        print('Fallback response body: ${response.body}');
+
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(response.body);
+          print('Parsed fallback response data: $responseData');
+
+          String botReply;
+          if (responseData['success'] == true &&
+              responseData['reply'] != null) {
+            botReply = responseData['reply'];
+          } else if (responseData['reply'] != null) {
+            botReply = responseData['reply'];
+          } else {
+            botReply = 'Sorry, I received an empty response. Please try again.';
+          }
+
+          setState(() {
+            _messages.add({
+              'text': botReply,
+              'isBot': true,
+              'timestamp': DateTime.now(),
+            });
+            _isLoading = false;
           });
-        });
-      } else {
-        final errorData = jsonDecode(response.body);
-        print('Error response: $errorData');
-        setState(() {
-          _messages.add({
-            'text':
-                'Sorry, I encountered an error: ${errorData['error'] ?? 'Unknown error'}. Please try again.',
-            'isBot': true,
-            'timestamp': DateTime.now(),
+        } else {
+          final errorData = jsonDecode(response.body);
+          print('Error response: $errorData');
+          setState(() {
+            _messages.add({
+              'text': 'Sorry, I encountered an error. Please try again later.',
+              'isBot': true,
+              'timestamp': DateTime.now(),
+            });
+            _isLoading = false;
           });
-        });
+        }
       }
-    } catch (error) {
-      print('Network error: $error');
-      // Use fallback response when backend is not available
-      String fallbackReply = _getFallbackResponse(message);
+    } catch (e) {
+      print('Error sending message: $e');
       setState(() {
         _messages.add({
-          'text': fallbackReply,
+          'text': 'Sorry, I encountered an error. Please try again.',
           'isBot': true,
           'timestamp': DateTime.now(),
         });
-      });
-    } finally {
-      setState(() {
         _isLoading = false;
       });
     }
@@ -347,7 +488,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: "Ask me anything...",
+                        hintText:
+                            "Type: 'I offer Flutter, need Java' or ask anything...",
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 16,
