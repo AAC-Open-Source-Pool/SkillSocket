@@ -17,11 +17,19 @@ class Chats extends StatefulWidget {
   State<Chats> createState() => _ChatsState();
 }
 
-class _ChatsState extends State<Chats> {
+class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> chats = [];
   bool _isLoading = true;
   String? currentUserId;
   late IO.Socket socket;
+
+  // Animation for unread badge pulse
+  late AnimationController _badgeController;
+  late Animation<double> _badgeScale;
+  late Animation<double> _badgeGlow;
+
+  // Map of partnerId -> unreadCount from backend
+  Map<String, int> _unreadCounts = {};
 
   String searchQuery = ""; // <-- Add this line
 
@@ -29,6 +37,19 @@ class _ChatsState extends State<Chats> {
   void initState() {
     super.initState();
     NotificationHelper.initialize();
+
+    // Unread badge pulse animation
+    _badgeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _badgeScale = Tween<double>(begin: 0.85, end: 1.2).animate(
+      CurvedAnimation(parent: _badgeController, curve: Curves.easeInOut),
+    );
+    _badgeGlow = Tween<double>(begin: 0.0, end: 12.0).animate(
+      CurvedAnimation(parent: _badgeController, curve: Curves.easeInOut),
+    );
+
     _initializeChats();
   }
 
@@ -88,7 +109,8 @@ class _ChatsState extends State<Chats> {
     setState(() {
       // Find the chat with the sender/receiver
       String partnerId;
-      if (messageData['from']['_id'] == currentUserId) {
+      final isFromMe = messageData['from']['_id'] == currentUserId;
+      if (isFromMe) {
         partnerId = messageData['to']['_id'];
       } else {
         partnerId = messageData['from']['_id'];
@@ -104,16 +126,19 @@ class _ChatsState extends State<Chats> {
           'content': messageData['content'],
           'createdAt': messageData['createdAt'],
           'from': messageData['from']['_id'],
-          'seen': messageData['seen'] ?? false
+          'seen': isFromMe ? true : (messageData['seen'] ?? false)
         };
+        // Increment unread count if message is from other user
+        if (!isFromMe) {
+          final current = _unreadCounts[partnerId] ?? 0;
+          _unreadCounts[partnerId] = current + 1;
+        }
         // Move to top
         var updatedChat = chats.removeAt(chatIndex);
         chats.insert(0, updatedChat);
       } else {
         // Add new chat
-        final partner = messageData['from']['_id'] == currentUserId
-            ? messageData['to']
-            : messageData['from'];
+        final partner = isFromMe ? messageData['to'] : messageData['from'];
         chats.insert(0, {
           '_id': '${currentUserId}_$partnerId',
           'participant': {
@@ -126,9 +151,13 @@ class _ChatsState extends State<Chats> {
             'content': messageData['content'],
             'createdAt': messageData['createdAt'],
             'from': messageData['from']['_id'],
-            'seen': messageData['seen'] ?? false
+            'seen': isFromMe ? true : (messageData['seen'] ?? false)
           }
         });
+        if (!isFromMe) {
+          final current = _unreadCounts[partnerId] ?? 0;
+          _unreadCounts[partnerId] = current + 1;
+        }
       }
     });
   }
@@ -139,10 +168,17 @@ class _ChatsState extends State<Chats> {
     });
 
     try {
-      final chatData = await ChatService.getUserChats();
+      final results = await Future.wait([
+        ChatService.getUserChats(),
+        ChatService.getUnreadCounts(),
+      ]);
+      final chatData = results[0] as List<Map<String, dynamic>>?;
+      final unread = results[1] as Map<String, int>;
+
       if (chatData != null) {
         setState(() {
           chats = chatData;
+          _unreadCounts = unread;
         });
       } else {
         // Fallback to sample data if no chats found or API fails
@@ -229,6 +265,7 @@ class _ChatsState extends State<Chats> {
 
   @override
   void dispose() {
+    _badgeController.dispose();
     if (currentUserId != null) {
       socket.dispose();
     }
@@ -420,9 +457,8 @@ class _ChatsState extends State<Chats> {
                             final chat = filteredChats[index];
                             final participant = chat['participant'];
                             final lastMessage = chat['lastMessage'];
-                            final bool isUnseen =
-                                lastMessage['seen'] == false &&
-                                    lastMessage['from'] != currentUserId;
+                            final int unread = _unreadCounts[participant['_id']] ?? 0;
+                            final bool isUnseen = unread > 0;
 
                             return ListTile(
                               leading: Stack(
@@ -437,24 +473,43 @@ class _ChatsState extends State<Chats> {
                                       ),
                                     ),
                                   ),
-                                  // Unread message indicator (like WhatsApp)
+                                  // Unread message indicator (badge with count)
                                   if (isUnseen)
                                     Positioned(
                                       right: 0,
                                       top: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.green,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Text(
-                                          '1',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                  child: ScaleTransition(
+                                        scale: _badgeScale,
+                                        child: AnimatedBuilder(
+                                          animation: _badgeController,
+                                          builder: (context, _) {
+                                            final glow = _badgeGlow.value;
+                                            return Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.green,
+                                                shape: BoxShape.circle,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.green.withOpacity(0.6),
+                                                    blurRadius: glow,
+                                                    spreadRadius: glow / 4,
+                                                  ),
+                                                ],
+                                              ),
+                                              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                                              child: Center(
+                                                child: Text(
+                                                  unread > 99 ? '99+' : unread.toString(),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ),
                                     ),
@@ -484,8 +539,19 @@ class _ChatsState extends State<Chats> {
                                   color: Colors.grey,
                                 ),
                               ),
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+                                // Optimistically clear unseen indicator locally
+                                setState(() {
+                                  final partnerId = participant['_id'];
+                                  _unreadCounts[partnerId] = 0;
+                                  final baseIndex = chats.indexWhere((c) => c['participant']?['_id'] == partnerId);
+                                  if (baseIndex != -1 && chats[baseIndex]['lastMessage'] is Map) {
+                                    chats[baseIndex]['lastMessage']['seen'] = true;
+                                  }
+                                });
+
+                                // Navigate to chat and wait until user returns
+                                await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => Chat(
@@ -495,6 +561,10 @@ class _ChatsState extends State<Chats> {
                                     ),
                                   ),
                                 );
+
+                                // After returning, mark messages as read on server and refresh list
+                                await ChatService.markMessagesAsRead(participant['_id']);
+                                await _loadChats();
                               },
                             );
                           },

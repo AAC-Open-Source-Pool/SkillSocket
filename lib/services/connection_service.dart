@@ -101,9 +101,22 @@ class ConnectionService {
 
       print('Accept request response: ${response.statusCode}');
       
+      // Try to parse body if present
+      Map<String, dynamic>? data;
+      try {
+        data = jsonDecode(response.body);
+      } catch (_) {}
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['success'] == true;
+        return (data != null ? (data['success'] == true) : true);
+      }
+
+      // Treat idempotent responses as success (already accepted/handled)
+      final msg = (data != null ? (data['message']?.toString().toLowerCase() ?? '') : '');
+      if (response.statusCode == 400 || response.statusCode == 409 || response.statusCode == 404) {
+        if (msg.contains('already') || msg.contains('handled') || msg.contains('accepted')) {
+          return true;
+        }
       }
       return false;
     } catch (e) {
@@ -124,9 +137,21 @@ class ConnectionService {
 
       print('Reject request response: ${response.statusCode}');
       
+      Map<String, dynamic>? data;
+      try {
+        data = jsonDecode(response.body);
+      } catch (_) {}
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['success'] == true;
+        return (data != null ? (data['success'] == true) : true);
+      }
+
+      // Treat idempotent responses as success (already rejected/handled)
+      final msg = (data != null ? (data['message']?.toString().toLowerCase() ?? '') : '');
+      if (response.statusCode == 400 || response.statusCode == 409 || response.statusCode == 404) {
+        if (msg.contains('already') || msg.contains('handled') || msg.contains('rejected')) {
+          return true;
+        }
       }
       return false;
     } catch (e) {
