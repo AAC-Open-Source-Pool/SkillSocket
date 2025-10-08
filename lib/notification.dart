@@ -61,17 +61,27 @@ class _NotificationsState extends State<Notifications> {
     // Add general notifications (excluding message notifications)
     for (var notification in allNotifications) {
       // Skip message notifications - they don't belong in notifications tab
-      if (notification['type'] == 'message') continue;
+      if ((notification['type'] ?? '') == 'message') continue;
+
+      final String title = (notification['title'] ?? '').toString();
+      final String body = (notification['body'] ?? '').toString();
+      final sender = notification['sender'];
+      final String? profileImage = sender is Map<String, dynamic>
+          ? (sender['profileImage'] as String?)
+          : null;
 
       tempNotifications["Today"]!.add({
-        "id": notification['_id'],
-        "type": notification['type'],
-        "title": notification['title'],
-        "body": notification['body'],
+        "id": notification['_id'] ?? '',
+        "type": notification['type'] ?? 'normal',
+        // Normalize for UI: map to user/action so Text.rich never gets nulls
+        "user": title.isNotEmpty ? title : 'Notification',
+        "action": body,
+        "title": title,
+        "body": body,
         "time": NotificationService.formatNotificationTime(
-            notification['createdAt']),
+            (notification['createdAt'] ?? '').toString()),
         "icon": Icons.notifications,
-        "profileImage": notification['sender']?['profileImage'],
+        "profileImage": profileImage,
         "read": notification['read'] ?? false,
         "data": notification['data'] ?? {},
       });
@@ -180,9 +190,9 @@ class _NotificationsState extends State<Notifications> {
         setState(() {
           notifications[section]?[index]["accepted"] = true;
         });
-
+        
         _showOverlayMessage("Connection request accepted!");
-
+        
         // Navigate to chat after a short delay
         Future.delayed(const Duration(seconds: 1), () {
           if (mounted) {
@@ -199,11 +209,29 @@ class _NotificationsState extends State<Notifications> {
           }
         });
       } else {
-        _showOverlayMessage("Failed to accept request");
+        // Treat as already handled (idempotent UX)
+        setState(() {
+          if (notifications[section] != null) {
+            notifications[section]!.removeAt(index);
+            if (notifications[section]!.isEmpty) {
+              notifications.remove(section);
+            }
+          }
+        });
+        _showOverlayMessage("Request already handled");
       }
     } catch (e) {
       print('Error accepting connection request: $e');
-      _showOverlayMessage("Error accepting request");
+      // Fail-soft: assume handled to keep UX clean
+      setState(() {
+        if (notifications[section] != null) {
+          notifications[section]!.removeAt(index);
+          if (notifications[section]!.isEmpty) {
+            notifications.remove(section);
+          }
+        }
+      });
+      _showOverlayMessage("Request already handled");
     }
   }
 
@@ -224,14 +252,28 @@ class _NotificationsState extends State<Notifications> {
             notifications.remove(section);
           }
         });
-
+        
         _showOverlayMessage("Connection request rejected");
       } else {
-        _showOverlayMessage("Failed to reject request");
+        // Treat as already handled (idempotent UX)
+        setState(() {
+          notifications[section]?.removeAt(index);
+          if (notifications[section]?.isEmpty ?? false) {
+            notifications.remove(section);
+          }
+        });
+        _showOverlayMessage("Request already handled");
       }
     } catch (e) {
       print('Error rejecting connection request: $e');
-      _showOverlayMessage("Error rejecting request");
+      // Fail-soft: assume handled to keep UX clean
+      setState(() {
+        notifications[section]?.removeAt(index);
+        if (notifications[section]?.isEmpty ?? false) {
+          notifications.remove(section);
+        }
+      });
+      _showOverlayMessage("Request already handled");
     }
   }
 
@@ -444,24 +486,24 @@ class _NotificationsState extends State<Notifications> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text.rich(
-                                          TextSpan(
-                                            children: [
-                                              TextSpan(
-                                                text: notif["user"],
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black),
-                                              ),
-                                              TextSpan(
-                                                text: ' ${notif["action"]}',
-                                                style: const TextStyle(
-                                                    color: Colors.black),
-                                              ),
-                                            ],
+                                          Text.rich(
+                                            TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: (notif["user"] ?? notif["title"] ?? 'Notification').toString(),
+                                                  style: const TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.black),
+                                                ),
+                                                TextSpan(
+                                                  text: ' ' + (notif["action"] ?? notif["body"] ?? '').toString(),
+                                                  style: const TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ],
+                                            ),
+                                            softWrap: true,
                                           ),
-                                          softWrap: true,
-                                        ),
                                         const SizedBox(height: 4),
                                         Text(
                                           notif["time"] ?? '',

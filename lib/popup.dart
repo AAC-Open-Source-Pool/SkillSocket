@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:swipable_stack/swipable_stack.dart';
 import 'package:barter_system/services/connection_service.dart';
+import 'package:barter_system/services/user_service.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   final String requiredSkill;
@@ -26,11 +27,29 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   bool isLoading = true;
   bool _isSending = false; // debounce flag to prevent multiple sends
   final Set<String> _sentRequests = {}; // track already requested userIds in this session
+  String? _currentUserId; // store current user's ID to prevent self-requests
 
   @override
   void initState() {
     super.initState();
+    _loadCurrentUser(); // load current user ID first
     fetchMatchingProfiles();
+    _loadAlreadySentRequests(); // preload sent requests to prevent duplicates across sessions
+  }
+
+  // Load current user ID to prevent self-requests and self-profile display
+  Future<void> _loadCurrentUser() async {
+    try {
+      final userProfile = await UserService.getUserProfile();
+      if (userProfile != null) {
+        setState(() {
+          _currentUserId = userProfile['_id'] ?? userProfile['id'];
+        });
+        print('Current user ID loaded: $_currentUserId');
+      }
+    } catch (e) {
+      print('Error loading current user: $e');
+    }
   }
 
   Future<void> fetchMatchingProfiles() async {
@@ -43,6 +62,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       if (data.isNotEmpty) {
         setState(() {
           profiles = data
+              .where((u) {
+                final userId = u["_id"] ?? u["id"] ?? "";
+                // Filter out current user's profile
+                return _currentUserId == null || userId.toString() != _currentUserId;
+              })
               .map((u) => {
                     "id": u["_id"] ?? "", // Add user ID
                     "name": u["name"] ?? "",
@@ -137,12 +161,45 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     ];
   }
 
+  // Preload already sent requests from server to prevent duplicates across sessions
+  Future<void> _loadAlreadySentRequests() async {
+    try {
+      final sent = await ConnectionService.getSentRequests();
+      if (sent != null) {
+        setState(() {
+          for (final r in sent) {
+            final to = (r['to'] is Map)
+                ? (r['to']['_id'] ?? r['to']['id'])
+                : (r['toUserId'] ?? r['to']);
+            if (to != null) {
+              _sentRequests.add(to.toString());
+            }
+          }
+        });
+      }
+    } catch (e) {
+      print('Error preloading sent requests: $e');
+    }
+  }
+
   // Send connection request
   Future<void> _sendConnectionRequest(Map<String, dynamic> profile) async {
     final String toId = (profile["id"] ?? "").toString();
     if (toId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Invalid user"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    // Prevent sending requests to self (safety check)
+    if (_currentUserId != null && toId == _currentUserId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("You cannot send a connection request to yourself"),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
       );
       return;
     }
@@ -564,6 +621,31 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                                   final currentIndex =
                                       _controller.currentIndex % profiles.length;
                                   final profile = profiles[currentIndex];
+                                  final toId = (profile["id"] ?? "").toString();
+                                  if (toId.isEmpty) return;
+                                  
+                                  // Prevent sending requests to self
+                                  if (_currentUserId != null && toId == _currentUserId) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("You cannot send a connection request to yourself"),
+                                        backgroundColor: Colors.orange,
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  
+                                  if (_sentRequests.contains(toId)) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("You already sent a request to ${profile["name"]}"),
+                                        backgroundColor: Colors.orange,
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   // Send connection request without swiping
                                   _sendConnectionRequest(profile);
                                 }

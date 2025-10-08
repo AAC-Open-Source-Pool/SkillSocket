@@ -128,7 +128,7 @@ class ChatService {
   static Future<bool> markMessagesAsRead(String partnerId) async {
     try {
       final headers = await _getHeaders();
-
+      
       final response = await http.post(
         Uri.parse('$baseUrl/messages/mark-seen/$partnerId'),
         headers: headers,
@@ -144,4 +144,36 @@ class ChatService {
     }
   }
 
+  // Get unread counts per conversation partner
+  static Future<Map<String, int>> getUnreadCounts() async {
+    try {
+      final headers = await _getHeaders();
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/messages/unread/count'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        // Expected format: [ { _id: senderId, count: N }, ... ]
+        final Map<String, int> counts = {};
+        if (data is List) {
+          for (final item in data) {
+            final String? id = (item['_id'] ?? item['id'])?.toString();
+            final int count = (item['count'] is int)
+                ? item['count']
+                : int.tryParse(item['count']?.toString() ?? '0') ?? 0;
+            if (id != null) counts[id] = count;
+          }
+        }
+        return counts;
+      }
+      return {};
+    } catch (e) {
+      print('Get unread counts exception: $e');
+      return {};
+    }
+  }
 }
+
