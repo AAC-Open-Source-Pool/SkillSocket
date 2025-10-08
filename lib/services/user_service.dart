@@ -55,6 +55,7 @@ class UserService {
       return null;
     }
   }
+
   // Add a review for a user
   static Future<Map<String, dynamic>?> addReview({
     required String userId,
@@ -65,7 +66,7 @@ class UserService {
   }) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/reviews/add'),
         headers: headers,
@@ -94,20 +95,17 @@ class UserService {
       }
     } catch (e) {
       print('Exception adding review: $e');
-      return {
-        'success': false,
-        'message': 'Network error occurred'
-      };
+      return {'success': false, 'message': 'Network error occurred'};
     }
   }
-
 
   // Get user profile by ID
   static Future<Map<String, dynamic>?> getUserProfileById(String userId) async {
     try {
       final headers = await _getHeaders();
 
-      print('Making GET request to: $baseUrl/user/profile/$userId'); // Debug log
+      print(
+          'Making GET request to: $baseUrl/user/profile/$userId'); // Debug log
       print('With headers: $headers'); // Debug log
 
       final response = await http.get(
@@ -115,14 +113,16 @@ class UserService {
         headers: headers,
       );
 
-      print('Get profile by ID response status: ${response.statusCode}'); // Debug log
+      print(
+          'Get profile by ID response status: ${response.statusCode}'); // Debug log
       print('Get profile by ID response body: ${response.body}'); // Debug log
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return data['user']; // Return the user object
       } else {
-        print('Get profile by ID error: ${response.statusCode} - ${response.body}');
+        print(
+            'Get profile by ID error: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e) {
