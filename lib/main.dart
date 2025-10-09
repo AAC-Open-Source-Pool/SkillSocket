@@ -1,4 +1,5 @@
-import 'package:barter_system/login.dart';
+//import 'package:barter_system/login.dart';
+import 'package:barter_system/splashscreen.dart'; // import the new splash page
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.purple,
         primaryColor: const Color.fromARGB(255, 177, 66, 116),
       ),
-      home: const LoginScreen(),
+      home: const LoadingPage(), // changed from LoginScreen to LoadingPage
     );
   }
 }

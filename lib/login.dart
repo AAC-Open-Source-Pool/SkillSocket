@@ -124,20 +124,64 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const CircleAvatar(
-                radius: 35,
-                backgroundColor: Colors.white70,
-                child: Text("LOGO", style: TextStyle(color: Colors.black)),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                "SkillSocket",
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(seconds: 2),
+                builder: (context, value, child) => Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 30 * (1 - value)),
+                    child: child,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Image.asset(
+                            'assets/logo3.png',
+                            fit: BoxFit.cover, // fills circle and trims excess
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      "SkillSocket",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(221, 0, 0, 0),
+                      ),
+                    ),
+                    const Text(
+                      "Link.Learn.Level Up.",
+                      style: TextStyle(
+                        fontSize: 20,
+                        //fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(221, 0, 0, 0),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
+
               const SizedBox(height: 40),
               Container(
                 padding: const EdgeInsets.all(20),

@@ -1,79 +1,131 @@
 import 'package:flutter/material.dart';
+import 'package:barter_system/services/review_service.dart';
+import 'package:barter_system/services/user_service.dart';
 
-class Reviews extends StatelessWidget {
+class Reviews extends StatefulWidget {
   const Reviews({super.key});
 
   @override
+  State<Reviews> createState() => _ReviewsState();
+}
+
+class _ReviewsState extends State<Reviews> {
+  List<Map<String, dynamic>> _givenReviews = [];
+  List<Map<String, dynamic>> _receivedReviews = [];
+  bool _loadingGiven = true;
+  bool _loadingReceived = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    final userId = await UserService.getCurrentUserId();
+
+    final given = await ReviewService.getMyReviews();
+    setState(() {
+      _givenReviews = (given ?? []).map<Map<String, dynamic>>((r) {
+        final name = r['reviewee']?['name']?.toString() ?? 'Unknown';
+        final created = r['createdAt']?.toString();
+        return _mapToUi(
+          user: name,
+          dateIso: created,
+          title: r['title']?.toString() ?? '',
+          body: r['comment']?.toString() ?? '',
+          rating: (r['rating'] is num) ? (r['rating'] as num).round() : 0,
+          id: r['_id']?.toString() ?? '',
+        );
+      }).toList();
+      _loadingGiven = false;
+    });
+
+    if (userId != null) {
+      final receivedData = await ReviewService.getUserReviews(userId: userId);
+      final reviews =
+          List<Map<String, dynamic>>.from(receivedData?['reviews'] ?? []);
+      setState(() {
+        _receivedReviews = reviews.map<Map<String, dynamic>>((r) {
+          final name = r['reviewer']?['name']?.toString() ?? 'Unknown';
+          final created = r['createdAt']?.toString();
+          return _mapToUi(
+            user: name,
+            dateIso: created,
+            title: r['title']?.toString() ?? '',
+            body: r['comment']?.toString() ?? '',
+            rating: (r['rating'] is num) ? (r['rating'] as num).round() : 0,
+            id: r['_id']?.toString() ?? '',
+          );
+        }).toList();
+        _loadingReceived = false;
+      });
+    } else {
+      setState(() {
+        _receivedReviews = [];
+        _loadingReceived = false;
+      });
+    }
+  }
+
+  Map<String, dynamic> _mapToUi({
+    required String user,
+    String? dateIso,
+    required String title,
+    required String body,
+    required int rating,
+    required String id,
+  }) {
+    return {
+      'user': user,
+      'date': _relativeTime(dateIso),
+      'title': title,
+      'body': body,
+      'likes': '0',
+      'dislikes': '0',
+      'color': const Color.fromARGB(255, 150, 198, 229),
+      'rating': rating.clamp(0, 5),
+      'id': id,
+      'isLiked': false,
+      'isDisliked': false,
+    };
+  }
+
+  String _relativeTime(String? iso) {
+    if (iso == null) return '';
+    try {
+      final dt = DateTime.parse(iso).toLocal();
+      final now = DateTime.now();
+      final diff = now.difference(dt);
+      if (diff.inDays >= 7) {
+        return 'on ${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+      } else if (diff.inDays >= 1) {
+        return '${diff.inDays} day${diff.inDays == 1 ? '' : 's'} ago';
+      } else if (diff.inHours >= 1) {
+        return '${diff.inHours} hour${diff.inHours == 1 ? '' : 's'} ago';
+      } else if (diff.inMinutes >= 1) {
+        return '${diff.inMinutes} min ago';
+      } else {
+        return 'just now';
+      }
+    } catch (_) {
+      return '';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> givenReviews = [
-      {
-        "user": "Rahul",
-        "date": "2 days ago",
-        "title": "Great collaborator",
-        "body": "Enjoyed working with Sara on the project!",
-        "likes": "12",
-        "dislikes": "0",
-        "comments": "2",
-        "shares": "0",
-        "color": Color.fromARGB(255, 150, 198, 229),
-        "rating": 4,
-      },
-      {
-        "user": "Meera",
-        "date": "5 days ago",
-        "title": "Very skilled",
-        "body": "Rahul really helped me debug my app efficiently.",
-        "likes": "8",
-        "dislikes": "1",
-        "comments": "1",
-        "shares": "0",
-        "color": Color.fromARGB(255, 150, 198, 229),
-        "rating": 5,
-      },
-    ];
-
-    final List<Map<String, dynamic>> receivedReviews = [
-      {
-        "user": "Karan",
-        "date": "1 day ago",
-        "title": "Helpful and patient",
-        "body": "Sara explained everything clearly, highly recommend!",
-        "likes": "20",
-        "dislikes": "0",
-        "comments": "3",
-        "shares": "1",
-        "color": Color.fromARGB(255, 150, 198, 229),
-        "rating": 5,
-      },
-      {
-        "user": "Priya",
-        "date": "1 week ago",
-        "title": "Good communication",
-        "body": "Was quick to respond and delivered on time.",
-        "likes": "15",
-        "dislikes": "2",
-        "comments": "2",
-        "shares": "0",
-        "color": Color.fromARGB(255, 150, 198, 229),
-        "rating": 4,
-      },
-    ];
-
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: Text(
+          title: const Text(
             'Reviews',
-            style: TextStyle(
-              fontSize: 30,
-              //fontStyle: FontStyle.italic,
-              color: Colors.white,
-            ),
+            style: TextStyle(fontSize: 30, color: Colors.white),
           ),
-          backgroundColor:Color(0xFF123b53),
-          iconTheme: IconThemeData(color: Colors.white),
+          backgroundColor: const Color(0xFF123b53),
+          iconTheme: const IconThemeData(color: Colors.white),
           bottom: const TabBar(
             indicatorColor: Colors.white,
             labelColor: Colors.white,
@@ -87,8 +139,16 @@ class Reviews extends StatelessWidget {
         backgroundColor: Colors.white,
         body: TabBarView(
           children: [
-            _buildReviewList(givenReviews),
-            _buildReviewList(receivedReviews),
+            _loadingGiven
+                ? const Center(child: CircularProgressIndicator())
+                : _givenReviews.isEmpty
+                    ? const Center(child: Text('No given reviews yet'))
+                    : _buildReviewList(_givenReviews),
+            _loadingReceived
+                ? const Center(child: CircularProgressIndicator())
+                : _receivedReviews.isEmpty
+                    ? const Center(child: Text('No received reviews yet'))
+                    : _buildReviewList(_receivedReviews),
           ],
         ),
       ),
@@ -106,9 +166,9 @@ class Reviews extends StatelessWidget {
             decoration: BoxDecoration(
               color: post['color'],
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
-                  color: const Color.fromARGB(184, 4, 2, 2),
+                  color: Color.fromARGB(184, 4, 2, 2),
                   blurRadius: 6,
                   offset: Offset(0, 4),
                 ),
@@ -122,39 +182,42 @@ class Reviews extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
+                    Expanded(
                       child: Row(
                         children: [
                           CircleAvatar(
                             radius: 12,
                             backgroundColor: Colors.white,
-                            child: Icon(Icons.person,
+                            child: const Icon(Icons.person,
                                 size: 16, color: Colors.black),
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            post['user'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
+                          Expanded(
+                            child: Text(
+                              post['user'],
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const SizedBox(width: 4),
                           Row(
-                            children: List.generate(
-                              post['rating'],
-                              (index) => Icon(
-                                Icons.star,
+                            children: List.generate(5, (i) {
+                              return Icon(
+                                i < post['rating']
+                                    ? Icons.star
+                                    : Icons.star_border,
                                 size: 14,
                                 color: Colors.yellow[700],
-                              ),
-                            ),
+                              );
+                            }),
                           ),
                         ],
                       ),
                     ),
                     Text(
                       post['date'],
-                      style: const TextStyle(
-                          color: Colors.black, fontSize: 12),
+                      style: const TextStyle(color: Colors.black, fontSize: 12),
                     ),
                   ],
                 ),
@@ -171,20 +234,24 @@ class Reviews extends StatelessWidget {
                 Text(
                   post['body'],
                   style: const TextStyle(
-                      fontSize: 14,
-                      color: Color.fromARGB(221, 255, 255, 255)),
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
                 ),
                 const SizedBox(height: 12),
-                // Bottom row: likes, dislikes, comments, shares
+                // Bottom row: only likes and dislikes
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    _iconText(Icons.thumb_up_alt_outlined, post['likes']),
-                    _iconText(Icons.thumb_down_alt_outlined, post['dislikes']),
-                    _iconText(Icons.comment_outlined, post['comments']),
-                    _iconText(Icons.share_outlined, post['shares']),
+                    // Like button
+                    _iconButton(Icons.thumb_up_alt_outlined, post, 'likes',
+                        'isLiked', 'isDisliked'),
+                    const SizedBox(width: 16),
+                    // Dislike button
+                    _iconButton(Icons.thumb_down_alt_outlined, post, 'dislikes',
+                        'isDisliked', 'isLiked'),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -193,11 +260,64 @@ class Reviews extends StatelessWidget {
     );
   }
 
-  Widget _iconText(IconData icon, String text) {
-    return Row(children: [
-      Icon(icon, size: 18, color: Colors.black),
-      const SizedBox(width: 6),
-      Text(text),
-    ]);
+  // Helper function to make icon+text clickable
+  Widget _iconButton(
+    IconData icon,
+    Map<String, dynamic> post,
+    String countField,
+    String toggleField,
+    String? otherToggleField,
+  ) {
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: () async {
+        final currentlyToggled = post[toggleField] as bool;
+        int delta = currentlyToggled ? -1 : 1;
+
+        // Optional: call ReviewService to register/unregister like/dislike
+        if (toggleField == 'isLiked') {
+          await ReviewService.likeReview(post['id']);
+        } else {
+          await ReviewService.dislikeReview(post['id']);
+        }
+
+        setState(() {
+          // Toggle current
+          post[toggleField] = !currentlyToggled;
+          post[countField] = ((int.tryParse(post[countField]) ?? 0) + delta).toString();
+
+          // If the other button was active, undo it
+          if (otherToggleField != null && post[otherToggleField] == true) {
+            post[otherToggleField] = false;
+            final otherCount = otherToggleField == 'isLiked' ? 'likes' : 'dislikes';
+            post[otherCount] = ((int.tryParse(post[otherCount]) ?? 1) - 1).toString();
+          }
+        });
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: _iconText(
+          icon,
+          post[countField],
+          color: post[toggleField] ? Colors.blue : Colors.black,
+        ),
+      ),
+    ),
+  );
+}
+
+
+  // Icon + text widget
+  Widget _iconText(IconData icon, String text, {Color? color}) {
+    final c = color ?? Colors.black;
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: c),
+        const SizedBox(width: 6),
+        Text(text, style: TextStyle(color: c)),
+      ],
+    );
   }
 }
