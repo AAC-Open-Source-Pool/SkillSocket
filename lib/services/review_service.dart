@@ -3,6 +3,38 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewService {
+  // Like a review
+  static Future<bool> likeReview(String reviewId) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.post(
+        Uri.parse('$baseUrl/like/$reviewId'),
+        headers: headers,
+      );
+      print('Like review response: \\${response.statusCode}');
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Exception liking review: $e');
+      return false;
+    }
+  }
+
+  // Dislike a review
+  static Future<bool> dislikeReview(String reviewId) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.post(
+        Uri.parse('$baseUrl/dislike/$reviewId'),
+        headers: headers,
+      );
+      print('Dislike review response: \\${response.statusCode}');
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Exception disliking review: $e');
+      return false;
+    }
+  }
+
   static const String baseUrl = 'https://skillsocket-backend.onrender.com/api/reviews';
 
   // Get headers with authentication token
@@ -21,7 +53,6 @@ class ReviewService {
     required String revieweeId,
     required double rating,
     required String title,
-    required String comment,
     String? skillContext,
   }) async {
     try {
@@ -34,7 +65,6 @@ class ReviewService {
           'revieweeId': revieweeId,
           'rating': rating,
           'title': title,
-          'comment': comment,
           if (skillContext != null) 'skillContext': skillContext,
         }),
       );
@@ -129,7 +159,6 @@ class ReviewService {
     required String reviewId,
     double? rating,
     String? title,
-    String? comment,
     String? skillContext,
   }) async {
     try {
@@ -138,7 +167,6 @@ class ReviewService {
       final body = <String, dynamic>{};
       if (rating != null) body['rating'] = rating;
       if (title != null) body['title'] = title;
-      if (comment != null) body['comment'] = comment;
       if (skillContext != null) body['skillContext'] = skillContext;
       
       final response = await http.put(

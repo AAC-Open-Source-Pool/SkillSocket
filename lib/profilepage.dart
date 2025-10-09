@@ -22,7 +22,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
     super.initState();
     _fetchLoggedInUserName();
     _loadUserProfile();
-
   }
 
   Future<void> _fetchLoggedInUserName() async {
@@ -146,20 +145,34 @@ class _UserProfilePageState extends State<UserProfilePage> {
               onPressed: () async {
                 final review = reviewController.text.trim();
                 if (review.isNotEmpty) {
-                  // 🔹 Call backend to save review
+                  final newReview = {
+                    'reviewer': _loggedInUserName ?? 'Anonymous',
+                    'comment': review,
+                    'date': DateTime.now().toString(),
+                  };
+
+                  // 🔹 1. Save review in backend
                   await UserService.addReview(
                     userId: widget.userId,
-                    rating: 4.0, // Default rating, could be made configurable
+                    rating: 4.0,
                     title: "Review",
                     comment: review,
                   );
+
+                  // 🔹 2. Update UI instantly
+                  setState(() {
+                    _reviews.insert(0, newReview);
+                  });
+
+                  // 🔹 3. Optionally reload from backend (for accuracy)
+                  await _loadUserProfile();
 
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text("Review submitted successfully")));
                 }
               },
-              child: const Text("Submit"),
+              child: const Text("Submit",style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -297,7 +310,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 ? (_userProfile!['skills'] as List).join(", ")
                                 : null),
                         const SizedBox(height: 24),
-                        // --- Separate Reviews Area ---
+                        // --- Reviews Section ---
                         Container(
                           width: double.infinity,
                           margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
@@ -323,9 +336,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 ),
                               ),
                               if (_reviews.isEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                  child: const Text(
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Text(
                                     "No reviews yet. Be the first to write one!",
                                     style: TextStyle(fontSize: 15, color: Colors.grey),
                                   ),
@@ -374,8 +387,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             ],
                           ),
                         ),
-                        // --- End Reviews Area ---
-                        const SizedBox(height: 80), // leave space for FAB
+                        const SizedBox(height: 80),
                       ]),
                     ),
                   ],

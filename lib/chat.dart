@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:barter_system/services/chat_service.dart';
+import 'package:barter_system/services/user_service.dart';
 import 'package:barter_system/profilepage.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
@@ -26,6 +27,7 @@ class _ChatState extends State<Chat> {
   final ScrollController _scrollController = ScrollController();
   late IO.Socket socket;
   String? currentUserId;
+  Map<String, dynamic>? currentUserProfile;
   bool _isLoading = false;
   bool _isTyping = false;
   Timer? _typingTimer;
@@ -45,6 +47,7 @@ class _ChatState extends State<Chat> {
     currentUserId = await ChatService.getCurrentUserId();
 
     if (currentUserId != null) {
+      currentUserProfile = await UserService.getUserProfileById(currentUserId!);
       await _loadChatHistory();
       _connectToServer();
     } else {
@@ -69,6 +72,8 @@ class _ChatState extends State<Chat> {
               'time': _formatTime(message['createdAt']),
               'senderId': message['from']['_id'],
               'senderName': message['from']['name'],
+              'senderProfile': message['from']['profileImage'], // new line
+  'status': 'sent',
             });
           }
         });
@@ -260,6 +265,7 @@ class _ChatState extends State<Chat> {
         'time': timeString,
         'senderId': currentUserId,
         'senderName': 'You',
+        'senderProfile': currentUserProfile?['profileImage'],
         'status': 'sending', // sending, sent, delivered, read
       });
     });
@@ -303,9 +309,28 @@ class _ChatState extends State<Chat> {
         backgroundColor: const Color(0xFF123b53),
         title: Row(
           children: [
-            const CircleAvatar(
-              backgroundColor: Color(0xFFB6E1F0),
-              child: Icon(Icons.person, color: Colors.white),
+            FutureBuilder<Map<String, dynamic>?>(
+              future: UserService.getUserProfileById(widget.recipientId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircleAvatar(
+                    backgroundColor: Color(0xFFB6E1F0),
+                    child: Icon(Icons.person, color: Colors.white),
+                  );
+                } else if (snapshot.hasData &&
+                    snapshot.data != null &&
+                    snapshot.data!['profileImage'] != null) {
+                  return CircleAvatar(
+                    backgroundImage:
+                        NetworkImage(snapshot.data!['profileImage']),
+                  );
+                } else {
+                  return const CircleAvatar(
+                    backgroundColor: Color(0xFFB6E1F0),
+                    child: Icon(Icons.person, color: Colors.white),
+                  );
+                }
+              },
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -329,8 +354,7 @@ class _ChatState extends State<Chat> {
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.white,
-                        decoration:
-                            TextDecoration.underline, // clickable effect
+                        //decoration: TextDecoration.underline,
                       ),
                     ),
                     if (_isTyping)
@@ -366,52 +390,89 @@ class _ChatState extends State<Chat> {
                           itemBuilder: (context, index) {
                             final msg = _messages[index];
                             return Align(
-                              alignment: msg['isMe']
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 10),
-                                margin: const EdgeInsets.symmetric(vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: msg['isMe']
-                                      ? const Color.fromARGB(255, 58, 137, 164)
-                                      : const Color(0xFFB6E1F0),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      msg['text'],
-                                      style: TextStyle(
-                                          color: msg['isMe']
-                                              ? Colors.white
-                                              : Colors.black87),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          msg['time'],
-                                          style: TextStyle(
-                                              color: msg['isMe']
-                                                  ? Colors.white70
-                                                  : Colors.black54,
-                                              fontSize: 10),
-                                        ),
-                                        if (msg['isMe']) ...[
-                                          const SizedBox(width: 4),
-                                          _buildMessageStatusIcon(
-                                              msg['status'] ?? 'sent'),
-                                        ],
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
+  alignment: msg['isMe'] ? Alignment.centerRight : Alignment.centerLeft,
+  child: Row(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      // Left side (receiver avatar)
+      if (!msg['isMe']) ...[
+        CircleAvatar(
+          radius: 12,
+          backgroundColor: Colors.grey.shade300,
+          backgroundImage: msg['senderProfile'] != null
+              ? NetworkImage(msg['senderProfile'])
+              : null,
+          child: msg['senderProfile'] == null
+              ? Text(
+                  msg['senderName'][0].toUpperCase(),
+                  style: const TextStyle(
+                      color: Color(0xFF123b53),
+                      fontWeight: FontWeight.bold),
+                )
+              : null,
+        ),
+        const SizedBox(width: 6),
+      ],
+
+      // Message bubble
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          color: msg['isMe']
+              ? const Color.fromARGB(255, 58, 137, 164)
+              : const Color(0xFFB6E1F0),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              msg['text'],
+              style: TextStyle(
+                  color: msg['isMe'] ? Colors.white : Colors.black87),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  msg['time'],
+                  style: TextStyle(
+                      color: msg['isMe'] ? Colors.white70 : Colors.black54,
+                      fontSize: 10),
+                ),
+                if (msg['isMe']) ...[
+                  const SizedBox(width: 4),
+                  _buildMessageStatusIcon(msg['status'] ?? 'sent'),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+
+      // Right side (sender avatar)
+      if (msg['isMe']) ...[
+        const SizedBox(width: 6),
+        CircleAvatar(
+          radius: 12,
+          backgroundColor: Colors.grey.shade300,
+          backgroundImage: msg['senderProfile'] != null
+              ? NetworkImage(msg['senderProfile'])
+              : null,
+          child: msg['senderProfile'] == null
+              ? const Icon(Icons.person,
+                  size: 14, color: Color(0xFF123b53))
+              : null,
+        ),
+      ],
+    ],
+  ),
+);
+
+
                           },
                         ),
                       ),
