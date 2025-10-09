@@ -57,6 +57,10 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
     // Get current user ID
     currentUserId = await ChatService.getCurrentUserId();
 
+    if (chats.isEmpty) { // 👈 Only load once
+    await _loadChats();
+  }
+
     if (currentUserId != null) {
       await _loadChats();
       _connectToSocket();
@@ -457,7 +461,8 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
                             final chat = filteredChats[index];
                             final participant = chat['participant'];
                             final lastMessage = chat['lastMessage'];
-                            final int unread = _unreadCounts[participant['_id']] ?? 0;
+                            final int unread =
+                                _unreadCounts[participant['_id']] ?? 0;
                             final bool isUnseen = unread > 0;
 
                             return ListTile(
@@ -465,20 +470,33 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
                                 children: [
                                   CircleAvatar(
                                     backgroundColor: const Color(0xFFB6E1F0),
-                                    child: Text(
-                                      participant['name'][0].toUpperCase(),
-                                      style: const TextStyle(
-                                        color: Color(0xFF123b53),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                    backgroundImage:
+                                        participant['profileImage'] != null &&
+                                                participant['profileImage']
+                                                    .isNotEmpty
+                                            ? NetworkImage(
+                                                participant['profileImage'])
+                                            : null,
+                                    child: participant['profileImage'] ==
+                                                null ||
+                                            participant['profileImage'].isEmpty
+                                        ? Text(
+                                            participant['name'][0]
+                                                .toUpperCase(),
+                                            style: const TextStyle(
+                                              color: Color(0xFF123b53),
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : null,
                                   ),
+
                                   // Unread message indicator (badge with count)
                                   if (isUnseen)
                                     Positioned(
                                       right: 0,
                                       top: 0,
-                                  child: ScaleTransition(
+                                      child: ScaleTransition(
                                         scale: _badgeScale,
                                         child: AnimatedBuilder(
                                           animation: _badgeController,
@@ -491,16 +509,20 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
                                                 shape: BoxShape.circle,
                                                 boxShadow: [
                                                   BoxShadow(
-                                                    color: Colors.green.withOpacity(0.6),
+                                                    color: Colors.green
+                                                        .withOpacity(0.6),
                                                     blurRadius: glow,
                                                     spreadRadius: glow / 4,
                                                   ),
                                                 ],
                                               ),
-                                              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                                              constraints: const BoxConstraints(
+                                                  minWidth: 18, minHeight: 18),
                                               child: Center(
                                                 child: Text(
-                                                  unread > 99 ? '99+' : unread.toString(),
+                                                  unread > 99
+                                                      ? '99+'
+                                                      : unread.toString(),
                                                   style: const TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 10,
@@ -544,9 +566,12 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
                                 setState(() {
                                   final partnerId = participant['_id'];
                                   _unreadCounts[partnerId] = 0;
-                                  final baseIndex = chats.indexWhere((c) => c['participant']?['_id'] == partnerId);
-                                  if (baseIndex != -1 && chats[baseIndex]['lastMessage'] is Map) {
-                                    chats[baseIndex]['lastMessage']['seen'] = true;
+                                  final baseIndex = chats.indexWhere((c) =>
+                                      c['participant']?['_id'] == partnerId);
+                                  if (baseIndex != -1 &&
+                                      chats[baseIndex]['lastMessage'] is Map) {
+                                    chats[baseIndex]['lastMessage']['seen'] =
+                                        true;
                                   }
                                 });
 
@@ -563,7 +588,8 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
                                 );
 
                                 // After returning, mark messages as read on server and refresh list
-                                await ChatService.markMessagesAsRead(participant['_id']);
+                                await ChatService.markMessagesAsRead(
+                                    participant['_id']);
                                 await _loadChats();
                               },
                             );
