@@ -12,7 +12,7 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-BASE_URL="https://skillsocket-backend.onrender.com"
+BASE_URL="http://localhost:3000"
 
 # Test 1: Health Check
 echo "📋 Test 1: Health Check"

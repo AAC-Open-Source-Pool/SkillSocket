@@ -41,7 +41,7 @@ Open browser or terminal:
 
 ```bash
 # Health check
-curl https://skillsocket-backend.onrender.com/api/health
+curl http://localhost:3000/api/health
 ```
 
 Expected response:

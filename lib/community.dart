@@ -9,6 +9,7 @@ import 'package:barter_system/models/backend_models.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:barter_system/widgets/profile_avatar.dart';
 
 import 'dart:io';
 
@@ -300,12 +301,12 @@ class _CommunityState extends State<Community> {
                     MaterialPageRoute(builder: (context) => Notifications()));
               },
               icon: Icon(Icons.notifications)),
-          IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Profile()));
-              },
-              icon: Icon(Icons.person_rounded)),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ProfileAvatar(radius: 18, onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (c) => Profile()));
+            }),
+          ),
         ],
       ),
       body: RefreshIndicator(

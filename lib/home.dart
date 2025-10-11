@@ -6,6 +6,7 @@ import 'package:barter_system/reviews.dart';
 import 'package:barter_system/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:barter_system/widgets/profile_avatar.dart';
 
 class TodoList extends StatelessWidget {
   final DateTime selectedDate;
@@ -244,12 +245,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => Notifications()));
               },
               icon: Icon(Icons.notifications)),
-          IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Profile()));
-              },
-              icon: Icon(Icons.person_rounded)),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ProfileAvatar(radius: 18, onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (c) => Profile()));
+            }),
+          ),
         ],
       ),
       body: SingleChildScrollView(

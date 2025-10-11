@@ -4,7 +4,7 @@ Complete examples for testing the todo API endpoints using curl, Postman, or any
 
 ## Base URL
 ```
-https://skillsocket-backend.onrender.com
+http://localhost:3000
 ```
 
 ## Authentication
@@ -13,7 +13,7 @@ All todo endpoints require a valid JWT token. First, login to get a token.
 
 ### Login
 ```bash
-curl -X POST https://skillsocket-backend.onrender.com/api/auth/login \
+curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -45,7 +45,7 @@ Fetch all todos for a specific date.
 
 **Request:**
 ```bash
-curl -X GET "https://skillsocket-backend.onrender.com/api/todos?date=2025-10-11" \
+curl -X GET "http://localhost:3000/api/todos?date=2025-10-11" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -90,7 +90,7 @@ Add a new todo for a specific date.
 
 **Request:**
 ```bash
-curl -X POST https://skillsocket-backend.onrender.com/api/todos \
+curl -X POST http://localhost:3000/api/todos \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -130,7 +130,7 @@ Update a todo's task text or completion status.
 
 **Request:**
 ```bash
-curl -X PATCH https://skillsocket-backend.onrender.com/api/todos/671234567890abcdef123458 \
+curl -X PATCH http://localhost:3000/api/todos/671234567890abcdef123458 \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -155,7 +155,7 @@ curl -X PATCH https://skillsocket-backend.onrender.com/api/todos/671234567890abc
 
 **Request:**
 ```bash
-curl -X PATCH https://skillsocket-backend.onrender.com/api/todos/671234567890abcdef123458 \
+curl -X PATCH http://localhost:3000/api/todos/671234567890abcdef123458 \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -180,7 +180,7 @@ curl -X PATCH https://skillsocket-backend.onrender.com/api/todos/671234567890abc
 
 **Request:**
 ```bash
-curl -X PATCH https://skillsocket-backend.onrender.com/api/todos/671234567890abcdef123458 \
+curl -X PATCH http://localhost:3000/api/todos/671234567890abcdef123458 \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -205,7 +205,7 @@ Remove a todo permanently.
 
 **Request:**
 ```bash
-curl -X DELETE https://skillsocket-backend.onrender.com/api/todos/671234567890abcdef123458 \
+curl -X DELETE http://localhost:3000/api/todos/671234567890abcdef123458 \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -230,7 +230,7 @@ curl -X DELETE https://skillsocket-backend.onrender.com/api/todos/671234567890ab
 
 ### Setup
 1. Create a new collection: "SkillSocket Todos"
-2. Add environment variable: `baseUrl` = `https://skillsocket-backend.onrender.com`
+2. Add environment variable: `baseUrl` = `http://localhost:3000`
 3. Add environment variable: `token` = (leave empty, will be set after login)
 
 ### Requests
@@ -292,7 +292,7 @@ curl -X DELETE https://skillsocket-backend.onrender.com/api/todos/671234567890ab
 ## JavaScript (Fetch API)
 
 ```javascript
-const baseUrl = 'https://skillsocket-backend.onrender.com';
+const baseUrl = 'http://localhost:3000';
 let token = 'YOUR_TOKEN_HERE';
 
 // Get todos for a date
@@ -370,7 +370,7 @@ async function deleteTodo(id) {
 import requests
 import json
 
-BASE_URL = 'https://skillsocket-backend.onrender.com'
+BASE_URL = 'http://localhost:3000'
 token = 'YOUR_TOKEN_HERE'
 
 headers = {
@@ -508,7 +508,7 @@ Check these endpoints to monitor API health:
 
 ### Health Check
 ```bash
-curl https://skillsocket-backend.onrender.com/api/health
+curl http://localhost:3000/api/health
 ```
 
 **Response:**
@@ -526,7 +526,7 @@ curl https://skillsocket-backend.onrender.com/api/health
 
 ### Root Endpoint
 ```bash
-curl https://skillsocket-backend.onrender.com/
+curl http://localhost:3000/
 ```
 
 **Response:**

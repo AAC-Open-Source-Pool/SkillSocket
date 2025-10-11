@@ -69,7 +69,7 @@ MongoDB connected
 ### Step 4: Test Production API
 ```bash
 # Health check
-curl https://skillsocket-backend.onrender.com/api/health
+curl http://localhost:3000/api/health
 
 # Expected response:
 {
@@ -89,7 +89,7 @@ curl https://skillsocket-backend.onrender.com/api/health
 
 #### 1. Get Auth Token
 ```bash
-curl -X POST https://skillsocket-backend.onrender.com/api/auth/login \
+curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"yourpassword"}'
 
@@ -98,7 +98,7 @@ curl -X POST https://skillsocket-backend.onrender.com/api/auth/login \
 
 #### 2. Create a Todo
 ```bash
-curl -X POST https://skillsocket-backend.onrender.com/api/todos \
+curl -X POST http://localhost:3000/api/todos \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"date":"2025-10-11","task":"Test todo from API"}'
@@ -108,7 +108,7 @@ curl -X POST https://skillsocket-backend.onrender.com/api/todos \
 
 #### 3. Get Todos for Date
 ```bash
-curl -X GET "https://skillsocket-backend.onrender.com/api/todos?date=2025-10-11" \
+curl -X GET "http://localhost:3000/api/todos?date=2025-10-11" \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Should return array of todos
@@ -116,7 +116,7 @@ curl -X GET "https://skillsocket-backend.onrender.com/api/todos?date=2025-10-11"
 
 #### 4. Update Todo (Toggle Done)
 ```bash
-curl -X PATCH https://skillsocket-backend.onrender.com/api/todos/TODO_ID \
+curl -X PATCH http://localhost:3000/api/todos/TODO_ID \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"done":true}'
@@ -126,7 +126,7 @@ curl -X PATCH https://skillsocket-backend.onrender.com/api/todos/TODO_ID \
 
 #### 5. Delete Todo
 ```bash
-curl -X DELETE https://skillsocket-backend.onrender.com/api/todos/TODO_ID \
+curl -X DELETE http://localhost:3000/api/todos/TODO_ID \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Should return {"success": true}
@@ -260,5 +260,5 @@ After successful deployment:
 
 **Deployment Date**: _________________  
 **Deployed By**: _________________  
-**Production URL**: https://skillsocket-backend.onrender.com  
+**Production URL**: http://localhost:3000  
 **Status**: ⬜ Pending | ⬜ In Progress | ⬜ Complete

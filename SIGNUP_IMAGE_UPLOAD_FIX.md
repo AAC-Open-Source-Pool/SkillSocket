@@ -82,12 +82,12 @@ The original `/upload-logo` endpoint remains unchanged and continues to require 
 
 Changed the upload URL from:
 ```dart
-Uri.parse('https://skillsocket-backend.onrender.com/api/user/upload-logo')
+Uri.parse('http://localhost:3000/api/user/upload-logo')
 ```
 
 To:
 ```dart
-Uri.parse('https://skillsocket-backend.onrender.com/api/user/upload-logo-public')
+Uri.parse('http://localhost:3000/api/user/upload-logo-public')
 ```
 
 ## How It Works Now
@@ -226,7 +226,7 @@ if (profileImageUrl == null) {
 ### Backend Changes
 The new endpoint is automatically available once deployed:
 ```
-POST https://skillsocket-backend.onrender.com/api/user/upload-logo-public
+POST http://localhost:3000/api/user/upload-logo-public
 ```
 
 ### No Configuration Needed

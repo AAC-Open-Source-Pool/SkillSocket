@@ -4,38 +4,41 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewService {
   // Like a review
-  static Future<bool> likeReview(String reviewId) async {
-    try {
-      final headers = await _getHeaders();
-      final response = await http.post(
-        Uri.parse('$baseUrl/like/$reviewId'),
-        headers: headers,
-      );
-      print('Like review response: \\${response.statusCode}');
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Exception liking review: $e');
-      return false;
+  static Future<Map<String, dynamic>?> likeReview(String reviewId) async {
+  try {
+    final headers = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('$baseUrl/like/$reviewId'),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
     }
+  } catch (e) {
+    print('Exception liking review: $e');
   }
+  return null;
+}
 
   // Dislike a review
-  static Future<bool> dislikeReview(String reviewId) async {
-    try {
-      final headers = await _getHeaders();
-      final response = await http.post(
-        Uri.parse('$baseUrl/dislike/$reviewId'),
-        headers: headers,
-      );
-      print('Dislike review response: \\${response.statusCode}');
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Exception disliking review: $e');
-      return false;
+  static Future<Map<String, dynamic>?> dislikeReview(String reviewId) async {
+  try {
+    final headers = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('$baseUrl/dislike/$reviewId'),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
     }
+  } catch (e) {
+    print('Exception disliking review: $e');
   }
+  return null;
+}
+  // Base URL for the review API
 
-  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api/reviews';
+  static const String baseUrl = 'http://localhost:3000/api/reviews';
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
