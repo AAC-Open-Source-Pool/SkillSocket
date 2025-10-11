@@ -1,12 +1,12 @@
 import 'package:barter_system/home.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:io';
 
 class SignUpPage extends StatefulWidget {
   final Map<String, dynamic>? userData;
-
   const SignUpPage({super.key, this.userData});
 
   @override
@@ -44,10 +44,16 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Future<String?> _uploadProfileImageToCloudinary(File profileImageFile) async {
     try {
+      print('🖼️ Starting profile image upload...');
+      print('🖼️ File path: ${profileImageFile.path}');
+      print('🖼️ File exists: ${await profileImageFile.exists()}');
+      
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('https://skillsocket-backend.onrender.com/api/user/upload-logo'),
+        Uri.parse('https://skillsocket-backend.onrender.com/api/user/upload-logo-public'),
       );
+
+      print('🖼️ Upload URL: ${request.url}');
 
       // Add the file to the request
       request.files.add(
@@ -57,19 +63,25 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
       );
 
+      print('🖼️ File added to request. Sending...');
       final streamedResponse = await request.send();
+      print('🖼️ Response status code: ${streamedResponse.statusCode}');
+      
       final response = await http.Response.fromStream(streamedResponse);
+      print('🖼️ Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
+        print('🖼️ Upload successful! URL: ${responseData['logoUrl']}');
         return responseData['logoUrl'];
       } else {
-        print(
-            'Profile image upload error: ${response.statusCode} - ${response.body}');
+        print('❌ Profile image upload error: ${response.statusCode}');
+        print('❌ Response body: ${response.body}');
         return null;
       }
-    } catch (e) {
-      print('Profile image upload exception: $e');
+    } catch (e, stackTrace) {
+      print('❌ Profile image upload exception: $e');
+      print('❌ Stack trace: $stackTrace');
       return null;
     }
   }
@@ -91,16 +103,32 @@ class _SignUpPageState extends State<SignUpPage> {
       // Upload profile image first if provided
       String? profileImageUrl;
       if (widget.userData?['profileImageFile'] != null) {
+        print('📸 Profile image file found, starting upload...');
         final profileImageFile = widget.userData!['profileImageFile'] as File;
+        
+        // Show uploading message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Uploading profile picture...'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        
         profileImageUrl =
             await _uploadProfileImageToCloudinary(profileImageFile);
         if (profileImageUrl == null) {
+          print('❌ Profile image upload returned null');
           setState(() {
-            _errorMessage = 'Failed to upload profile image. Please try again.';
+            _errorMessage = 'Failed to upload profile image. Please check your internet connection and try again.';
             _isLoading = false;
           });
           return;
         }
+        print('✅ Profile image uploaded successfully: $profileImageUrl');
+      } else {
+        print('ℹ️ No profile image file provided');
       }
 
       // Parse date of birth from DD/MM/YYYY to ISO format
@@ -159,6 +187,35 @@ class _SignUpPageState extends State<SignUpPage> {
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201 && responseData['success'] == true) {
+        // Auto-login after successful signup
+        try {
+          final loginResponse = await http.post(
+            Uri.parse('https://skillsocket-backend.onrender.com/api/auth/login'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'email': widget.userData?['email'] ?? '',
+              'password': widget.userData?['password'] ?? '',
+            }),
+          );
+
+          if (loginResponse.statusCode == 200) {
+            final loginData = jsonDecode(loginResponse.body);
+            if (loginData['success'] == true && loginData['data'] != null) {
+              // Save token and user ID to SharedPreferences
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('token', loginData['data']['token']);
+              await prefs.setString('userId', loginData['data']['user']['_id']);
+              
+              print('Auto-login successful. Token and userId saved.');
+            }
+          }
+        } catch (e) {
+          print('Auto-login error: $e');
+          // Continue anyway, user can login manually
+        }
+
         if (mounted) {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
@@ -168,7 +225,7 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           );
 
-          // Navigate to community selection
+          // Navigate to home page
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
