@@ -54,31 +54,31 @@ class TodoList extends StatelessWidget {
         todos.isEmpty
             ? const Center(child: Text("No tasks for today."))
             : ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: todos.length,
-                itemBuilder: (context, index) {
-                  final todo = todos[index];
-                  return ListTile(
-                    leading: Checkbox(
-                      value: todo['done'],
-                      onChanged: (value) => onToggle(index, value),
-                    ),
-                    title: Text(
-                      todo['task'],
-                      style: TextStyle(
-                        decoration: todo['done']
-                            ? TextDecoration.lineThrough
-                            : TextDecoration.none,
-                      ),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Color(0xFF56195B)),
-                      onPressed: () => onDelete(index),
-                    ),
-                  );
-                },
-              ),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: todos.length,
+                    itemBuilder: (context, index) {
+                      final todo = todos[index];
+                      return ListTile(
+                        leading: Checkbox(
+                          value: todo['done'],
+                          onChanged: (value) => onToggle(index, value),
+                        ),
+                        title: Text(
+                          todo['task'],
+                          style: TextStyle(
+                            decoration: todo['done']
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                          ),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Color(0xFF56195B)),
+                          onPressed: () => onDelete(index),
+                        ),
+                      );
+                    },
+                  ),
       ],
     );
   }
