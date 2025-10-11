@@ -4,7 +4,6 @@ import 'package:barter_system/login.dart';
 import 'package:barter_system/profile.dart';
 import 'package:barter_system/reviews.dart';
 import 'package:barter_system/notification.dart';
-import 'package:barter_system/services/todo_service.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -12,7 +11,6 @@ class TodoList extends StatelessWidget {
   final DateTime selectedDate;
   final TextEditingController controller;
   final List<Map<String, dynamic>> todos;
-  final bool loading;
   final VoidCallback onAdd;
   final Function(int index, bool? value) onToggle;
   final Function(int index) onDelete;
@@ -22,7 +20,6 @@ class TodoList extends StatelessWidget {
     required this.selectedDate,
     required this.controller,
     required this.todos,
-    this.loading = false,
     required this.onAdd,
     required this.onToggle,
     required this.onDelete,
@@ -54,11 +51,9 @@ class TodoList extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        loading
-            ? const Center(child: CircularProgressIndicator())
-            : todos.isEmpty
-                ? const Center(child: Text("No tasks for today."))
-                : ListView.builder(
+        todos.isEmpty
+            ? const Center(child: Text("No tasks for today."))
+            : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: todos.length,
@@ -104,36 +99,11 @@ class _MyHomePageState extends State<MyHomePage> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   final TextEditingController _todoController = TextEditingController();
   final TextEditingController _eventController = TextEditingController();
-  List<Map<String, dynamic>> _todos = [];
+  final Map<DateTime, List<Map<String, dynamic>>> _todos = {};
   final Map<DateTime, List<String>> _events = {};
-  bool _loadingTodos = false;
 
   DateTime _getDateKey(DateTime date) {
     return DateTime(date.year, date.month, date.day);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTodos(_focusedDay);
-  }
-
-  Future<void> _loadTodos(DateTime date) async {
-    setState(() {
-      _loadingTodos = true;
-    });
-    final todos = await TodoService.getTodos(date);
-    if (todos != null) {
-      setState(() {
-        _todos = todos;
-        _loadingTodos = false;
-      });
-    } else {
-      setState(() {
-        _todos = [];
-        _loadingTodos = false;
-      });
-    }
   }
 
   void _showAddEventDialog() {
@@ -173,6 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final dateKey = _getDateKey(_selectedDay ?? _focusedDay);
+    final todaysTodos = _todos[dateKey] ?? [];
     final todaysEvents = _events[dateKey] ?? [];
 
     return Scaffold(
@@ -299,7 +270,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         _selectedDay = selectedDay;
                         _focusedDay = focusedDay;
                       });
-                      _loadTodos(selectedDay);
                     },
                     eventLoader: (day) {
                       return _events[_getDateKey(day)] ?? [];
@@ -419,36 +389,35 @@ class _MyHomePageState extends State<MyHomePage> {
                 TodoList(
                   selectedDate: dateKey,
                   controller: _todoController,
-                  todos: _todos,
-                  loading: _loadingTodos,
-                  onAdd: () async {
+                  todos: todaysTodos,
+                  onAdd: () {
                     if (_todoController.text.isNotEmpty) {
-                      final newTodo = await TodoService.createTodo(dateKey, _todoController.text);
-                      if (newTodo != null) {
-                        setState(() {
-                          _todos.add(newTodo);
-                          _todoController.clear();
-                        });
-                      }
-                    }
-                  },
-                  onToggle: (index, value) async {
-                    final todo = _todos[index];
-                    final updated = await TodoService.updateTodo(todo['_id'], done: value);
-                    if (updated != null) {
                       setState(() {
-                        _todos[index] = updated;
+                        _todos[dateKey] = [
+                          ...todaysTodos,
+                          {"task": _todoController.text, "done": false}
+                        ];
+                        _todoController.clear();
                       });
                     }
                   },
-                  onDelete: (index) async {
-                    final todo = _todos[index];
-                    final success = await TodoService.deleteTodo(todo['_id']);
-                    if (success) {
-                      setState(() {
-                        _todos.removeAt(index);
-                      });
-                    }
+                  onToggle: (index, value) {
+                    setState(() {
+                      final updatedTodos = [...todaysTodos];
+                      updatedTodos[index] = {
+                        ...updatedTodos[index],
+                        'done': value,
+                      };
+                      _todos[dateKey] = updatedTodos;
+                    });
+                  },
+                  onDelete: (index) {
+                    setState(() {
+                      final updatedTodos =
+                          List<Map<String, dynamic>>.from(todaysTodos);
+                      updatedTodos.removeAt(index);
+                      _todos[dateKey] = updatedTodos;
+                    });
                   },
                 ),
                 Padding(
