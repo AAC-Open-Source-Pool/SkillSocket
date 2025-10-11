@@ -105,15 +105,23 @@ class _NotificationsState extends State<Notifications> {
       });
     }
 
-    // Add some static notifications for demo
+    // Add some static notifications for demo including sample connection responses
     tempNotifications["Today"]!.addAll([
       {
         "type": "normal",
-        "user": "John",
-        "action": "liked your post",
-        "time": "2h ago",
-        "icon": Icons.thumb_up_alt_outlined,
-        "showThumbnail": true
+        "user": "SkillSocket",
+        "action": "Sample profiles help you explore the interface. Try different skills to find real users!",
+        "time": "1h ago",
+        "icon": Icons.info_outline,
+        "showThumbnail": false
+      },
+      {
+        "type": "normal",
+        "user": "System",
+        "action": "Connection requests to sample profiles are simulated. Use varied skills to discover real matches.",
+        "time": "3h ago",
+        "icon": Icons.psychology,
+        "showThumbnail": false
       },
     ]);
 
@@ -179,20 +187,31 @@ class _NotificationsState extends State<Notifications> {
     if (notification == null) return;
 
     final requestId = notification["requestId"];
-    final userName = notification["user"];
+    final userName = notification["user"] ?? "User";
     final userId = notification["userId"];
+
+    // Validate required fields
+    if (requestId == null || requestId.toString().isEmpty) {
+      _showOverlayMessage("Invalid request");
+      return;
+    }
+
+    if (userId == null || userId.toString().isEmpty) {
+      _showOverlayMessage("Invalid user");
+      return;
+    }
 
     try {
       final success =
-          await ConnectionService.acceptConnectionRequest(requestId);
+          await ConnectionService.acceptConnectionRequest(requestId.toString());
 
       if (success) {
         setState(() {
           notifications[section]?[index]["accepted"] = true;
         });
-        
+
         _showOverlayMessage("Connection request accepted!");
-        
+
         // Navigate to chat after a short delay
         Future.delayed(const Duration(seconds: 1), () {
           if (mounted) {
@@ -241,9 +260,15 @@ class _NotificationsState extends State<Notifications> {
 
     final requestId = notification["requestId"];
 
+    // Validate required fields
+    if (requestId == null || requestId.toString().isEmpty) {
+      _showOverlayMessage("Invalid request");
+      return;
+    }
+
     try {
       final success =
-          await ConnectionService.rejectConnectionRequest(requestId);
+          await ConnectionService.rejectConnectionRequest(requestId.toString());
 
       if (success) {
         setState(() {
@@ -252,7 +277,7 @@ class _NotificationsState extends State<Notifications> {
             notifications.remove(section);
           }
         });
-        
+
         _showOverlayMessage("Connection request rejected");
       } else {
         // Treat as already handled (idempotent UX)
@@ -486,24 +511,31 @@ class _NotificationsState extends State<Notifications> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                          Text.rich(
-                                            TextSpan(
-                                              children: [
-                                                TextSpan(
-                                                  text: (notif["user"] ?? notif["title"] ?? 'Notification').toString(),
-                                                  style: const TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.black),
-                                                ),
-                                                TextSpan(
-                                                  text: ' ' + (notif["action"] ?? notif["body"] ?? '').toString(),
-                                                  style: const TextStyle(
-                                                      color: Colors.black),
-                                                ),
-                                              ],
-                                            ),
-                                            softWrap: true,
+                                        Text.rich(
+                                          TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: (notif["user"] ??
+                                                        notif["title"] ??
+                                                        'Notification')
+                                                    .toString(),
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black),
+                                              ),
+                                              TextSpan(
+                                                text: ' ' +
+                                                    (notif["action"] ??
+                                                            notif["body"] ??
+                                                            '')
+                                                        .toString(),
+                                                style: const TextStyle(
+                                                    color: Colors.black),
+                                              ),
+                                            ],
                                           ),
+                                          softWrap: true,
+                                        ),
                                         const SizedBox(height: 4),
                                         Text(
                                           notif["time"] ?? '',

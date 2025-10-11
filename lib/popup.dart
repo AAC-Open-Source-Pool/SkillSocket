@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:swipable_stack/swipable_stack.dart';
 import 'package:barter_system/services/connection_service.dart';
 import 'package:barter_system/services/user_service.dart';
+// import 'package:shared_preferences/shared_preferences.dart'; // For future local storage
 
 class ProfileEditScreen extends StatefulWidget {
   final String requiredSkill;
@@ -26,7 +27,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   List<Map<String, dynamic>> profiles = [];
   bool isLoading = true;
   bool _isSending = false; // debounce flag to prevent multiple sends
-  final Set<String> _sentRequests = {}; // track already requested userIds in this session
+  final Set<String> _sentRequests =
+      {}; // track already requested userIds in this session
   String? _currentUserId; // store current user's ID to prevent self-requests
 
   @override
@@ -56,45 +58,115 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     setState(() => isLoading = true);
     final url = Uri.parse(
         'https://skillsocket-backend.onrender.com/api/users/match?required=${widget.requiredSkill}&offered=${widget.offeredSkill}');
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      if (data.isNotEmpty) {
-        setState(() {
-          profiles = data
-              .where((u) {
-                final userId = u["_id"] ?? u["id"] ?? "";
-                // Filter out current user's profile
-                return _currentUserId == null || userId.toString() != _currentUserId;
-              })
-              .map((u) => {
-                    "id": u["_id"] ?? "", // Add user ID
-                    "name": u["name"] ?? "",
-                    "profileImage": u["profileImage"],
-                    "skillsOffered":
-                        (u["skillsOffered"] as List?)?.join(', ') ?? "",
-                    "skillsRequired":
-                        (u["skillsRequired"] as List?)?.join(', ') ?? "",
-                    "education": u["education"] ?? "",
-                    "location": u["location"] ?? "",
-                    "profession": u["profession"] ?? "",
-                    "ratingsValue": u["ratingsValue"] ?? 4.5,
-                    "reviews": u["reviews"] ?? _staticReviews(), // Use real reviews from backend
-                  })
-              .toList();
-          isLoading = false;
-        });
+
+    try {
+      final response = await http.get(url);
+      print(
+          '🔍 API Response: Status=${response.statusCode}, Body=${response.body}');
+
+      if (response.statusCode == 200) {
+        final List data = jsonDecode(response.body);
+        print('📊 Found ${data.length} matching users from backend');
+
+        if (data.isNotEmpty) {
+          print('✅ Showing real matching users');
+          setState(() {
+            profiles = data
+                .where((u) {
+                  final userId = u["_id"] ?? u["id"] ?? "";
+                  // Filter out current user's profile
+                  return _currentUserId == null ||
+                      userId.toString() != _currentUserId;
+                })
+                .map((u) => {
+                      "id": u["_id"] ?? "", // Add user ID
+                      "name": u["name"] ?? "",
+                      "profileImage": u["profileImage"],
+                      "skillsOffered":
+                          (u["skillsOffered"] as List?)?.join(', ') ?? "",
+                      "skillsRequired":
+                          (u["skillsRequired"] as List?)?.join(', ') ?? "",
+                      "education": u["education"] ?? "",
+                      "location": u["location"] ?? "",
+                      "profession": u["profession"] ?? "",
+                      "ratingsValue": u["ratingsValue"] ?? 4.5,
+                      "reviews": u["reviews"] ??
+                          _staticReviews(), // Use real reviews from backend
+                    })
+                .toList();
+            isLoading = false;
+          });
+        } else {
+          // Show random static profiles if no match found
+          print('❌ No matches found - showing random static profiles');
+          setState(() {
+            profiles = _randomStaticProfiles();
+            isLoading = false;
+          });
+
+          // Show message about no real matches found
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    "No real users found with ${widget.requiredSkill} ↔ ${widget.offeredSkill}. Showing sample profiles - try different skills!"),
+                backgroundColor: Colors.blue,
+                duration: const Duration(seconds: 4),
+                action: SnackBarAction(
+                  label: 'Change Skills',
+                  textColor: Colors.white,
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            );
+          });
+        }
       } else {
-        // Show random static profiles if no match found
+        print('⚠️ API error - showing random static profiles');
         setState(() {
           profiles = _randomStaticProfiles();
           isLoading = false;
         });
+
+        // Show message about API error
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  "Could not connect to find real matches. Showing sample profiles for ${widget.requiredSkill} ↔ ${widget.offeredSkill}."),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 4),
+              action: SnackBarAction(
+                label: 'Retry',
+                textColor: Colors.white,
+                onPressed: () => fetchMatchingProfiles(),
+              ),
+            ),
+          );
+        });
       }
-    } else {
+    } catch (e) {
+      print('❗ Exception in fetchMatchingProfiles: $e');
       setState(() {
         profiles = _randomStaticProfiles();
         isLoading = false;
+      });
+
+      // Show message about connection error
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "Connection error. Showing sample profiles for ${widget.requiredSkill} ↔ ${widget.offeredSkill}."),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: () => fetchMatchingProfiles(),
+            ),
+          ),
+        );
       });
     }
   }
@@ -117,48 +189,181 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       return skills.map((e) => e.toString()).toList();
     }
     if (skills is String) {
-      return skills.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      return skills
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
     }
     return [];
   }
 
-
   List<Map<String, dynamic>> _randomStaticProfiles() {
-    return [
-      {
-        "id": "demo_user_1", // Demo user ID
-        "name": "Alara",
-        "profileImage": null,
-        "skillsOffered": widget.requiredSkill,
-        "skillsRequired": widget.offeredSkill,
-        "education": "B.Tech",
-        "location": "India",
-        "profession": "Student",
-        "reviews": _staticReviews(),
-      },
-      {
-        "id": "demo_user_2", // Demo user ID
-        "name": "Ethan",
-        "profileImage": null,
-        "skillsOffered": widget.requiredSkill,
-        "skillsRequired": widget.offeredSkill,
-        "education": "M.Tech",
-        "location": "USA",
-        "profession": "Developer",
-        "reviews": _staticReviews(),
-      },
-      {
-        "id": "demo_user_3", // Demo user ID
-        "name": "Sophia",
-        "profileImage": null,
-        "skillsOffered": widget.requiredSkill,
-        "skillsRequired": widget.offeredSkill,
-        "education": "B.Sc",
-        "location": "UK",
-        "profession": "Data Scientist",
-        "reviews": _staticReviews(),
-      },
+    // Generate completely random demo profiles - NOT from database
+    // These are synthetic users to show when no real matches exist
+    final demoNames = [
+      "Alex Chen", "Maya Patel", "Jordan Lee", "Priya Singh", "Lucas Brown",
+      "Aria Sharma", "Dev Kumar", "Sofia Rodriguez", "Ryan O'Connor", "Zara Ahmed",
+      "Kai Nakamura", "Elena Petrov", "Marcus Johnson", "Ava Thompson", "Leo Zhang",
+      "Ananya Gupta", "Ethan Taylor", "Ravi Mehta", "Isabella Garcia", "Arjun Patel",
+      "Chloe Wilson", "Rohan Sharma", "Emma Davis", "Vikram Singh", "Olivia Brown",
+      "Karan Verma", "Sophia Martinez", "Aditya Kumar", "Grace Lee", "Nikhil Jain"
     ];
+
+    final demoLocations = [
+      "Mumbai, India", "New York, USA", "London, UK", "Toronto, Canada", "Sydney, Australia",
+      "Berlin, Germany", "Tokyo, Japan", "Paris, France", "Singapore", "Dubai, UAE",
+      "São Paulo, Brazil", "Stockholm, Sweden", "Amsterdam, Netherlands", "Barcelona, Spain",
+      "Melbourne, Australia", "Vancouver, Canada", "Seoul, South Korea", "Tel Aviv, Israel",
+      "Zurich, Switzerland", "Dublin, Ireland", "Vienna, Austria", "Copenhagen, Denmark",
+      "Helsinki, Finland", "Oslo, Norway", "Prague, Czech Republic", "Warsaw, Poland",
+      "Budapest, Hungary", "Lisbon, Portugal", "Athens, Greece", "Istanbul, Turkey"
+    ];
+
+    final demoEducations = [
+      "B.Tech Computer Science", "M.Sc Data Science", "B.E Software Engineering", "MBA Technology",
+      "B.Sc Information Systems", "M.Tech AI/ML", "B.Des UI/UX", "M.Sc Cybersecurity",
+      "B.Com + Digital Marketing", "Ph.D Computer Science", "B.Sc Mathematics", "M.A Psychology",
+      "B.Tech Information Technology", "M.S Computer Science", "B.Sc Software Engineering",
+      "M.Tech Data Science", "B.Des Product Design", "M.Sc Artificial Intelligence",
+      "B.E Electronics & Communication", "MBA Business Analytics", "B.Sc Applied Mathematics",
+      "M.A Digital Media", "B.Tech Mechanical Engineering", "M.Sc Machine Learning",
+      "B.Sc Statistics", "M.Tech Software Engineering", "B.A Computer Applications",
+      "M.Sc Information Technology", "B.Tech Civil Engineering", "MBA Marketing"
+    ];
+
+    final demoProfessions = [
+      "Software Developer", "Data Analyst", "ML Engineer", "Product Manager", "Full Stack Developer",
+      "UI/UX Designer", "DevOps Engineer", "Cybersecurity Analyst", "Digital Marketing Specialist",
+      "Research Scientist", "Technical Writer", "Business Analyst", "Game Developer", "Mobile App Developer",
+      "Frontend Developer", "Backend Developer", "Data Scientist", "Cloud Architect", "AI Research Engineer",
+      "Quality Assurance Engineer", "System Administrator", "Database Administrator", "Network Engineer",
+      "Blockchain Developer", "IoT Developer", "AR/VR Developer", "Site Reliability Engineer",
+      "Solutions Architect", "Engineering Manager", "Scrum Master", "Product Owner", "Growth Hacker",
+      "Content Strategist", "SEO Specialist", "Social Media Manager", "Brand Manager"
+    ];
+
+    final demoComments = [
+      "Great collaboration skills and very patient teacher!", "Helped me understand complex concepts with ease.",
+      "Professional approach and excellent communication.", "Would love to work together on future projects.",
+      "Knowledgeable and always willing to share expertise.", "Perfect match for skill exchange, highly recommended!",
+      "Clear explanations and supportive learning environment.", "Inspiring mentor with practical industry experience.",
+      "Amazing problem-solving skills and creative thinking.", "Very responsive and delivers quality work on time.",
+      "Excellent technical knowledge and leadership qualities.", "Great at breaking down complex topics into simple steps.",
+      "Fantastic team player with strong analytical skills.", "Outstanding communication and project management abilities.",
+      "Innovative approach to challenges and solutions.", "Highly skilled professional with deep industry insights.",
+      "Exceptional mentor who guides with patience and expertise.", "Reliable collaborator with impressive technical depth."
+    ];
+
+    List<Map<String, dynamic>> randomProfiles = [];
+
+    // Shuffle lists to get truly random combinations
+    demoNames.shuffle();
+    demoLocations.shuffle();
+    demoEducations.shuffle();
+    demoProfessions.shuffle();
+    demoComments.shuffle();
+
+    // Generate 8-12 random profiles with complementary skills for more variety
+    final numProfiles = 8 + (DateTime.now().millisecond % 5); // 8-12 profiles
+    
+    for (int i = 0; i < numProfiles; i++) {
+      // More randomized selection from larger pools
+      final nameIndex = (DateTime.now().millisecondsSinceEpoch + i) % demoNames.length;
+      final locationIndex = (DateTime.now().microsecond + i * 7) % demoLocations.length;
+      final educationIndex = (DateTime.now().millisecond + i * 13) % demoEducations.length;
+      final professionIndex = (DateTime.now().microsecond + i * 11) % demoProfessions.length;
+      
+      randomProfiles.add({
+        "id":
+            "random_demo_${DateTime.now().millisecondsSinceEpoch}_${i}_${(demoNames[nameIndex].hashCode + i).abs()}",
+        "name": demoNames[nameIndex],
+        "profileImage": null,
+        "skillsOffered": widget.requiredSkill, // Exactly what user needs
+        "skillsRequired": widget.offeredSkill, // Exactly what user offers  
+        "education": demoEducations[educationIndex],
+        "location": demoLocations[locationIndex],
+        "profession": demoProfessions[professionIndex],
+        "ratingsValue": 3.5 + (i * 0.25) + (DateTime.now().millisecond % 15) * 0.04, // More varied ratings
+        "reviews": [
+          {
+            "reviewer": "Community Member ${(nameIndex + i + 1) % 20 + 1}",
+            "rating": 3.8 + (i * 0.2) + (DateTime.now().millisecond % 6) * 0.1,
+            "title": "Potential Skill Exchange",
+            "date":
+                "${DateTime.now().subtract(Duration(days: i + 1)).day} ${_getMonthName(DateTime.now().month)} 2024",
+            "comment": demoComments[(nameIndex + i) % demoComments.length]
+          },
+          {
+            "reviewer": "SkillSocket User ${(educationIndex + i) % 15 + 1}",
+            "rating": 4.0 + (i * 0.15) + (DateTime.now().microsecond % 4) * 0.1,
+            "title": "Great Learning Partner",
+            "date":
+                "${DateTime.now().subtract(Duration(days: (i + 1) * 2)).day} ${_getMonthName(DateTime.now().month)} 2024",
+            "comment": "Perfect complementary skills for knowledge exchange!"
+          },
+          {
+            "reviewer": "Peer Reviewer",
+            "rating": 4.3 + (i * 0.1),
+            "title": "Excellent Mentor",
+            "date":
+                "${DateTime.now().subtract(Duration(days: (i + 1) * 3)).day} ${_getMonthName(DateTime.now().month)} 2024",
+            "comment": demoComments[(professionIndex + i + 5) % demoComments.length]
+          }
+        ],
+      });
+    }
+
+    return randomProfiles;
+  }
+
+  // Helper method to get month name
+  String _getMonthName(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    return months[month - 1];
+  }
+
+  // Check if a profile is a demo user
+  bool _isDemoUser(Map<String, dynamic> profile) {
+    final id = profile["id"]?.toString() ?? "";
+    return id.startsWith("random_demo_") || id.startsWith("demo_");
+  }
+
+  // Store demo connection request locally (for potential future use in notifications)
+  Future<void> _storeDemoConnectionRequest(Map<String, dynamic> profile) async {
+    try {
+      // This could be expanded to store in SharedPreferences or local database
+      // For now, just log the demo connection request
+      print('Demo connection request sent to: ${profile["name"]} (${profile["id"]})');
+      print('Skills offered by demo user: ${profile["skillsOffered"]}');
+      print('Skills required by demo user: ${profile["skillsRequired"]}');
+      
+      // Future enhancement: Store in local storage for demo notifications
+      // final prefs = await SharedPreferences.getInstance();
+      // List<String> demoRequests = prefs.getStringList('demo_connection_requests') ?? [];
+      // demoRequests.add(jsonEncode({
+      //   'id': profile['id'],
+      //   'name': profile['name'],
+      //   'timestamp': DateTime.now().toIso8601String(),
+      //   'message': 'Demo connection request sent'
+      // }));
+      // await prefs.setStringList('demo_connection_requests', demoRequests);
+    } catch (e) {
+      print('Error storing demo connection request: $e');
+    }
   }
 
   // Preload already sent requests from server to prevent duplicates across sessions
@@ -187,8 +392,29 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     final String toId = (profile["id"] ?? "").toString();
     if (toId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invalid user"), backgroundColor: Colors.red),
+        const SnackBar(
+            content: Text("Invalid user"), backgroundColor: Colors.red),
       );
+      return;
+    }
+
+    // Handle demo users with simulated success (no backend call)
+    if (_isDemoUser(profile)) {
+      // Simulate successful connection request for demo users
+      _sentRequests.add(toId);
+      
+      // Store demo connection request locally (could be used for local notifications)
+      _storeDemoConnectionRequest(profile);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Connection request sent to ${profile["name"]}!"),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
       return;
     }
 
@@ -226,7 +452,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     try {
       final result = await ConnectionService.sendConnectionRequest(
         toUserId: toId,
-        message: "Hi ${profile["name"]}, I'd like to connect and exchange skills: ${widget.requiredSkill} for ${widget.offeredSkill}!",
+        message:
+            "Hi ${profile["name"]}, I'd like to connect and exchange skills: ${widget.requiredSkill} for ${widget.offeredSkill}!",
       );
 
       if (result != null && result['success'] == true) {
@@ -244,14 +471,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       } else if (result != null && result['success'] == false) {
         // Handle specific error cases from backend
         final errorMessage = result['message'] ?? 'Failed to send request';
-        
+
         if (errorMessage.toLowerCase().contains('already sent')) {
           // Connection request already sent
           _sentRequests.add(toId);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text("Connection request already sent to ${profile["name"]}"),
+                content: Text(
+                    "Connection request already sent to ${profile["name"]}"),
                 backgroundColor: Colors.orange,
                 duration: const Duration(seconds: 2),
               ),
@@ -274,7 +502,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Unexpected error sending request to ${profile["name"]}"),
+              content: Text(
+                  "Unexpected error sending request to ${profile["name"]}"),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 2),
             ),
@@ -286,7 +515,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Network error sending request to ${profile["name"]}"),
+            content:
+                Text("Network error sending request to ${profile["name"]}"),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -316,14 +546,37 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               CircleAvatar(
                 radius: 60,
                 backgroundColor: const Color(0xFFB6E1F0),
-                backgroundImage: profile["profileImage"] != null && profile["profileImage"].toString().isNotEmpty
+                backgroundImage: profile["profileImage"] != null &&
+                        profile["profileImage"].toString().isNotEmpty
                     ? NetworkImage(profile["profileImage"])
                     : null,
-                child: profile["profileImage"] == null || profile["profileImage"].toString().isEmpty
+                child: profile["profileImage"] == null ||
+                        profile["profileImage"].toString().isEmpty
                     ? const Icon(Icons.person, size: 60, color: Colors.white)
                     : null,
               ),
               const SizedBox(height: 16),
+
+              // Demo badge for sample profiles
+              if (_isDemoUser(profile))
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    "SAMPLE PROFILE",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
               Text(
                 profile["name"] ?? "Unknown",
                 style: const TextStyle(
@@ -619,27 +872,31 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             : () {
                                 if (profiles.isNotEmpty) {
                                   final currentIndex =
-                                      _controller.currentIndex % profiles.length;
+                                      _controller.currentIndex %
+                                          profiles.length;
                                   final profile = profiles[currentIndex];
                                   final toId = (profile["id"] ?? "").toString();
                                   if (toId.isEmpty) return;
-                                  
+
                                   // Prevent sending requests to self
-                                  if (_currentUserId != null && toId == _currentUserId) {
+                                  if (_currentUserId != null &&
+                                      toId == _currentUserId) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text("You cannot send a connection request to yourself"),
+                                        content: Text(
+                                            "You cannot send a connection request to yourself"),
                                         backgroundColor: Colors.orange,
                                         duration: Duration(seconds: 2),
                                       ),
                                     );
                                     return;
                                   }
-                                  
+
                                   if (_sentRequests.contains(toId)) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text("You already sent a request to ${profile["name"]}"),
+                                        content: Text(
+                                            "You already sent a request to ${profile["name"]}"),
                                         backgroundColor: Colors.orange,
                                         duration: const Duration(seconds: 2),
                                       ),
