@@ -40,7 +40,7 @@ git push origin main
 ### Step 3: Verify Backend
 ```bash
 # Health check
-curl https://skillsocket-backend.onrender.com/api/health
+curl http://localhost:3000/api/health
 ```
 
 Expected response:

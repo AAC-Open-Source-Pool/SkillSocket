@@ -106,7 +106,7 @@ git push origin main
 # 2. Render auto-deploys (wait 2-5 minutes)
 
 # 3. Verify deployment
-curl https://skillsocket-backend.onrender.com/api/health
+curl http://localhost:3000/api/health
 
 # 4. Test in Flutter app
 # - Login
@@ -240,6 +240,6 @@ If you encounter issues:
 ---
 
 **Integration Date**: October 11, 2025  
-**Backend URL**: https://skillsocket-backend.onrender.com  
+**Backend URL**: http://localhost:3000  
 **Status**: ✅ Ready for Deployment  
 **Estimated Deployment Time**: 5-10 minutes

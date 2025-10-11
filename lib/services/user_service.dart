@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
-  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
+  static const String baseUrl = 'http://localhost:3000/api';
 
   // Helpers used across the app
   static Future<String?> getCurrentUserId() async {

@@ -56,7 +56,7 @@ git push origin main
 ### Step 2: Wait for Deployment
 - Go to https://dashboard.render.com
 - Find your service
-- Wait for deployment (2-5 minutes)
+curl http://localhost:3000/api/health
 - Check logs for: `🚀 Server running on port 3000`
 
 ### Step 3: Test Backend
@@ -82,19 +82,19 @@ Then:
 1. Navigate to Signup
 2. Fill in all fields
 3. **Select a profile picture**
-4. Click NEXT
-5. Fill in additional fields
-6. Click SUBMIT
+ Try on WiFi instead of mobile data
+ Check if device has internet access
+ Try opening http://localhost:3000 in browser
 
 ### Step 5: Check Logs
-
-**Flutter Console** - Look for:
-```
+ Check app has storage/camera permissions
+ Try selecting from gallery instead of camera
+ Try a different image file
 📸 Profile image file found, starting upload...
 🖼️ Starting profile image upload...
 🖼️ File path: /data/user/0/.../image.jpg
 🖼️ File exists: true
-🖼️ Upload URL: https://skillsocket-backend.onrender.com/api/user/upload-logo-public
+🖼️ Upload URL: http://localhost:3000/api/user/upload-logo-public
 🖼️ File added to request. Sending...
 🖼️ Response status code: 200
 🖼️ Response body: {"msg":"Profile image uploaded successfully","logoUrl":"https://..."}
@@ -115,7 +115,7 @@ Then:
 #### Check 1: Backend Deployed?
 ```powershell
 # Test health endpoint
-curl https://skillsocket-backend.onrender.com/api/health
+curl http://localhost:3000/api/health
 
 # Should return: {"status":"healthy","database":"connected"}
 ```
@@ -137,7 +137,7 @@ Go to Render Dashboard → Environment Variables:
 #### Check 4: Network Connection?
 - Try on WiFi instead of mobile data
 - Check if device has internet access
-- Try opening https://skillsocket-backend.onrender.com in browser
+- Try opening http://localhost:3000 in browser
 
 #### Check 5: File Permissions?
 - Check app has storage/camera permissions
@@ -286,7 +286,7 @@ router.post('/upload-logo-public', uploadLimiter, upload.single('logo'), ...);
 ## Support
 
 ### Check Status
-- **Backend**: https://skillsocket-backend.onrender.com/api/health
+- **Backend**: http://localhost:3000/api/health
 - **Render Dashboard**: https://dashboard.render.com
 - **GitHub Repo**: Check latest commit
 
@@ -329,7 +329,7 @@ git add . && git commit -m "Fix signup image upload" && git push
 flutter run
 
 # Check health
-curl https://skillsocket-backend.onrender.com/api/health
+curl http://localhost:3000/api/health
 
 # View logs
 # Go to: https://dashboard.render.com → Your Service → Logs

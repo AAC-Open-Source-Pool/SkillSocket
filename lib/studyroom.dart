@@ -4,6 +4,7 @@ import 'package:barter_system/profile.dart';
 import 'package:barter_system/reviews.dart';
 import 'package:barter_system/history.dart';
 import 'package:barter_system/login.dart';
+import 'package:barter_system/widgets/profile_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StudyRoom extends StatefulWidget {
@@ -133,12 +134,12 @@ class _StudyRoomState extends State<StudyRoom> {
                     MaterialPageRoute(builder: (context) => Notifications()));
               },
               icon: Icon(Icons.notifications)),
-          IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Profile()));
-              },
-              icon: Icon(Icons.person_rounded)),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ProfileAvatar(radius: 18, onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (c) => Profile()));
+            }),
+          ),
         ],
       ),
       body: 

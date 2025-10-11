@@ -25,11 +25,17 @@ class _ReviewsState extends State<Reviews> {
     final userId = await UserService.getCurrentUserId();
 
     final given = await ReviewService.getMyReviews();
-    setState(() {
+      setState(() {
       _givenReviews = (given ?? []).map<Map<String, dynamic>>((r) {
         final name = r['reviewee']?['name']?.toString() ?? 'Unknown';
         final created = r['createdAt']?.toString();
-        return _mapToUi(
+
+        final likesCount = (r['likes'] is num) ? r['likes'] : (r['likes'] is List ? (r['likes'] as List).length : 0);
+        final dislikesCount = (r['dislikes'] is num) ? r['dislikes'] : (r['dislikes'] is List ? (r['dislikes'] as List).length : 0);
+        final isLiked = userId != null && (r['likes'] is List ? (r['likes'] as List).any((id) => id.toString() == userId) : false);
+        final isDisliked = userId != null && (r['dislikes'] is List ? (r['dislikes'] as List).any((id) => id.toString() == userId) : false);
+
+        final mapped = _mapToUi(
           user: name,
           dateIso: created,
           title: r['title']?.toString() ?? '',
@@ -37,6 +43,13 @@ class _ReviewsState extends State<Reviews> {
           rating: (r['rating'] is num) ? (r['rating'] as num).round() : 0,
           id: r['_id']?.toString() ?? '',
         );
+
+        mapped['likes'] = likesCount.toString();
+        mapped['dislikes'] = dislikesCount.toString();
+        mapped['isLiked'] = isLiked;
+        mapped['isDisliked'] = isDisliked;
+
+        return mapped;
       }).toList();
       _loadingGiven = false;
     });
@@ -49,7 +62,12 @@ class _ReviewsState extends State<Reviews> {
         _receivedReviews = reviews.map<Map<String, dynamic>>((r) {
           final name = r['reviewer']?['name']?.toString() ?? 'Unknown';
           final created = r['createdAt']?.toString();
-          return _mapToUi(
+          final likesCount = (r['likes'] is num) ? r['likes'] : (r['likes'] is List ? (r['likes'] as List).length : 0);
+          final dislikesCount = (r['dislikes'] is num) ? r['dislikes'] : (r['dislikes'] is List ? (r['dislikes'] as List).length : 0);
+          final isLiked = (r['likes'] is List ? (r['likes'] as List).any((id) => id.toString() == userId) : false);
+          final isDisliked = (r['dislikes'] is List ? (r['dislikes'] as List).any((id) => id.toString() == userId) : false);
+
+          final mapped = _mapToUi(
             user: name,
             dateIso: created,
             title: r['title']?.toString() ?? '',
@@ -57,6 +75,14 @@ class _ReviewsState extends State<Reviews> {
             rating: (r['rating'] is num) ? (r['rating'] as num).round() : 0,
             id: r['_id']?.toString() ?? '',
           );
+
+          // Override default like/dislike fields
+          mapped['likes'] = likesCount.toString();
+          mapped['dislikes'] = dislikesCount.toString();
+          mapped['isLiked'] = isLiked;
+          mapped['isDisliked'] = isDisliked;
+
+          return mapped;
         }).toList();
         _loadingReceived = false;
       });
@@ -261,39 +287,46 @@ class _ReviewsState extends State<Reviews> {
   }
 
   // Helper function to make icon+text clickable
-  Widget _iconButton(
-    IconData icon,
-    Map<String, dynamic> post,
-    String countField,
-    String toggleField,
-    String? otherToggleField,
-  ) {
+Widget _iconButton(
+  IconData icon,
+  Map<String, dynamic> post,
+  String countField,
+  String toggleField,
+  String otherToggleField,
+) {
   return Material(
     color: Colors.transparent,
     child: InkWell(
       onTap: () async {
-        final currentlyToggled = post[toggleField] as bool;
-        int delta = currentlyToggled ? -1 : 1;
-
-        // Optional: call ReviewService to register/unregister like/dislike
+        // Call API
+        Map<String, dynamic>? data;
         if (toggleField == 'isLiked') {
-          await ReviewService.likeReview(post['id']);
+          data = await ReviewService.likeReview(post['id']);
         } else {
-          await ReviewService.dislikeReview(post['id']);
+          data = await ReviewService.dislikeReview(post['id']);
         }
 
-        setState(() {
-          // Toggle current
-          post[toggleField] = !currentlyToggled;
-          post[countField] = ((int.tryParse(post[countField]) ?? 0) + delta).toString();
+        if (data != null && data['success'] == true) {
+          setState(() {
+            // Update counts from backend
+            post['likes'] = data?['likes'].toString();
+            post['dislikes'] = data?['dislikes'].toString();
 
-          // If the other button was active, undo it
-          if (otherToggleField != null && post[otherToggleField] == true) {
-            post[otherToggleField] = false;
-            final otherCount = otherToggleField == 'isLiked' ? 'likes' : 'dislikes';
-            post[otherCount] = ((int.tryParse(post[otherCount]) ?? 1) - 1).toString();
-          }
-        });
+            // Update toggles
+            if (toggleField == 'isLiked') {
+              post['isLiked'] = !post['isLiked'];
+              if (post['isDisliked'] == true) post['isDisliked'] = false;
+            } else {
+              post['isDisliked'] = !post['isDisliked'];
+              if (post['isLiked'] == true) post['isLiked'] = false;
+            }
+          });
+        } else {
+          // Optional: show error
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to update like/dislike')),
+          );
+        }
       },
       borderRadius: BorderRadius.circular(8),
       child: Padding(
@@ -307,7 +340,6 @@ class _ReviewsState extends State<Reviews> {
     ),
   );
 }
-
 
   // Icon + text widget
   Widget _iconText(IconData icon, String text, {Color? color}) {

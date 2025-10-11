@@ -81,35 +81,35 @@ git push origin main
 3. Check deployment logs for:
    - `MongoDB connected`
    - `🚀 Server running on port 3000`
-4. Test health endpoint: `https://skillsocket-backend.onrender.com/api/health`
+4. Test health endpoint: `http://localhost:3000/api/health`
 
 ### Step 3: Test API Endpoints
 Use Postman or curl to test:
 
 ```bash
 # Get auth token first (login)
-curl -X POST https://skillsocket-backend.onrender.com/api/auth/login \
+curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"password"}'
 
 # Get todos for a date
-curl -X GET "https://skillsocket-backend.onrender.com/api/todos?date=2025-10-11" \
+curl -X GET "http://localhost:3000/api/todos?date=2025-10-11" \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Create a todo
-curl -X POST https://skillsocket-backend.onrender.com/api/todos \
+curl -X POST http://localhost:3000/api/todos \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"date":"2025-10-11","task":"Complete project"}'
 
 # Update todo (toggle done)
-curl -X PATCH https://skillsocket-backend.onrender.com/api/todos/TODO_ID \
+curl -X PATCH http://localhost:3000/api/todos/TODO_ID \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"done":true}'
 
 # Delete todo
-curl -X DELETE https://skillsocket-backend.onrender.com/api/todos/TODO_ID \
+curl -X DELETE http://localhost:3000/api/todos/TODO_ID \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 

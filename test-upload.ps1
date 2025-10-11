@@ -4,7 +4,7 @@ Write-Host "🧪 Testing Profile Image Upload Endpoints" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 
-$BASE_URL = "https://skillsocket-backend.onrender.com"
+$BASE_URL = "http://localhost:3000"
 
 # Test 1: Health Check
 Write-Host "📋 Test 1: Health Check" -ForegroundColor Yellow

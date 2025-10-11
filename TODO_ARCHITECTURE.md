@@ -132,7 +132,7 @@
 └────┬───────────────────────────────────────────────────────┘
      │
      ↓ HTTP POST
-     │ URL: https://skillsocket-backend.onrender.com/api/todos
+     │ URL: http://localhost:3000/api/todos
      │ Headers: { Authorization: "Bearer eyJhbGc..." }
      │ Body: { date: "2025-10-11", task: "Buy milk" }
      │

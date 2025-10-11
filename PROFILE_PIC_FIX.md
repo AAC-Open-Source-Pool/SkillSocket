@@ -34,7 +34,7 @@ if (response.statusCode == 201 && responseData['success'] == true) {
   // Auto-login after successful signup
   try {
     final loginResponse = await http.post(
-      Uri.parse('https://skillsocket-backend.onrender.com/api/auth/login'),
+  Uri.parse('http://localhost:3000/api/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': widget.userData?['email'] ?? '',

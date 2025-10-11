@@ -85,7 +85,7 @@ Look for these log messages in the Flutter console:
 🖼️ Starting profile image upload...
 🖼️ File path: /data/user/0/.../cache/image_picker...
 🖼️ File exists: true
-🖼️ Upload URL: https://skillsocket-backend.onrender.com/api/user/upload-logo-public
+🖼️ Upload URL: http://localhost:3000/api/user/upload-logo-public
 🖼️ File added to request. Sending...
 🖼️ Response status code: 200
 🖼️ Response body: {"msg":"Profile image uploaded successfully","logoUrl":"https://..."}
@@ -101,7 +101,7 @@ Look for these log messages in the Flutter console:
 🖼️ Starting profile image upload...
 🖼️ File path: /data/user/0/.../cache/image_picker...
 🖼️ File exists: true
-🖼️ Upload URL: https://skillsocket-backend.onrender.com/api/user/upload-logo-public
+🖼️ Upload URL: http://localhost:3000/api/user/upload-logo-public
 🖼️ File added to request. Sending...
 ❌ Profile image upload exception: SocketException: Failed host lookup...
 ❌ Stack trace: ...
@@ -168,7 +168,7 @@ git commit -m "Add public upload endpoint for signup"
 git push origin main
 
 # Wait for Render deployment (2-5 minutes)
-# Check: https://skillsocket-backend.onrender.com/api/health
+# Check: http://localhost:3000/api/health
 ```
 
 ### Issue 2: Cloudinary Not Configured
@@ -219,9 +219,9 @@ router.post('/upload-logo-public', upload.single('logo'), ...)
 
 ## Testing Checklist
 
-### Pre-Test Setup
+- #### Pre-Test Setup
 - [ ] Backend deployed to Render
-- [ ] Health endpoint returns 200: `curl https://skillsocket-backend.onrender.com/api/health`
+- [ ] Health endpoint returns 200: `curl http://localhost:3000/api/health`
 - [ ] Cloudinary credentials configured in Render
 - [ ] App has storage/camera permissions
 
@@ -287,7 +287,7 @@ Use curl or Postman to test the endpoint:
 
 ```bash
 # Test public upload endpoint
-curl -X POST https://skillsocket-backend.onrender.com/api/user/upload-logo-public \
+curl -X POST http://localhost:3000/api/user/upload-logo-public \
   -F "logo=@/path/to/test-image.jpg"
 
 # Expected response:
@@ -301,7 +301,7 @@ curl -X POST https://skillsocket-backend.onrender.com/api/user/upload-logo-publi
 
 ### Fix 1: Restart Backend
 If backend is sleeping (Render free tier):
-1. Visit: https://skillsocket-backend.onrender.com/api/health
+1. Visit: http://localhost:3000/api/health
 2. Wait 30 seconds for backend to wake up
 3. Try signup again
 
