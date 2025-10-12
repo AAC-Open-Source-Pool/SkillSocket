@@ -4,6 +4,8 @@ import 'package:barter_system/login.dart';
 import 'package:barter_system/profile.dart';
 import 'package:barter_system/reviews.dart';
 import 'package:barter_system/notification.dart';
+import 'package:barter_system/services/todo_service.dart';
+import 'package:barter_system/services/event_service.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -101,8 +103,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _eventController = TextEditingController();
   final Map<DateTime, List<Map<String, dynamic>>> _todos = {};
   final Map<DateTime, List<Map<String, dynamic>>> _events = {};
-  bool _isLoadingTodos = false;
-  bool _isLoadingEvents = false;
 
   @override
   void initState() {
@@ -117,10 +117,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Load todos from backend for specific date
   Future<void> _loadTodosForDate(DateTime date) async {
-    setState(() {
-      _isLoadingTodos = true;
-    });
-
     try {
       final todos = await TodoService.getTodos(date);
       if (todos != null) {
@@ -131,19 +127,11 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     } catch (e) {
       print('Error loading todos: $e');
-    } finally {
-      setState(() {
-        _isLoadingTodos = false;
-      });
     }
   }
 
   // Load events from backend for specific date
   Future<void> _loadEventsForDate(DateTime date) async {
-    setState(() {
-      _isLoadingEvents = true;
-    });
-
     try {
       final events = await EventService.getEvents(date);
       if (events != null) {
@@ -154,10 +142,6 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     } catch (e) {
       print('Error loading events: $e');
-    } finally {
-      setState(() {
-        _isLoadingEvents = false;
-      });
     }
   }
 
