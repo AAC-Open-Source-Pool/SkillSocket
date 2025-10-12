@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:barter_system/notification.dart';
 import 'package:barter_system/popup.dart';
 import 'package:barter_system/profile.dart';
-import 'package:barter_system/widgets/profile_avatar.dart';
 
 class SkillMatchApp extends StatefulWidget {
   const SkillMatchApp({super.key});
@@ -51,11 +50,12 @@ class _SkillMatchAppState extends State<SkillMatchApp> {
               },
               icon: const Icon(Icons.notifications),
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: ProfileAvatar(radius: 18, onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (c) => Profile()));
-              }),
+            IconButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Profile()));
+              },
+              icon: const Icon(Icons.person_rounded),
             ),
           ],
         ),

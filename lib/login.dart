@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://skillsocket-backend.onrender.com/api/auth/login'),
+  Uri.parse('https://skillsocket-backend.onrender.com/api/auth/login'),
         headers: {
           'Content-Type': 'application/json',
         },
