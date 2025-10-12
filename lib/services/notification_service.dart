@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationService {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
@@ -23,7 +23,7 @@ class NotificationService {
   }) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/notifications?page=$page&limit=$limit'),
         headers: headers,
@@ -45,10 +45,11 @@ class NotificationService {
   }
 
   // Mark notifications as read
-  static Future<bool> markNotificationsAsRead(List<String> notificationIds) async {
+  static Future<bool> markNotificationsAsRead(
+      List<String> notificationIds) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.put(
         Uri.parse('$baseUrl/notifications/read'),
         headers: headers,
@@ -70,7 +71,7 @@ class NotificationService {
   static Future<int> getUnreadCount() async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/notifications/unread-count'),
         headers: headers,
@@ -91,7 +92,7 @@ class NotificationService {
   static Future<bool> sendTestNotification() async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/notifications/test'),
         headers: headers,

@@ -58,9 +58,10 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
     // Get current user ID
     currentUserId = await ChatService.getCurrentUserId();
 
-    if (chats.isEmpty) { // 👈 Only load once
-    await _loadChats();
-  }
+    if (chats.isEmpty) {
+      // 👈 Only load once
+      await _loadChats();
+    }
 
     if (currentUserId != null) {
       await _loadChats();
@@ -72,7 +73,7 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
 
   void _connectToSocket() {
     socket = IO.io(
-      "http://localhost:3000/",
+      "https://skillsocket-backend.onrender.com/",
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -386,9 +387,12 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
               icon: Icon(Icons.notifications)),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: ProfileAvatar(radius: 18, onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (c) => Profile()));
-            }),
+            child: ProfileAvatar(
+                radius: 18,
+                onTap: () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (c) => Profile()));
+                }),
           ),
         ],
       ),
