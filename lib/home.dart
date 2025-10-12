@@ -7,6 +7,8 @@ import 'package:barter_system/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:barter_system/widgets/profile_avatar.dart';
+import 'package:barter_system/services/todo_service.dart';
+import 'package:barter_system/services/event_service.dart';
 
 class TodoList extends StatelessWidget {
   final DateTime selectedDate;
@@ -55,31 +57,31 @@ class TodoList extends StatelessWidget {
         todos.isEmpty
             ? const Center(child: Text("No tasks for today."))
             : ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: todos.length,
-                    itemBuilder: (context, index) {
-                      final todo = todos[index];
-                      return ListTile(
-                        leading: Checkbox(
-                          value: todo['done'],
-                          onChanged: (value) => onToggle(index, value),
-                        ),
-                        title: Text(
-                          todo['task'],
-                          style: TextStyle(
-                            decoration: todo['done']
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                          ),
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Color(0xFF56195B)),
-                          onPressed: () => onDelete(index),
-                        ),
-                      );
-                    },
-                  ),
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  final todo = todos[index];
+                  return ListTile(
+                    leading: Checkbox(
+                      value: todo['done'],
+                      onChanged: (value) => onToggle(index, value),
+                    ),
+                    title: Text(
+                      todo['task'],
+                      style: TextStyle(
+                        decoration: todo['done']
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Color(0xFF56195B)),
+                      onPressed: () => onDelete(index),
+                    ),
+                  );
+                },
+              ),
       ],
     );
   }
@@ -101,10 +103,65 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _todoController = TextEditingController();
   final TextEditingController _eventController = TextEditingController();
   final Map<DateTime, List<Map<String, dynamic>>> _todos = {};
-  final Map<DateTime, List<String>> _events = {};
+  final Map<DateTime, List<Map<String, dynamic>>> _events = {};
+  bool _isLoadingTodos = false;
+  bool _isLoadingEvents = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTodosForDate(_focusedDay);
+    _loadEventsForDate(_focusedDay);
+  }
 
   DateTime _getDateKey(DateTime date) {
     return DateTime(date.year, date.month, date.day);
+  }
+
+  // Load todos from backend for specific date
+  Future<void> _loadTodosForDate(DateTime date) async {
+    setState(() {
+      _isLoadingTodos = true;
+    });
+
+    try {
+      final todos = await TodoService.getTodos(date);
+      if (todos != null) {
+        final dateKey = _getDateKey(date);
+        setState(() {
+          _todos[dateKey] = todos;
+        });
+      }
+    } catch (e) {
+      print('Error loading todos: $e');
+    } finally {
+      setState(() {
+        _isLoadingTodos = false;
+      });
+    }
+  }
+
+  // Load events from backend for specific date
+  Future<void> _loadEventsForDate(DateTime date) async {
+    setState(() {
+      _isLoadingEvents = true;
+    });
+
+    try {
+      final events = await EventService.getEvents(date);
+      if (events != null) {
+        final dateKey = _getDateKey(date);
+        setState(() {
+          _events[dateKey] = events;
+        });
+      }
+    } catch (e) {
+      print('Error loading events: $e');
+    } finally {
+      setState(() {
+        _isLoadingEvents = false;
+      });
+    }
   }
 
   void _showAddEventDialog() {
@@ -123,16 +180,41 @@ class _MyHomePageState extends State<MyHomePage> {
             child: const Text("Cancel"),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_eventController.text.isEmpty) return;
+
+              final title = _eventController.text;
               final dateKey = _getDateKey(_selectedDay ?? _focusedDay);
-              setState(() {
-                _events[dateKey] = [
-                  ...(_events[dateKey] ?? []),
-                  _eventController.text
-                ];
-              });
               Navigator.pop(context);
+
+              try {
+                final newEvent = await EventService.createEvent(dateKey, title);
+                if (newEvent != null) {
+                  setState(() {
+                    _events[dateKey] = [...(_events[dateKey] ?? []), newEvent];
+                  });
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to add event. Please try again.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              } catch (e) {
+                print('Error adding event: $e');
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('Network error. Please check your connection.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
             child: const Text("Add"),
           ),
@@ -247,9 +329,12 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.notifications)),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: ProfileAvatar(radius: 18, onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (c) => Profile()));
-            }),
+            child: ProfileAvatar(
+                radius: 18,
+                onTap: () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (c) => Profile()));
+                }),
           ),
         ],
       ),
@@ -271,9 +356,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         _selectedDay = selectedDay;
                         _focusedDay = focusedDay;
                       });
+                      // Load todos and events for selected date
+                      _loadTodosForDate(selectedDay);
+                      _loadEventsForDate(selectedDay);
                     },
                     eventLoader: (day) {
-                      return _events[_getDateKey(day)] ?? [];
+                      final events = _events[_getDateKey(day)] ?? [];
+                      return events
+                          .map((event) => event['title'] ?? '')
+                          .toList();
                     },
                     calendarFormat: _calendarFormat,
                     onFormatChanged: (format) {
@@ -327,7 +418,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         final event = entry.value;
                         return ListTile(
                           leading: const Icon(Icons.event),
-                          title: Text(event),
+                          title: Text(event['title'] ?? 'No title'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -336,7 +427,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                     color: Colors.deepPurple),
                                 onPressed: () {
                                   TextEditingController editController =
-                                      TextEditingController(text: event);
+                                      TextEditingController(
+                                          text: event['title'] ?? '');
                                   showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
@@ -349,15 +441,59 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 Navigator.pop(context),
                                             child: const Text("Cancel")),
                                         TextButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              todaysEvents[index] =
-                                                  editController.text;
-                                              _events[dateKey] = [
-                                                ...todaysEvents
-                                              ];
-                                            });
+                                          onPressed: () async {
+                                            if (editController.text.isEmpty)
+                                              return;
+
+                                            final eventId = event['_id'];
+                                            if (eventId == null) {
+                                              Navigator.pop(context);
+                                              return;
+                                            }
+
                                             Navigator.pop(context);
+
+                                            try {
+                                              final updatedEvent =
+                                                  await EventService
+                                                      .updateEvent(eventId,
+                                                          editController.text);
+                                              if (updatedEvent != null) {
+                                                setState(() {
+                                                  final updatedEvents = [
+                                                    ...todaysEvents
+                                                  ];
+                                                  updatedEvents[index] =
+                                                      updatedEvent;
+                                                  _events[dateKey] =
+                                                      updatedEvents;
+                                                });
+                                              } else {
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                          'Failed to update event. Please try again.'),
+                                                      backgroundColor:
+                                                          Colors.red,
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            } catch (e) {
+                                              print('Error updating event: $e');
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                        'Network error. Please check your connection.'),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
+                                              }
+                                            }
                                           },
                                           child: const Text("Save"),
                                         ),
@@ -369,11 +505,49 @@ class _MyHomePageState extends State<MyHomePage> {
                               IconButton(
                                 icon:
                                     const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  setState(() {
-                                    todaysEvents.removeAt(index);
-                                    _events[dateKey] = [...todaysEvents];
-                                  });
+                                onPressed: () async {
+                                  final eventId = event['_id'];
+                                  if (eventId == null) {
+                                    print('Event ID is null, cannot delete');
+                                    return;
+                                  }
+
+                                  try {
+                                    final success =
+                                        await EventService.deleteEvent(eventId);
+                                    if (success) {
+                                      setState(() {
+                                        final updatedEvents =
+                                            List<Map<String, dynamic>>.from(
+                                                todaysEvents);
+                                        updatedEvents.removeAt(index);
+                                        _events[dateKey] = updatedEvents;
+                                      });
+                                    } else {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Failed to delete event. Please try again.'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } catch (e) {
+                                    print('Error deleting event: $e');
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Network error. Please check your connection.'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  }
                                 },
                               ),
                             ],
@@ -391,34 +565,127 @@ class _MyHomePageState extends State<MyHomePage> {
                   selectedDate: dateKey,
                   controller: _todoController,
                   todos: todaysTodos,
-                  onAdd: () {
+                  onAdd: () async {
                     if (_todoController.text.isNotEmpty) {
-                      setState(() {
-                        _todos[dateKey] = [
-                          ...todaysTodos,
-                          {"task": _todoController.text, "done": false}
-                        ];
-                        _todoController.clear();
-                      });
+                      final task = _todoController.text;
+                      _todoController.clear();
+
+                      try {
+                        final newTodo =
+                            await TodoService.createTodo(dateKey, task);
+                        if (newTodo != null) {
+                          setState(() {
+                            _todos[dateKey] = [...todaysTodos, newTodo];
+                          });
+                        } else {
+                          // Show error message
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Failed to add todo. Please try again.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      } catch (e) {
+                        print('Error adding todo: $e');
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Network error. Please check your connection.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
                     }
                   },
-                  onToggle: (index, value) {
-                    setState(() {
-                      final updatedTodos = [...todaysTodos];
-                      updatedTodos[index] = {
-                        ...updatedTodos[index],
-                        'done': value,
-                      };
-                      _todos[dateKey] = updatedTodos;
-                    });
+                  onToggle: (index, value) async {
+                    final todo = todaysTodos[index];
+                    final todoId = todo['_id'];
+
+                    if (todoId == null) {
+                      print('Todo ID is null, cannot update');
+                      return;
+                    }
+
+                    try {
+                      final updatedTodo =
+                          await TodoService.updateTodo(todoId, done: value);
+                      if (updatedTodo != null) {
+                        setState(() {
+                          final updatedTodos = [...todaysTodos];
+                          updatedTodos[index] = updatedTodo;
+                          _todos[dateKey] = updatedTodos;
+                        });
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Failed to update todo. Please try again.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      print('Error updating todo: $e');
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Network error. Please check your connection.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
                   },
-                  onDelete: (index) {
-                    setState(() {
-                      final updatedTodos =
-                          List<Map<String, dynamic>>.from(todaysTodos);
-                      updatedTodos.removeAt(index);
-                      _todos[dateKey] = updatedTodos;
-                    });
+                  onDelete: (index) async {
+                    final todo = todaysTodos[index];
+                    final todoId = todo['_id'];
+
+                    if (todoId == null) {
+                      print('Todo ID is null, cannot delete');
+                      return;
+                    }
+
+                    try {
+                      final success = await TodoService.deleteTodo(todoId);
+                      if (success) {
+                        setState(() {
+                          final updatedTodos =
+                              List<Map<String, dynamic>>.from(todaysTodos);
+                          updatedTodos.removeAt(index);
+                          _todos[dateKey] = updatedTodos;
+                        });
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Failed to delete todo. Please try again.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      print('Error deleting todo: $e');
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Network error. Please check your connection.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
                 Padding(

@@ -61,12 +61,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     });
 
     try {
-      // First try the deployed MCP Gateway
+      // First try the local MCP Gateway
       print('Sending message to MCP Gateway: $message');
       try {
         final mcpResponse = await http
             .post(
-              Uri.parse('https://skill-socket-agents.onrender.com/mcp/invoke'),
+              Uri.parse('http://localhost:3000/mcp/invoke'),
               headers: {
                 'Content-Type': 'application/json',
               },

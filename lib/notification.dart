@@ -16,11 +16,54 @@ class _NotificationsState extends State<Notifications> {
   List<Map<String, dynamic>> connectionRequests = [];
   List<Map<String, dynamic>> allNotifications = [];
   int unreadCount = 0;
+  Set<String> _processingRequests =
+      {}; // Track requests being processed to prevent duplicates
 
   @override
   void initState() {
     super.initState();
     _loadNotifications();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh notifications when returning to this screen
+    // This ensures we have the latest pending connection requests
+    _loadNotifications();
+  }
+
+  // Method to refresh notifications (can be called manually)
+  Future<void> refreshNotifications() async {
+    await _loadNotifications();
+  }
+
+  // Method to clean up processed requests from UI
+  void _cleanupProcessedRequests() {
+    setState(() {
+      // Remove any notifications that are no longer pending
+      notifications.forEach((section, notificationList) {
+        notificationList.removeWhere((notification) {
+          if (notification["type"] == "connection_request") {
+            final status = notification["status"] ?? "pending";
+            return status != "pending";
+          }
+          return false;
+        });
+      });
+
+      // Remove empty sections
+      notifications
+          .removeWhere((section, notificationList) => notificationList.isEmpty);
+    });
+  }
+
+  // Get current user ID for validation
+  String? _getCurrentUserId() {
+    // This should be implemented to get the current user's ID
+    // For now, return null to skip self-request validation
+    // TODO: Implement proper current user ID retrieval
+    return null;
   }
 
   Future<void> _loadNotifications() async {
@@ -34,18 +77,65 @@ class _NotificationsState extends State<Notifications> {
       final notificationsData = await NotificationService.getNotifications();
 
       if (requests != null) {
-        connectionRequests = requests;
+        // Comprehensive filtering to ensure only valid pending requests
+        connectionRequests = requests.where((request) {
+          try {
+            // Basic null check (request can't be null in where clause, but keeping for safety)
+
+            // Check status
+            final status = request["status"] ?? "pending";
+            if (status != "pending") return false;
+
+            // Check required fields
+            if (request["_id"] == null || request["_id"].toString().isEmpty)
+              return false;
+            if (request["from"] == null) return false;
+
+            final from = request["from"];
+            if (from is! Map<String, dynamic>) return false;
+            if (from["name"] == null || from["name"].toString().isEmpty)
+              return false;
+            if (from["_id"] == null || from["_id"].toString().isEmpty)
+              return false;
+
+            // Basic ID format validation
+            if (request["_id"].toString().length < 10) return false;
+            if (from["_id"].toString().length < 10) return false;
+
+            return true;
+          } catch (e) {
+            print('Error validating request in filter: $e, request: $request');
+            return false;
+          }
+        }).toList();
+
+        print(
+            'Loaded ${connectionRequests.length} valid pending connection requests');
+      } else {
+        connectionRequests = []; // Ensure it's not null
+        print('No connection requests received from backend');
       }
 
       if (notificationsData != null) {
         allNotifications =
             List<Map<String, dynamic>>.from(notificationsData['data'] ?? []);
         unreadCount = notificationsData['unreadCount'] ?? 0;
+      } else {
+        allNotifications = []; // Ensure it's not null
+        unreadCount = 0;
       }
 
       _buildNotificationsMap();
+
+      // Clean up any processed requests from UI
+      _cleanupProcessedRequests();
     } catch (e) {
       print('Error loading notifications: $e');
+      // Set empty arrays on error to prevent null issues
+      connectionRequests = [];
+      allNotifications = [];
+      unreadCount = 0;
+      _buildNotificationsMap();
     }
 
     setState(() {
@@ -87,43 +177,97 @@ class _NotificationsState extends State<Notifications> {
       });
     }
 
-    // Add connection requests
+    // Add connection requests (only valid pending ones)
     for (var request in connectionRequests) {
-      tempNotifications["Today"]!.add({
-        "type": "connection_request",
-        "requestId": request["_id"],
-        "user": request["from"]["name"],
-        "userId": request["from"]["_id"],
-        "profileImage":
-            request["from"]["profileImage"] ?? request["from"]["logo"],
-        "userEmail": request["from"]["email"],
-        "action": "sent you a connection request",
-        "message": request["message"] ?? "",
-        "time": _formatTime(request["createdAt"]),
-        "icon": Icons.person_add,
-        "accepted": false,
-      });
+      try {
+        // Comprehensive validation before adding
+        // (request can't be null in for loop, but keeping for safety)
+
+        // Validate request ID
+        if (request["_id"] == null || request["_id"].toString().isEmpty) {
+          print('Skipping request with invalid ID: $request');
+          continue;
+        }
+
+        // Validate from user data
+        if (request["from"] == null) {
+          print('Skipping request with null from data: $request');
+          continue;
+        }
+
+        final from = request["from"];
+        if (from is! Map<String, dynamic>) {
+          print('Skipping request with invalid from data type: $from');
+          continue;
+        }
+
+        // Validate from user required fields
+        if (from["name"] == null || from["name"].toString().isEmpty) {
+          print('Skipping request with invalid from name: $from');
+          continue;
+        }
+
+        if (from["_id"] == null || from["_id"].toString().isEmpty) {
+          print('Skipping request with invalid from ID: $from');
+          continue;
+        }
+
+        // Ensure only pending requests are shown
+        final status = request["status"] ?? "pending";
+        if (status != "pending") {
+          print(
+              'Skipping non-pending request: ${request["_id"]} with status: $status');
+          continue;
+        }
+
+        // Validate request ID format (should be valid ObjectId)
+        final requestId = request["_id"].toString();
+        if (requestId.length < 10) {
+          // Basic ObjectId validation
+          print('Skipping request with invalid ID format: $requestId');
+          continue;
+        }
+
+        // Validate from user ID format
+        final fromUserId = from["_id"].toString();
+        if (fromUserId.length < 10) {
+          // Basic ObjectId validation
+          print(
+              'Skipping request with invalid from user ID format: $fromUserId');
+          continue;
+        }
+
+        // Additional safety check - ensure request is not from self
+        // This should be handled by backend, but adding extra safety
+        if (fromUserId == _getCurrentUserId()) {
+          print('Skipping self-request: $fromUserId');
+          continue;
+        }
+
+        // All validations passed - add to notifications
+        tempNotifications["Today"]!.add({
+          "type": "connection_request",
+          "requestId": requestId,
+          "user": from["name"].toString(),
+          "userId": fromUserId,
+          "profileImage": from["profileImage"] ?? from["logo"],
+          "userEmail": from["email"],
+          "action": "sent you a connection request",
+          "message": request["message"] ?? "",
+          "time": _formatTime(request["createdAt"]),
+          "icon": Icons.person_add,
+          "accepted": false,
+          "status": status,
+        });
+
+        print('Added valid connection request: ${from["name"]} (${requestId})');
+      } catch (e) {
+        print('Error processing connection request: $e, request: $request');
+        continue; // Skip this request and continue with others
+      }
     }
 
-    // Add some static notifications for demo including sample connection responses
-    tempNotifications["Today"]!.addAll([
-      {
-        "type": "normal",
-        "user": "SkillSocket",
-        "action": "Sample profiles help you explore the interface. Try different skills to find real users!",
-        "time": "1h ago",
-        "icon": Icons.info_outline,
-        "showThumbnail": false
-      },
-      {
-        "type": "normal",
-        "user": "System",
-        "action": "Connection requests to sample profiles are simulated. Use varied skills to discover real matches.",
-        "time": "3h ago",
-        "icon": Icons.psychology,
-        "showThumbnail": false
-      },
-    ]);
+    // Removed sample profile messages as requested
 
     setState(() {
       notifications = tempNotifications;
@@ -201,13 +345,33 @@ class _NotificationsState extends State<Notifications> {
       return;
     }
 
+    // Prevent multiple requests for the same request
+    final requestIdStr = requestId.toString();
+    if (_processingRequests.contains(requestIdStr)) {
+      _showOverlayMessage("Request is already being processed");
+      return;
+    }
+
+    // Mark as processing
+    setState(() {
+      _processingRequests.add(requestIdStr);
+    });
+
     try {
       final success =
           await ConnectionService.acceptConnectionRequest(requestId.toString());
 
       if (success) {
         setState(() {
-          notifications[section]?[index]["accepted"] = true;
+          // Remove the notification after successful acceptance
+          if (notifications[section] != null) {
+            notifications[section]!.removeAt(index);
+            if (notifications[section]!.isEmpty) {
+              notifications.remove(section);
+            }
+          }
+          // Remove from processing set
+          _processingRequests.remove(requestIdStr);
         });
 
         _showOverlayMessage("Connection request accepted!");
@@ -236,6 +400,8 @@ class _NotificationsState extends State<Notifications> {
               notifications.remove(section);
             }
           }
+          // Remove from processing set
+          _processingRequests.remove(requestIdStr);
         });
         _showOverlayMessage("Request already handled");
       }
@@ -249,6 +415,8 @@ class _NotificationsState extends State<Notifications> {
             notifications.remove(section);
           }
         }
+        // Remove from processing set
+        _processingRequests.remove(requestIdStr);
       });
       _showOverlayMessage("Request already handled");
     }
@@ -266,6 +434,18 @@ class _NotificationsState extends State<Notifications> {
       return;
     }
 
+    // Prevent multiple requests for the same request
+    final requestIdStr = requestId.toString();
+    if (_processingRequests.contains(requestIdStr)) {
+      _showOverlayMessage("Request is already being processed");
+      return;
+    }
+
+    // Mark as processing
+    setState(() {
+      _processingRequests.add(requestIdStr);
+    });
+
     try {
       final success =
           await ConnectionService.rejectConnectionRequest(requestId.toString());
@@ -276,6 +456,8 @@ class _NotificationsState extends State<Notifications> {
           if (notifications[section]?.isEmpty ?? false) {
             notifications.remove(section);
           }
+          // Remove from processing set
+          _processingRequests.remove(requestIdStr);
         });
 
         _showOverlayMessage("Connection request rejected");
@@ -286,6 +468,8 @@ class _NotificationsState extends State<Notifications> {
           if (notifications[section]?.isEmpty ?? false) {
             notifications.remove(section);
           }
+          // Remove from processing set
+          _processingRequests.remove(requestIdStr);
         });
         _showOverlayMessage("Request already handled");
       }
@@ -297,6 +481,8 @@ class _NotificationsState extends State<Notifications> {
         if (notifications[section]?.isEmpty ?? false) {
           notifications.remove(section);
         }
+        // Remove from processing set
+        _processingRequests.remove(requestIdStr);
       });
       _showOverlayMessage("Request already handled");
     }
