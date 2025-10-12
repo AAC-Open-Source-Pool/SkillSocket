@@ -39,6 +39,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     _loadAlreadySentRequests(); // preload sent requests to prevent duplicates across sessions
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh sent requests when returning to this screen
+    // This allows sending new requests after rejections
+    _loadAlreadySentRequests();
+  }
+
   // Load current user ID to prevent self-requests and self-profile display
   Future<void> _loadCurrentUser() async {
     try {
@@ -56,8 +64,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   Future<void> fetchMatchingProfiles() async {
     setState(() => isLoading = true);
-  final url = Uri.parse(
-    'http://localhost:3000/api/users/match?required=${widget.requiredSkill}&offered=${widget.offeredSkill}');
+    final url = Uri.parse(
+        'http://localhost:3000/api/users/match?required=${widget.requiredSkill}&offered=${widget.offeredSkill}');
 
     try {
       final response = await http.get(url);
@@ -202,57 +210,162 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     // Generate completely random demo profiles - NOT from database
     // These are synthetic users to show when no real matches exist
     final demoNames = [
-      "Alex Chen", "Maya Patel", "Jordan Lee", "Priya Singh", "Lucas Brown",
-      "Aria Sharma", "Dev Kumar", "Sofia Rodriguez", "Ryan O'Connor", "Zara Ahmed",
-      "Kai Nakamura", "Elena Petrov", "Marcus Johnson", "Ava Thompson", "Leo Zhang",
-      "Ananya Gupta", "Ethan Taylor", "Ravi Mehta", "Isabella Garcia", "Arjun Patel",
-      "Chloe Wilson", "Rohan Sharma", "Emma Davis", "Vikram Singh", "Olivia Brown",
-      "Karan Verma", "Sophia Martinez", "Aditya Kumar", "Grace Lee", "Nikhil Jain"
+      "Alex Chen",
+      "Maya Patel",
+      "Jordan Lee",
+      "Priya Singh",
+      "Lucas Brown",
+      "Aria Sharma",
+      "Dev Kumar",
+      "Sofia Rodriguez",
+      "Ryan O'Connor",
+      "Zara Ahmed",
+      "Kai Nakamura",
+      "Elena Petrov",
+      "Marcus Johnson",
+      "Ava Thompson",
+      "Leo Zhang",
+      "Ananya Gupta",
+      "Ethan Taylor",
+      "Ravi Mehta",
+      "Isabella Garcia",
+      "Arjun Patel",
+      "Chloe Wilson",
+      "Rohan Sharma",
+      "Emma Davis",
+      "Vikram Singh",
+      "Olivia Brown",
+      "Karan Verma",
+      "Sophia Martinez",
+      "Aditya Kumar",
+      "Grace Lee",
+      "Nikhil Jain"
     ];
 
     final demoLocations = [
-      "Mumbai, India", "New York, USA", "London, UK", "Toronto, Canada", "Sydney, Australia",
-      "Berlin, Germany", "Tokyo, Japan", "Paris, France", "Singapore", "Dubai, UAE",
-      "São Paulo, Brazil", "Stockholm, Sweden", "Amsterdam, Netherlands", "Barcelona, Spain",
-      "Melbourne, Australia", "Vancouver, Canada", "Seoul, South Korea", "Tel Aviv, Israel",
-      "Zurich, Switzerland", "Dublin, Ireland", "Vienna, Austria", "Copenhagen, Denmark",
-      "Helsinki, Finland", "Oslo, Norway", "Prague, Czech Republic", "Warsaw, Poland",
-      "Budapest, Hungary", "Lisbon, Portugal", "Athens, Greece", "Istanbul, Turkey"
+      "Mumbai, India",
+      "New York, USA",
+      "London, UK",
+      "Toronto, Canada",
+      "Sydney, Australia",
+      "Berlin, Germany",
+      "Tokyo, Japan",
+      "Paris, France",
+      "Singapore",
+      "Dubai, UAE",
+      "São Paulo, Brazil",
+      "Stockholm, Sweden",
+      "Amsterdam, Netherlands",
+      "Barcelona, Spain",
+      "Melbourne, Australia",
+      "Vancouver, Canada",
+      "Seoul, South Korea",
+      "Tel Aviv, Israel",
+      "Zurich, Switzerland",
+      "Dublin, Ireland",
+      "Vienna, Austria",
+      "Copenhagen, Denmark",
+      "Helsinki, Finland",
+      "Oslo, Norway",
+      "Prague, Czech Republic",
+      "Warsaw, Poland",
+      "Budapest, Hungary",
+      "Lisbon, Portugal",
+      "Athens, Greece",
+      "Istanbul, Turkey"
     ];
 
     final demoEducations = [
-      "B.Tech Computer Science", "M.Sc Data Science", "B.E Software Engineering", "MBA Technology",
-      "B.Sc Information Systems", "M.Tech AI/ML", "B.Des UI/UX", "M.Sc Cybersecurity",
-      "B.Com + Digital Marketing", "Ph.D Computer Science", "B.Sc Mathematics", "M.A Psychology",
-      "B.Tech Information Technology", "M.S Computer Science", "B.Sc Software Engineering",
-      "M.Tech Data Science", "B.Des Product Design", "M.Sc Artificial Intelligence",
-      "B.E Electronics & Communication", "MBA Business Analytics", "B.Sc Applied Mathematics",
-      "M.A Digital Media", "B.Tech Mechanical Engineering", "M.Sc Machine Learning",
-      "B.Sc Statistics", "M.Tech Software Engineering", "B.A Computer Applications",
-      "M.Sc Information Technology", "B.Tech Civil Engineering", "MBA Marketing"
+      "B.Tech Computer Science",
+      "M.Sc Data Science",
+      "B.E Software Engineering",
+      "MBA Technology",
+      "B.Sc Information Systems",
+      "M.Tech AI/ML",
+      "B.Des UI/UX",
+      "M.Sc Cybersecurity",
+      "B.Com + Digital Marketing",
+      "Ph.D Computer Science",
+      "B.Sc Mathematics",
+      "M.A Psychology",
+      "B.Tech Information Technology",
+      "M.S Computer Science",
+      "B.Sc Software Engineering",
+      "M.Tech Data Science",
+      "B.Des Product Design",
+      "M.Sc Artificial Intelligence",
+      "B.E Electronics & Communication",
+      "MBA Business Analytics",
+      "B.Sc Applied Mathematics",
+      "M.A Digital Media",
+      "B.Tech Mechanical Engineering",
+      "M.Sc Machine Learning",
+      "B.Sc Statistics",
+      "M.Tech Software Engineering",
+      "B.A Computer Applications",
+      "M.Sc Information Technology",
+      "B.Tech Civil Engineering",
+      "MBA Marketing"
     ];
 
     final demoProfessions = [
-      "Software Developer", "Data Analyst", "ML Engineer", "Product Manager", "Full Stack Developer",
-      "UI/UX Designer", "DevOps Engineer", "Cybersecurity Analyst", "Digital Marketing Specialist",
-      "Research Scientist", "Technical Writer", "Business Analyst", "Game Developer", "Mobile App Developer",
-      "Frontend Developer", "Backend Developer", "Data Scientist", "Cloud Architect", "AI Research Engineer",
-      "Quality Assurance Engineer", "System Administrator", "Database Administrator", "Network Engineer",
-      "Blockchain Developer", "IoT Developer", "AR/VR Developer", "Site Reliability Engineer",
-      "Solutions Architect", "Engineering Manager", "Scrum Master", "Product Owner", "Growth Hacker",
-      "Content Strategist", "SEO Specialist", "Social Media Manager", "Brand Manager"
+      "Software Developer",
+      "Data Analyst",
+      "ML Engineer",
+      "Product Manager",
+      "Full Stack Developer",
+      "UI/UX Designer",
+      "DevOps Engineer",
+      "Cybersecurity Analyst",
+      "Digital Marketing Specialist",
+      "Research Scientist",
+      "Technical Writer",
+      "Business Analyst",
+      "Game Developer",
+      "Mobile App Developer",
+      "Frontend Developer",
+      "Backend Developer",
+      "Data Scientist",
+      "Cloud Architect",
+      "AI Research Engineer",
+      "Quality Assurance Engineer",
+      "System Administrator",
+      "Database Administrator",
+      "Network Engineer",
+      "Blockchain Developer",
+      "IoT Developer",
+      "AR/VR Developer",
+      "Site Reliability Engineer",
+      "Solutions Architect",
+      "Engineering Manager",
+      "Scrum Master",
+      "Product Owner",
+      "Growth Hacker",
+      "Content Strategist",
+      "SEO Specialist",
+      "Social Media Manager",
+      "Brand Manager"
     ];
 
     final demoComments = [
-      "Great collaboration skills and very patient teacher!", "Helped me understand complex concepts with ease.",
-      "Professional approach and excellent communication.", "Would love to work together on future projects.",
-      "Knowledgeable and always willing to share expertise.", "Perfect match for skill exchange, highly recommended!",
-      "Clear explanations and supportive learning environment.", "Inspiring mentor with practical industry experience.",
-      "Amazing problem-solving skills and creative thinking.", "Very responsive and delivers quality work on time.",
-      "Excellent technical knowledge and leadership qualities.", "Great at breaking down complex topics into simple steps.",
-      "Fantastic team player with strong analytical skills.", "Outstanding communication and project management abilities.",
-      "Innovative approach to challenges and solutions.", "Highly skilled professional with deep industry insights.",
-      "Exceptional mentor who guides with patience and expertise.", "Reliable collaborator with impressive technical depth."
+      "Great collaboration skills and very patient teacher!",
+      "Helped me understand complex concepts with ease.",
+      "Professional approach and excellent communication.",
+      "Would love to work together on future projects.",
+      "Knowledgeable and always willing to share expertise.",
+      "Perfect match for skill exchange, highly recommended!",
+      "Clear explanations and supportive learning environment.",
+      "Inspiring mentor with practical industry experience.",
+      "Amazing problem-solving skills and creative thinking.",
+      "Very responsive and delivers quality work on time.",
+      "Excellent technical knowledge and leadership qualities.",
+      "Great at breaking down complex topics into simple steps.",
+      "Fantastic team player with strong analytical skills.",
+      "Outstanding communication and project management abilities.",
+      "Innovative approach to challenges and solutions.",
+      "Highly skilled professional with deep industry insights.",
+      "Exceptional mentor who guides with patience and expertise.",
+      "Reliable collaborator with impressive technical depth."
     ];
 
     List<Map<String, dynamic>> randomProfiles = [];
@@ -266,25 +379,31 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
     // Generate 8-12 random profiles with complementary skills for more variety
     final numProfiles = 8 + (DateTime.now().millisecond % 5); // 8-12 profiles
-    
+
     for (int i = 0; i < numProfiles; i++) {
       // More randomized selection from larger pools
-      final nameIndex = (DateTime.now().millisecondsSinceEpoch + i) % demoNames.length;
-      final locationIndex = (DateTime.now().microsecond + i * 7) % demoLocations.length;
-      final educationIndex = (DateTime.now().millisecond + i * 13) % demoEducations.length;
-      final professionIndex = (DateTime.now().microsecond + i * 11) % demoProfessions.length;
-      
+      final nameIndex =
+          (DateTime.now().millisecondsSinceEpoch + i) % demoNames.length;
+      final locationIndex =
+          (DateTime.now().microsecond + i * 7) % demoLocations.length;
+      final educationIndex =
+          (DateTime.now().millisecond + i * 13) % demoEducations.length;
+      final professionIndex =
+          (DateTime.now().microsecond + i * 11) % demoProfessions.length;
+
       randomProfiles.add({
         "id":
             "random_demo_${DateTime.now().millisecondsSinceEpoch}_${i}_${(demoNames[nameIndex].hashCode + i).abs()}",
         "name": demoNames[nameIndex],
         "profileImage": null,
         "skillsOffered": widget.requiredSkill, // Exactly what user needs
-        "skillsRequired": widget.offeredSkill, // Exactly what user offers  
+        "skillsRequired": widget.offeredSkill, // Exactly what user offers
         "education": demoEducations[educationIndex],
         "location": demoLocations[locationIndex],
         "profession": demoProfessions[professionIndex],
-        "ratingsValue": 3.5 + (i * 0.25) + (DateTime.now().millisecond % 15) * 0.04, // More varied ratings
+        "ratingsValue": 3.5 +
+            (i * 0.25) +
+            (DateTime.now().millisecond % 15) * 0.04, // More varied ratings
         "reviews": [
           {
             "reviewer": "Community Member ${(nameIndex + i + 1) % 20 + 1}",
@@ -308,7 +427,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             "title": "Excellent Mentor",
             "date":
                 "${DateTime.now().subtract(Duration(days: (i + 1) * 3)).day} ${_getMonthName(DateTime.now().month)} 2024",
-            "comment": demoComments[(professionIndex + i + 5) % demoComments.length]
+            "comment":
+                demoComments[(professionIndex + i + 5) % demoComments.length]
           }
         ],
       });
@@ -347,10 +467,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     try {
       // This could be expanded to store in SharedPreferences or local database
       // For now, just log the demo connection request
-      print('Demo connection request sent to: ${profile["name"]} (${profile["id"]})');
+      print(
+          'Demo connection request sent to: ${profile["name"]} (${profile["id"]})');
       print('Skills offered by demo user: ${profile["skillsOffered"]}');
       print('Skills required by demo user: ${profile["skillsRequired"]}');
-      
+
       // Future enhancement: Store in local storage for demo notifications
       // final prefs = await SharedPreferences.getInstance();
       // List<String> demoRequests = prefs.getStringList('demo_connection_requests') ?? [];
@@ -376,7 +497,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             final to = (r['to'] is Map)
                 ? (r['to']['_id'] ?? r['to']['id'])
                 : (r['toUserId'] ?? r['to']);
-            if (to != null) {
+            final status = r['status'] ?? 'pending';
+
+            // Only track pending requests (Instagram-like behavior)
+            // If rejected, allow sending new request
+            if (to != null && status == 'pending') {
               _sentRequests.add(to.toString());
             }
           }
@@ -402,10 +527,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     if (_isDemoUser(profile)) {
       // Simulate successful connection request for demo users
       _sentRequests.add(toId);
-      
+
       // Store demo connection request locally (could be used for local notifications)
       _storeDemoConnectionRequest(profile);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -438,9 +563,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       // Already requested in this session
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("You already sent a request to ${profile["name"]}"),
+          content: Text(
+              "Connection request already sent to ${profile["name"]}. Please wait for their response."),
           backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 3),
         ),
       );
       return;
@@ -479,9 +605,21 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                    "Connection request already sent to ${profile["name"]}"),
+                    "Connection request already sent to ${profile["name"]}. Please wait for their response."),
                 backgroundColor: Colors.orange,
-                duration: const Duration(seconds: 2),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        } else if (errorMessage.toLowerCase().contains('already connected')) {
+          // Already connected with this user
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content:
+                    Text("You are already connected with ${profile["name"]}"),
+                backgroundColor: Colors.blue,
+                duration: const Duration(seconds: 3),
               ),
             );
           }

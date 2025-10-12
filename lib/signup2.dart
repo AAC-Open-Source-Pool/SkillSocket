@@ -1,4 +1,5 @@
 import 'package:barter_system/home.dart';
+import 'package:barter_system/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -187,49 +188,21 @@ class _SignUpPageState extends State<SignUpPage> {
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201 && responseData['success'] == true) {
-        // Auto-login after successful signup
-        try {
-          final loginResponse = await http.post(
-            Uri.parse('http://localhost:3000/api/auth/login'),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode({
-              'email': widget.userData?['email'] ?? '',
-              'password': widget.userData?['password'] ?? '',
-            }),
-          );
-
-          if (loginResponse.statusCode == 200) {
-            final loginData = jsonDecode(loginResponse.body);
-            if (loginData['success'] == true && loginData['data'] != null) {
-              // Save token and user ID to SharedPreferences
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setString('token', loginData['data']['token']);
-              await prefs.setString('userId', loginData['data']['user']['_id']);
-              
-              print('Auto-login successful. Token and userId saved.');
-            }
-          }
-        } catch (e) {
-          print('Auto-login error: $e');
-          // Continue anyway, user can login manually
-        }
 
         if (mounted) {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Account created successfully!'),
+              content: Text('Account created successfully! Please login to continue.'),
               backgroundColor: Colors.green,
             ),
           );
 
-          // Navigate to home page
-          Navigator.pushReplacement(
+          // Navigate to login page
+          Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-                builder: (context) => MyHomePage(title: 'SkillSocket')),
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+            (route) => false,
           );
         }
       } else {
