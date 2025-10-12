@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TodoService {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
 
   // Get auth token from shared preferences
   static Future<String?> _getToken() async {

@@ -38,7 +38,7 @@ class ReviewService {
 }
   // Base URL for the review API
 
-  static const String baseUrl = 'http://localhost:3000/api/reviews';
+  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api/reviews';
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {

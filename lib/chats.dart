@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'chat.dart';
 import 'new_chat_screen.dart';
 import 'package:barter_system/profile.dart';
-import 'package:barter_system/widgets/profile_avatar.dart';
 import 'package:barter_system/reviews.dart';
 import 'package:barter_system/notification.dart';
 import 'package:barter_system/history.dart';
@@ -72,7 +71,7 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
 
   void _connectToSocket() {
     socket = IO.io(
-      "http://localhost:3000/",
+  "https://skillsocket-backend.onrender.com/",
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -384,12 +383,12 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
                     MaterialPageRoute(builder: (context) => Notifications()));
               },
               icon: Icon(Icons.notifications)),
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: ProfileAvatar(radius: 18, onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (c) => Profile()));
-            }),
-          ),
+          IconButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Profile()));
+              },
+              icon: Icon(Icons.person_rounded)),
         ],
       ),
       body: Column(

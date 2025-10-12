@@ -206,7 +206,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         print('MCP Gateway error, falling back to Gemini: $mcpError');
 
         final response = await http.post(
-          Uri.parse('http://localhost:3000/api/chat'),
+          Uri.parse('https://skillsocket-backend.onrender.com/api/chat'),
           headers: {
             'Content-Type': 'application/json',
           },
