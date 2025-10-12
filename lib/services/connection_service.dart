@@ -3,8 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ConnectionService {
-  static const String baseUrl =
-      'https://skillsocket-backend.onrender.com/api/connections';
+  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api/connections';
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {

@@ -51,8 +51,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse(
-            'https://skillsocket-backend.onrender.com/api/user/upload-logo-public'),
+  Uri.parse('https://skillsocket-backend.onrender.com/api/user/upload-logo-public'),
       );
 
       print('🖼️ Upload URL: ${request.url}');
@@ -177,7 +176,7 @@ class _SignUpPageState extends State<SignUpPage> {
       print('Sending signup data: $signupData');
 
       final response = await http.post(
-        Uri.parse('https://skillsocket-backend.onrender.com/api/auth/signup'),
+  Uri.parse('https://skillsocket-backend.onrender.com/api/auth/signup'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -190,6 +189,35 @@ class _SignUpPageState extends State<SignUpPage> {
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201 && responseData['success'] == true) {
+        // Auto-login after successful signup
+        try {
+          final loginResponse = await http.post(
+            Uri.parse('https://skillsocket-backend.onrender.com/api/auth/login'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'email': widget.userData?['email'] ?? '',
+              'password': widget.userData?['password'] ?? '',
+            }),
+          );
+
+          if (loginResponse.statusCode == 200) {
+            final loginData = jsonDecode(loginResponse.body);
+            if (loginData['success'] == true && loginData['data'] != null) {
+              // Save token and user ID to SharedPreferences
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('token', loginData['data']['token']);
+              await prefs.setString('userId', loginData['data']['user']['_id']);
+              
+              print('Auto-login successful. Token and userId saved.');
+            }
+          }
+        } catch (e) {
+          print('Auto-login error: $e');
+          // Continue anyway, user can login manually
+        }
+
         if (mounted) {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(

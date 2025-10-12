@@ -5,11 +5,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class FirebaseMessagingService {
-  static final FirebaseMessaging _firebaseMessaging =
-      FirebaseMessaging.instance;
-  static final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
-
+  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  static final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  
   static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
 
   // Initialize Firebase Messaging

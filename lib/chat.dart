@@ -95,7 +95,7 @@ class _ChatState extends State<Chat> {
 
   void _connectToServer() {
     socket = IO.io(
-      "https://skillsocket-backend.onrender.com/",
+  "https://skillsocket-backend.onrender.com/",
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
