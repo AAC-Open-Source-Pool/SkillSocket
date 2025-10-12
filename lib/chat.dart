@@ -73,7 +73,7 @@ class _ChatState extends State<Chat> {
               'senderId': message['from']['_id'],
               'senderName': message['from']['name'],
               'senderProfile': message['from']['profileImage'], // new line
-  'status': 'sent',
+              'status': 'sent',
             });
           }
         });
@@ -390,89 +390,102 @@ class _ChatState extends State<Chat> {
                           itemBuilder: (context, index) {
                             final msg = _messages[index];
                             return Align(
-  alignment: msg['isMe'] ? Alignment.centerRight : Alignment.centerLeft,
-  child: Row(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.end,
-    children: [
-      // Left side (receiver avatar)
-      if (!msg['isMe']) ...[
-        CircleAvatar(
-          radius: 12,
-          backgroundColor: Colors.grey.shade300,
-          backgroundImage: msg['senderProfile'] != null
-              ? NetworkImage(msg['senderProfile'])
-              : null,
-          child: msg['senderProfile'] == null
-              ? Text(
-                  msg['senderName'][0].toUpperCase(),
-                  style: const TextStyle(
-                      color: Color(0xFF123b53),
-                      fontWeight: FontWeight.bold),
-                )
-              : null,
-        ),
-        const SizedBox(width: 6),
-      ],
+                              alignment: msg['isMe']
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  // Left side (receiver avatar)
+                                  if (!msg['isMe']) ...[
+                                    CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.grey.shade300,
+                                      backgroundImage: msg['senderProfile'] !=
+                                              null
+                                          ? NetworkImage(msg['senderProfile'])
+                                          : null,
+                                      child: msg['senderProfile'] == null
+                                          ? Text(
+                                              msg['senderName'][0]
+                                                  .toUpperCase(),
+                                              style: const TextStyle(
+                                                  color: Color(0xFF123b53),
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                          : null,
+                                    ),
+                                    const SizedBox(width: 6),
+                                  ],
 
-      // Message bubble
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        decoration: BoxDecoration(
-          color: msg['isMe']
-              ? const Color.fromARGB(255, 58, 137, 164)
-              : const Color(0xFFB6E1F0),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              msg['text'],
-              style: TextStyle(
-                  color: msg['isMe'] ? Colors.white : Colors.black87),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  msg['time'],
-                  style: TextStyle(
-                      color: msg['isMe'] ? Colors.white70 : Colors.black54,
-                      fontSize: 10),
-                ),
-                if (msg['isMe']) ...[
-                  const SizedBox(width: 4),
-                  _buildMessageStatusIcon(msg['status'] ?? 'sent'),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
+                                  // Message bubble
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 10),
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: msg['isMe']
+                                          ? const Color.fromARGB(
+                                              255, 58, 137, 164)
+                                          : const Color(0xFFB6E1F0),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          msg['text'],
+                                          style: TextStyle(
+                                              color: msg['isMe']
+                                                  ? Colors.white
+                                                  : Colors.black87),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              msg['time'],
+                                              style: TextStyle(
+                                                  color: msg['isMe']
+                                                      ? Colors.white70
+                                                      : Colors.black54,
+                                                  fontSize: 10),
+                                            ),
+                                            if (msg['isMe']) ...[
+                                              const SizedBox(width: 4),
+                                              _buildMessageStatusIcon(
+                                                  msg['status'] ?? 'sent'),
+                                            ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
 
-      // Right side (sender avatar)
-      if (msg['isMe']) ...[
-        const SizedBox(width: 6),
-        CircleAvatar(
-          radius: 12,
-          backgroundColor: Colors.grey.shade300,
-          backgroundImage: msg['senderProfile'] != null
-              ? NetworkImage(msg['senderProfile'])
-              : null,
-          child: msg['senderProfile'] == null
-              ? const Icon(Icons.person,
-                  size: 14, color: Color(0xFF123b53))
-              : null,
-        ),
-      ],
-    ],
-  ),
-);
-
-
+                                  // Right side (sender avatar)
+                                  if (msg['isMe']) ...[
+                                    const SizedBox(width: 6),
+                                    CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.grey.shade300,
+                                      backgroundImage: msg['senderProfile'] !=
+                                              null
+                                          ? NetworkImage(msg['senderProfile'])
+                                          : null,
+                                      child: msg['senderProfile'] == null
+                                          ? const Icon(Icons.person,
+                                              size: 14,
+                                              color: Color(0xFF123b53))
+                                          : null,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            );
                           },
                         ),
                       ),

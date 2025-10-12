@@ -23,7 +23,7 @@ class NotificationService {
   }) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/notifications?page=$page&limit=$limit'),
         headers: headers,
@@ -45,10 +45,11 @@ class NotificationService {
   }
 
   // Mark notifications as read
-  static Future<bool> markNotificationsAsRead(List<String> notificationIds) async {
+  static Future<bool> markNotificationsAsRead(
+      List<String> notificationIds) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.put(
         Uri.parse('$baseUrl/notifications/read'),
         headers: headers,
@@ -70,7 +71,7 @@ class NotificationService {
   static Future<int> getUnreadCount() async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/notifications/unread-count'),
         headers: headers,
@@ -91,7 +92,7 @@ class NotificationService {
   static Future<bool> sendTestNotification() async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/notifications/test'),
         headers: headers,

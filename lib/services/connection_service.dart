@@ -23,7 +23,7 @@ class ConnectionService {
   }) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/send'),
         headers: headers,
@@ -68,14 +68,14 @@ class ConnectionService {
   static Future<List<Map<String, dynamic>>?> getReceivedRequests() async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/received'),
         headers: headers,
       );
 
       print('Get received requests response: ${response.statusCode}');
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
@@ -93,14 +93,14 @@ class ConnectionService {
   static Future<bool> acceptConnectionRequest(String requestId) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/accept/$requestId'),
         headers: headers,
       );
 
       print('Accept request response: ${response.statusCode}');
-      
+
       // Try to parse body if present
       Map<String, dynamic>? data;
       try {
@@ -112,9 +112,15 @@ class ConnectionService {
       }
 
       // Treat idempotent responses as success (already accepted/handled)
-      final msg = (data != null ? (data['message']?.toString().toLowerCase() ?? '') : '');
-      if (response.statusCode == 400 || response.statusCode == 409 || response.statusCode == 404) {
-        if (msg.contains('already') || msg.contains('handled') || msg.contains('accepted')) {
+      final msg = (data != null
+          ? (data['message']?.toString().toLowerCase() ?? '')
+          : '');
+      if (response.statusCode == 400 ||
+          response.statusCode == 409 ||
+          response.statusCode == 404) {
+        if (msg.contains('already') ||
+            msg.contains('handled') ||
+            msg.contains('accepted')) {
           return true;
         }
       }
@@ -129,14 +135,14 @@ class ConnectionService {
   static Future<bool> rejectConnectionRequest(String requestId) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/reject/$requestId'),
         headers: headers,
       );
 
       print('Reject request response: ${response.statusCode}');
-      
+
       Map<String, dynamic>? data;
       try {
         data = jsonDecode(response.body);
@@ -147,9 +153,15 @@ class ConnectionService {
       }
 
       // Treat idempotent responses as success (already rejected/handled)
-      final msg = (data != null ? (data['message']?.toString().toLowerCase() ?? '') : '');
-      if (response.statusCode == 400 || response.statusCode == 409 || response.statusCode == 404) {
-        if (msg.contains('already') || msg.contains('handled') || msg.contains('rejected')) {
+      final msg = (data != null
+          ? (data['message']?.toString().toLowerCase() ?? '')
+          : '');
+      if (response.statusCode == 400 ||
+          response.statusCode == 409 ||
+          response.statusCode == 404) {
+        if (msg.contains('already') ||
+            msg.contains('handled') ||
+            msg.contains('rejected')) {
           return true;
         }
       }
@@ -164,7 +176,7 @@ class ConnectionService {
   static Future<List<Map<String, dynamic>>?> getSentRequests() async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/sent'),
         headers: headers,
