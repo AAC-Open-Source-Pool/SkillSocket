@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TodoService {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
 
   // Get auth token from shared preferences
   static Future<String?> _getToken() async {
@@ -31,7 +31,7 @@ class TodoService {
     try {
       final headers = await _getHeaders();
       final dateStr = _formatDate(date);
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/todos?date=$dateStr'),
         headers: headers,
@@ -39,12 +39,14 @@ class TodoService {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        return data.map((item) => {
-          '_id': item['_id'],
-          'task': item['task'],
-          'done': item['done'],
-          'date': item['date'],
-        }).toList();
+        return data
+            .map((item) => {
+                  '_id': item['_id'],
+                  'task': item['task'],
+                  'done': item['done'],
+                  'date': item['date'],
+                })
+            .toList();
       } else {
         print('Get todos error: ${response.statusCode} - ${response.body}');
         return null;
@@ -57,7 +59,8 @@ class TodoService {
 
   // Create a new todo
   // POST /api/todos { date: 'YYYY-MM-DD', task: string }
-  static Future<Map<String, dynamic>?> createTodo(DateTime date, String task) async {
+  static Future<Map<String, dynamic>?> createTodo(
+      DateTime date, String task) async {
     try {
       final headers = await _getHeaders();
       final dateStr = _formatDate(date);
@@ -88,7 +91,8 @@ class TodoService {
 
   // Update a todo (toggle done or edit task)
   // PATCH /api/todos/:id { task?, done? }
-  static Future<Map<String, dynamic>?> updateTodo(String id, {String? task, bool? done}) async {
+  static Future<Map<String, dynamic>?> updateTodo(String id,
+      {String? task, bool? done}) async {
     try {
       final headers = await _getHeaders();
       final body = <String, dynamic>{};

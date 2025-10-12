@@ -61,12 +61,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     });
 
     try {
-      // First try the local MCP Gateway
+      // First try the deployed MCP Gateway
       print('Sending message to MCP Gateway: $message');
       try {
         final mcpResponse = await http
             .post(
-              Uri.parse('http://localhost:3000/mcp/invoke'),
+              Uri.parse('https://skill-socket-agents.onrender.com/mcp/invoke'),
               headers: {
                 'Content-Type': 'application/json',
               },
@@ -206,7 +206,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         print('MCP Gateway error, falling back to Gemini: $mcpError');
 
         final response = await http.post(
-          Uri.parse('http://localhost:3000/api/chat'),
+          Uri.parse('https://skillsocket-backend.onrender.com/api/chat'),
           headers: {
             'Content-Type': 'application/json',
           },

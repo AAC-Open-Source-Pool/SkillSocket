@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EventService {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
 
   // Get auth token from shared preferences
   static Future<String?> _getToken() async {
@@ -31,7 +31,7 @@ class EventService {
     try {
       final headers = await _getHeaders();
       final dateStr = _formatDate(date);
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/events?date=$dateStr'),
         headers: headers,
@@ -39,11 +39,13 @@ class EventService {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        return data.map((item) => {
-          '_id': item['_id'],
-          'title': item['title'],
-          'date': item['date'],
-        }).toList();
+        return data
+            .map((item) => {
+                  '_id': item['_id'],
+                  'title': item['title'],
+                  'date': item['date'],
+                })
+            .toList();
       } else {
         print('Get events error: ${response.statusCode} - ${response.body}');
         return null;
@@ -56,7 +58,8 @@ class EventService {
 
   // Create a new event
   // POST /api/events { date: 'YYYY-MM-DD', title: string }
-  static Future<Map<String, dynamic>?> createEvent(DateTime date, String title) async {
+  static Future<Map<String, dynamic>?> createEvent(
+      DateTime date, String title) async {
     try {
       final headers = await _getHeaders();
       final dateStr = _formatDate(date);
@@ -86,7 +89,8 @@ class EventService {
 
   // Update an event (edit title)
   // PATCH /api/events/:id { title }
-  static Future<Map<String, dynamic>?> updateEvent(String id, String title) async {
+  static Future<Map<String, dynamic>?> updateEvent(
+      String id, String title) async {
     try {
       final headers = await _getHeaders();
 

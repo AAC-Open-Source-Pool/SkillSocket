@@ -4,13 +4,14 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
 
   // Helpers used across the app
   static Future<String?> getCurrentUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('userId');
   }
+
   // Optionally expose token if needed elsewhere
   static Future<String?> getAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -30,7 +31,8 @@ class UserService {
   static Future<Map<String, dynamic>?> getUserProfile() async {
     try {
       final headers = await _getHeaders();
-      final res = await http.get(Uri.parse('$baseUrl/user/profile'), headers: headers);
+      final res =
+          await http.get(Uri.parse('$baseUrl/user/profile'), headers: headers);
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         return data['user'];
@@ -45,7 +47,8 @@ class UserService {
   static Future<Map<String, dynamic>?> getUserProfileById(String userId) async {
     try {
       final headers = await _getHeaders();
-      final res = await http.get(Uri.parse('$baseUrl/user/profile/$userId'), headers: headers);
+      final res = await http.get(Uri.parse('$baseUrl/user/profile/$userId'),
+          headers: headers);
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         return data['user'];

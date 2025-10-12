@@ -48,10 +48,11 @@ class _SignUpPageState extends State<SignUpPage> {
       print('🖼️ Starting profile image upload...');
       print('🖼️ File path: ${profileImageFile.path}');
       print('🖼️ File exists: ${await profileImageFile.exists()}');
-      
+
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://localhost:3000/api/user/upload-logo-public'),
+        Uri.parse(
+            'https://skillsocket-backend.onrender.com/api/user/upload-logo-public'),
       );
 
       print('🖼️ Upload URL: ${request.url}');
@@ -67,7 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
       print('🖼️ File added to request. Sending...');
       final streamedResponse = await request.send();
       print('🖼️ Response status code: ${streamedResponse.statusCode}');
-      
+
       final response = await http.Response.fromStream(streamedResponse);
       print('🖼️ Response body: ${response.body}');
 
@@ -106,7 +107,7 @@ class _SignUpPageState extends State<SignUpPage> {
       if (widget.userData?['profileImageFile'] != null) {
         print('📸 Profile image file found, starting upload...');
         final profileImageFile = widget.userData!['profileImageFile'] as File;
-        
+
         // Show uploading message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -116,13 +117,14 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           );
         }
-        
+
         profileImageUrl =
             await _uploadProfileImageToCloudinary(profileImageFile);
         if (profileImageUrl == null) {
           print('❌ Profile image upload returned null');
           setState(() {
-            _errorMessage = 'Failed to upload profile image. Please check your internet connection and try again.';
+            _errorMessage =
+                'Failed to upload profile image. Please check your internet connection and try again.';
             _isLoading = false;
           });
           return;
@@ -175,7 +177,7 @@ class _SignUpPageState extends State<SignUpPage> {
       print('Sending signup data: $signupData');
 
       final response = await http.post(
-        Uri.parse('http://localhost:3000/api/auth/signup'),
+        Uri.parse('https://skillsocket-backend.onrender.com/api/auth/signup'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -188,12 +190,12 @@ class _SignUpPageState extends State<SignUpPage> {
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201 && responseData['success'] == true) {
-
         if (mounted) {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Account created successfully! Please login to continue.'),
+              content: Text(
+                  'Account created successfully! Please login to continue.'),
               backgroundColor: Colors.green,
             ),
           );

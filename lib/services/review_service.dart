@@ -5,40 +5,41 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ReviewService {
   // Like a review
   static Future<Map<String, dynamic>?> likeReview(String reviewId) async {
-  try {
-    final headers = await _getHeaders();
-    final response = await http.post(
-      Uri.parse('$baseUrl/like/$reviewId'),
-      headers: headers,
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+    try {
+      final headers = await _getHeaders();
+      final response = await http.post(
+        Uri.parse('$baseUrl/like/$reviewId'),
+        headers: headers,
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+    } catch (e) {
+      print('Exception liking review: $e');
     }
-  } catch (e) {
-    print('Exception liking review: $e');
+    return null;
   }
-  return null;
-}
 
   // Dislike a review
   static Future<Map<String, dynamic>?> dislikeReview(String reviewId) async {
-  try {
-    final headers = await _getHeaders();
-    final response = await http.post(
-      Uri.parse('$baseUrl/dislike/$reviewId'),
-      headers: headers,
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+    try {
+      final headers = await _getHeaders();
+      final response = await http.post(
+        Uri.parse('$baseUrl/dislike/$reviewId'),
+        headers: headers,
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+    } catch (e) {
+      print('Exception disliking review: $e');
     }
-  } catch (e) {
-    print('Exception disliking review: $e');
+    return null;
   }
-  return null;
-}
   // Base URL for the review API
 
-  static const String baseUrl = 'http://localhost:3000/api/reviews';
+  static const String baseUrl =
+      'https://skillsocket-backend.onrender.com/api/reviews';
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
@@ -60,7 +61,7 @@ class ReviewService {
   }) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/add'),
         headers: headers,
@@ -88,10 +89,7 @@ class ReviewService {
       }
     } catch (e) {
       print('Exception adding review: $e');
-      return {
-        'success': false,
-        'message': 'Network error occurred'
-      };
+      return {'success': false, 'message': 'Network error occurred'};
     }
   }
 
@@ -103,14 +101,14 @@ class ReviewService {
   }) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/user/$userId?page=$page&limit=$limit'),
         headers: headers,
       );
 
       print('Get user reviews response: ${response.statusCode}');
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
@@ -129,21 +127,21 @@ class ReviewService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('userId');
-      
+
       if (userId == null) {
         print('No user ID found');
         return null;
       }
 
       final headers = await _getHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl/by-user/$userId'),
         headers: headers,
       );
 
       print('Get my reviews response: ${response.statusCode}');
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
@@ -166,12 +164,12 @@ class ReviewService {
   }) async {
     try {
       final headers = await _getHeaders();
-      
+
       final body = <String, dynamic>{};
       if (rating != null) body['rating'] = rating;
       if (title != null) body['title'] = title;
       if (skillContext != null) body['skillContext'] = skillContext;
-      
+
       final response = await http.put(
         Uri.parse('$baseUrl/update/$reviewId'),
         headers: headers,
@@ -179,7 +177,7 @@ class ReviewService {
       );
 
       print('Update review response: ${response.statusCode}');
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data;
@@ -192,10 +190,7 @@ class ReviewService {
       }
     } catch (e) {
       print('Exception updating review: $e');
-      return {
-        'success': false,
-        'message': 'Network error occurred'
-      };
+      return {'success': false, 'message': 'Network error occurred'};
     }
   }
 
@@ -203,14 +198,14 @@ class ReviewService {
   static Future<bool> deleteReview(String reviewId) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.delete(
         Uri.parse('$baseUrl/delete/$reviewId'),
         headers: headers,
       );
 
       print('Delete review response: ${response.statusCode}');
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['success'] == true;
@@ -231,13 +226,13 @@ class ReviewService {
   static String getStarDisplay(double rating) {
     final fullStars = rating.floor();
     final hasHalfStar = (rating - fullStars) >= 0.5;
-    
+
     String stars = '★' * fullStars;
     if (hasHalfStar) stars += '☆';
-    
+
     final emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
     stars += '☆' * emptyStars;
-    
+
     return stars;
   }
 }

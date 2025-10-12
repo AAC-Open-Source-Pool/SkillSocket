@@ -65,7 +65,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Future<void> fetchMatchingProfiles() async {
     setState(() => isLoading = true);
     final url = Uri.parse(
-        'http://localhost:3000/api/users/match?required=${widget.requiredSkill}&offered=${widget.offeredSkill}');
+        'https://skillsocket-backend.onrender.com/api/users/match?required=${widget.requiredSkill}&offered=${widget.offeredSkill}');
 
     try {
       final response = await http.get(url);
