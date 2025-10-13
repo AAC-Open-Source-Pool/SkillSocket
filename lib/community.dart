@@ -530,7 +530,9 @@ class _CommunityState extends State<Community> {
       floatingActionButton: Builder(
         builder: (context) {
           return FloatingActionButton(
-            child: const Icon(Icons.add),
+            backgroundColor: const Color(0xFF123b53),
+            child: const Icon(Icons.add, color: Colors.white),
+            //child: const Icon(Icons.add),
             onPressed: () {
               final RenderBox button = context.findRenderObject() as RenderBox;
               final RenderBox overlay =

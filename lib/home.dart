@@ -426,13 +426,30 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             )),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => ChatbotScreen()));
-        },
-        child: Icon(Icons.android),
+       floatingActionButton: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          image: DecorationImage(
+            image: AssetImage('assets/new-chatbot-skyblue.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(30),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(30),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ChatbotScreen()));
+            },
+          ),
+        ),
       ),
     );
   }
 }
+
+
