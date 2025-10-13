@@ -38,7 +38,8 @@ class ReviewService {
   }
   // Base URL for the review API
 
-  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api/reviews';
+  static const String baseUrl =
+      'https://skillsocket-backend.onrender.com/api/reviews';
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
@@ -56,7 +57,6 @@ class ReviewService {
     required String revieweeId,
     required double rating,
     required String title,
-    String? skillContext,
   }) async {
     try {
       final headers = await _getHeaders();
@@ -68,7 +68,6 @@ class ReviewService {
           'revieweeId': revieweeId,
           'rating': rating,
           'title': title,
-          if (skillContext != null) 'skillContext': skillContext,
         }),
       );
 
@@ -159,7 +158,6 @@ class ReviewService {
     required String reviewId,
     double? rating,
     String? title,
-    String? skillContext,
   }) async {
     try {
       final headers = await _getHeaders();
@@ -167,7 +165,6 @@ class ReviewService {
       final body = <String, dynamic>{};
       if (rating != null) body['rating'] = rating;
       if (title != null) body['title'] = title;
-      if (skillContext != null) body['skillContext'] = skillContext;
 
       final response = await http.put(
         Uri.parse('$baseUrl/update/$reviewId'),
