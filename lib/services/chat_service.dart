@@ -128,7 +128,7 @@ class ChatService {
   static Future<bool> markMessagesAsRead(String partnerId) async {
     try {
       final headers = await _getHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/messages/mark-seen/$partnerId'),
         headers: headers,
@@ -176,4 +176,3 @@ class ChatService {
     }
   }
 }
-

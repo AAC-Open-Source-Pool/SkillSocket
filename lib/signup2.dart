@@ -1,4 +1,5 @@
 import 'package:barter_system/home.dart';
+import 'package:barter_system/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,7 +48,7 @@ class _SignUpPageState extends State<SignUpPage> {
       print('🖼️ Starting profile image upload...');
       print('🖼️ File path: ${profileImageFile.path}');
       print('🖼️ File exists: ${await profileImageFile.exists()}');
-      
+
       var request = http.MultipartRequest(
         'POST',
   Uri.parse('https://skillsocket-backend.onrender.com/api/user/upload-logo-public'),
@@ -66,7 +67,7 @@ class _SignUpPageState extends State<SignUpPage> {
       print('🖼️ File added to request. Sending...');
       final streamedResponse = await request.send();
       print('🖼️ Response status code: ${streamedResponse.statusCode}');
-      
+
       final response = await http.Response.fromStream(streamedResponse);
       print('🖼️ Response body: ${response.body}');
 
@@ -105,7 +106,7 @@ class _SignUpPageState extends State<SignUpPage> {
       if (widget.userData?['profileImageFile'] != null) {
         print('📸 Profile image file found, starting upload...');
         final profileImageFile = widget.userData!['profileImageFile'] as File;
-        
+
         // Show uploading message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -115,13 +116,14 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           );
         }
-        
+
         profileImageUrl =
             await _uploadProfileImageToCloudinary(profileImageFile);
         if (profileImageUrl == null) {
           print('❌ Profile image upload returned null');
           setState(() {
-            _errorMessage = 'Failed to upload profile image. Please check your internet connection and try again.';
+            _errorMessage =
+                'Failed to upload profile image. Please check your internet connection and try again.';
             _isLoading = false;
           });
           return;
@@ -220,16 +222,17 @@ class _SignUpPageState extends State<SignUpPage> {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Account created successfully!'),
+              content: Text(
+                  'Account created successfully! Please login to continue.'),
               backgroundColor: Colors.green,
             ),
           );
 
-          // Navigate to home page
-          Navigator.pushReplacement(
+          // Navigate to login page
+          Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-                builder: (context) => MyHomePage(title: 'SkillSocket')),
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+            (route) => false,
           );
         }
       } else {
@@ -269,10 +272,17 @@ class _SignUpPageState extends State<SignUpPage> {
               Padding(
                 padding: const EdgeInsets.only(top: 60.0, left: 20.0),
                 child: Column(children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white70,
-                    child: Text("LOGO", style: TextStyle(color: Colors.black)),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/logo3.png',
+                        fit: BoxFit.cover,
+                        height: 60,
+                        width: 60,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text("SkillSocket",

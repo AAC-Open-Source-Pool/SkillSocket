@@ -57,9 +57,10 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
     // Get current user ID
     currentUserId = await ChatService.getCurrentUserId();
 
-    if (chats.isEmpty) { // 👈 Only load once
-    await _loadChats();
-  }
+    if (chats.isEmpty) {
+      // 👈 Only load once
+      await _loadChats();
+    }
 
     if (currentUserId != null) {
       await _loadChats();

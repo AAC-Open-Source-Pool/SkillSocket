@@ -154,10 +154,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white70,
-                  child: Text("LOGO", style: TextStyle(color: Colors.black)),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/logo3.png',
+                      fit: BoxFit.cover,
+                      height: 60,
+                      width: 60,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 const Text("SkillSocket",

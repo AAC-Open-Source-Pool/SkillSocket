@@ -22,7 +22,7 @@ class FirebaseMessagingService {
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       print('User granted permission for notifications');
-      
+
       // Get FCM token
       String? token = await _firebaseMessaging.getToken();
       if (token != null) {
@@ -74,7 +74,7 @@ class FirebaseMessagingService {
   // Handle foreground messages (when app is open)
   static Future<void> _handleForegroundMessage(RemoteMessage message) async {
     print('Received foreground message: ${message.messageId}');
-    
+
     // Show local notification when app is in foreground
     await _showLocalNotification(message);
   }
@@ -103,7 +103,7 @@ class FirebaseMessagingService {
   // Navigate based on notification type
   static void _navigateBasedOnNotification(Map<String, dynamic> data) {
     final type = data['type'];
-    
+
     switch (type) {
       case 'message':
         // Navigate to chat screen
@@ -112,17 +112,17 @@ class FirebaseMessagingService {
         // TODO: Add navigation logic
         print('Navigate to chat: $chatId with $senderId');
         break;
-        
+
       case 'connection_request':
         // Navigate to notifications screen
         print('Navigate to notifications screen');
         break;
-        
+
       case 'connection_accepted':
         // Navigate to connections or chat
         print('Navigate to connections');
         break;
-        
+
       default:
         print('Unknown notification type: $type');
     }
@@ -166,7 +166,7 @@ class FirebaseMessagingService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final authToken = prefs.getString('token');
-      
+
       if (authToken == null) {
         print('No auth token found, cannot save FCM token');
         return;
