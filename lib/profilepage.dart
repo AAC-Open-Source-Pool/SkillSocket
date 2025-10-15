@@ -36,17 +36,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
     setState(() => _isLoading = true);
 
     try {
-      // Load user profile
       final userProfile = await UserService.getUserProfileById(widget.userId);
-
-      // Load reviews separately using ReviewService
       final reviewsData =
           await ReviewService.getUserReviews(userId: widget.userId);
       final reviews = reviewsData?['reviews'] ?? [];
 
       setState(() {
         _userProfile = userProfile;
-        // Map backend review data to display format
         _reviews = List<Map<String, dynamic>>.from(reviews).map((review) {
           return {
             'reviewer': review['reviewer']?['name']?.toString() ?? 'Anonymous',
@@ -117,14 +113,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
   void _showReviewDialog() {
     final TextEditingController reviewController = TextEditingController();
     final TextEditingController titleController = TextEditingController();
-    double selectedRating = 5.0; // Default to 5 stars
+    double selectedRating = 5.0;
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
+              scrollable: true,
               backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
@@ -133,99 +131,98 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 style: TextStyle(
                     color: Color(0xFF123b53), fontWeight: FontWeight.bold),
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_loggedInUserName != null)
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_loggedInUserName != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.person, color: Color(0xFF123b53)),
+                            const SizedBox(width: 8),
+                            Text(
+                              _loggedInUserName!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF123b53),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.person, color: Color(0xFF123b53)),
-                          const SizedBox(width: 8),
-                          Text(
-                            _loggedInUserName!,
-                            style: const TextStyle(
+                          const Text(
+                            "Rating:",
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF123b53),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(5, (index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  setDialogState(() {
+                                    selectedRating = (index + 1).toDouble();
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.star,
+                                  size: 32,
+                                  color: index < selectedRating
+                                      ? Colors.amber
+                                      : Colors.grey[300],
+                                ),
+                              );
+                            }),
+                          ),
+                          Center(
+                            child: Text(
+                              "${selectedRating.toInt()}/5 Stars",
+                              style: const TextStyle(
+                                color: Color(0xFF123b53),
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  // Star Rating Selection
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Rating:",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF123b53),
-                          ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: TextField(
+                        controller: titleController,
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                          hintText: "Review title (e.g., 'Great teaching!')",
+                          filled: true,
+                          fillColor: const Color(0xFFB6E1F0).withOpacity(0.3),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(5, (index) {
-                            return GestureDetector(
-                              onTap: () {
-                                setDialogState(() {
-                                  selectedRating = (index + 1).toDouble();
-                                });
-                              },
-                              child: Icon(
-                                Icons.star,
-                                size: 32,
-                                color: index < selectedRating
-                                    ? Colors.amber
-                                    : Colors.grey[300],
-                              ),
-                            );
-                          }),
-                        ),
-                        Center(
-                          child: Text(
-                            "${selectedRating.toInt()}/5 Stars",
-                            style: const TextStyle(
-                              color: Color(0xFF123b53),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  // Review Title
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: TextField(
-                      controller: titleController,
-                      maxLines: 1,
+                    TextField(
+                      controller: reviewController,
+                      maxLines: 4,
                       decoration: InputDecoration(
-                        hintText: "Review title (e.g., 'Great teaching!')",
+                        hintText: "Share your experience...",
                         filled: true,
                         fillColor: const Color(0xFFB6E1F0).withOpacity(0.3),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
-                  ),
-                  // Review Comment
-                  TextField(
-                    controller: reviewController,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      hintText: "Share your experience...",
-                      filled: true,
-                      fillColor: const Color(0xFFB6E1F0).withOpacity(0.3),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -241,13 +238,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     final title = titleController.text.trim();
 
                     if (review.isNotEmpty && title.isNotEmpty) {
-                      // Show loading
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                         content: Text("Submitting review..."),
                         duration: Duration(seconds: 1),
                       ));
 
-                      // 🔹 1. Save review in backend with proper data
                       final result = await UserService.addReview(
                         userId: widget.userId,
                         rating: selectedRating,
@@ -258,7 +253,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       Navigator.pop(context);
 
                       if (result != null && result['success'] == true) {
-                        // 🔹 2a. Add review to UI immediately for instant feedback
                         final newReview = {
                           'reviewer': _loggedInUserName ?? 'You',
                           'title': title,
@@ -272,7 +266,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           _reviews.insert(0, newReview);
                         });
 
-                        // 🔹 2b. Reload from backend to get accurate data (async)
                         _loadUserProfile();
 
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -280,7 +273,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 content: Text("Review submitted successfully!"),
                                 backgroundColor: Colors.green));
                       } else {
-                        // Handle error
                         final errorMsg =
                             result?['message'] ?? 'Failed to submit review';
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -436,13 +428,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 ? (_userProfile!['skills'] as List).join(", ")
                                 : null),
                         const SizedBox(height: 24),
-                        // --- Reviews Section ---
                         Container(
                           width: double.infinity,
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 0, vertical: 0),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 0, vertical: 0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -450,7 +437,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 20.0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       mainAxisAlignment:
@@ -505,7 +493,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                   child: Column(
                                     children: [
                                       ..._reviews.map((review) => Card(
-                                            color: const Color(0xFFECC9EE),
+                                            color: const Color(0xFFB6E1F0),
                                             margin: const EdgeInsets.only(
                                                 bottom: 12),
                                             child: Padding(
@@ -515,7 +503,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  // Reviewer name and rating row
                                                   Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment
@@ -532,7 +519,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                                               Color(0xFF123b53),
                                                         ),
                                                       ),
-                                                      // Star rating
                                                       Row(
                                                         children: List.generate(
                                                             5, (index) {
@@ -552,7 +538,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                                     ],
                                                   ),
                                                   const SizedBox(height: 6),
-                                                  // Review title
                                                   if (review['title']
                                                           ?.toString()
                                                           .isNotEmpty ==
@@ -574,7 +559,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                                           .isNotEmpty ==
                                                       true)
                                                     const SizedBox(height: 4),
-                                                  // Review comment
                                                   Text(
                                                     review['comment']
                                                             ?.toString() ??
@@ -584,7 +568,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                                     style: const TextStyle(
                                                         fontSize: 15),
                                                   ),
-                                                  // Date
                                                   if (review['date'] != null)
                                                     Padding(
                                                       padding:

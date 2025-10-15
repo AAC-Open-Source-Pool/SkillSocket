@@ -310,15 +310,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         ),
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 20,
-              // Make the background transparent so the image itself fully fills
-              // the circular area and no background shows through.
-              backgroundColor: Colors.transparent,
-              // Use backgroundImage so the asset fully covers the circular area.
-              // This behaves like `object-fit: cover` and will crop edges if needed.
-              backgroundImage: AssetImage('assets/new-chatbot-skyblue.png'),
-            ),
+          const CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.transparent,
+                          backgroundImage:
+                              AssetImage('assets/new-chatbot-skyblue.png'),
+                        ),
             SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,12 +397,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         : MainAxisAlignment.end,
                     children: [
                       if (message['isBot']) ...[
-                        CircleAvatar(
+                        const CircleAvatar(
                           radius: 16,
-                          // Transparent background so the image fully fills the circle.
                           backgroundColor: Colors.transparent,
-                          // Use backgroundImage to ensure the circular avatar is fully
-                          // filled by the image (acts like BoxFit.cover).
                           backgroundImage:
                               AssetImage('assets/new-chatbot-skyblue.png'),
                         ),
