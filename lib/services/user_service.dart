@@ -138,7 +138,6 @@ class UserService {
     required double rating,
     required String title,
     required String comment,
-    String? skillContext,
   }) async {
     try {
       final headers = await _getHeaders();
@@ -147,7 +146,6 @@ class UserService {
         'rating': rating,
         'title': title,
         'comment': comment,
-        if (skillContext != null) 'skillContext': skillContext,
       };
       final res = await http.post(
         Uri.parse('$baseUrl/reviews/add'),

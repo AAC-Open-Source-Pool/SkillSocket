@@ -21,4 +21,4 @@ class MyApp extends StatelessWidget {
       home: const LoadingPage(), // changed from LoginScreen to LoadingPage
     );
   }
-}
+}     

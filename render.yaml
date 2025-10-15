@@ -1,46 +1,35 @@
-# This render.yaml is for reference only
-# Since we're using Docker Hub method, create the service manually in Render dashboard
-
-# Manual Render Setup Instructions:
-# 1. Go to Render Dashboard → New Web Service
-# 2. Choose "Deploy an existing image from a registry"
-# 3. Image URL: docker.io/yourusername/skillsocket-backend:latest
-# 4. Configure as shown below:
-
 services:
   - type: web
     name: skillsocket-backend
-    env: docker
-    # Image will be pulled from Docker Hub automatically
-    image:
-      url: docker.io/yourusername/skillsocket-backend:latest
+    env: node
+    region: oregon
     plan: free
-    region: oregon  # Choose closest to your users
-    healthCheckPath: /api/health
-    # Auto-deploy when new image is pushed to Docker Hub
+    rootDir: lib/backend
+    buildCommand: npm ci --production
+    startCommand: npm start
+    healthCheckPath: /ping
     autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3000
-      # Add your MongoDB connection string manually in Render dashboard
+        value: 10000
+      # Add these manually in Render dashboard - DO NOT commit real values
       - key: MONGODB_URI
-        value: "mongodb+srv://username:password@cluster.mongodb.net/skillsocket"
-      # Generate a strong JWT secret manually in Render dashboard  
+        sync: false # Set this in Render dashboard manually
       - key: JWT_SECRET
-        value: "your-super-secret-jwt-key-here"
-      # Optional: Add these if you use Cloudinary
+        sync: false # Set this in Render dashboard manually
+      # Optional Cloudinary vars - set in Render dashboard if using
       - key: CLOUDINARY_CLOUD_NAME
-        value: "your-cloudinary-name"
+        sync: false
       - key: CLOUDINARY_API_KEY
-        value: "your-cloudinary-key"
+        sync: false
       - key: CLOUDINARY_API_SECRET
-        value: "your-cloudinary-secret"
-      # Optional: Add these if you use Firebase
+        sync: false
+      # Optional Firebase vars - set in Render dashboard if using
       - key: FIREBASE_PROJECT_ID
-        value: "your-firebase-project-id"
+        sync: false
       - key: FIREBASE_CLIENT_EMAIL
-        value: "your-firebase-client-email"
+        sync: false
       - key: FIREBASE_PRIVATE_KEY
-        value: "your-firebase-private-key"
+        sync: false
