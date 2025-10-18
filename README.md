@@ -17,74 +17,63 @@
 ---
 
 ##  Abstract  
-SkillSocket is an interactive platform designed to help users **exchange skills, share study materials, and collaborate in real time**.  
-It connects learners who want to teach or learn practical skills — from coding and design to art and communication.  
 
-Key features include:  
-- Creating and joining **collaboration rooms**  
-- **Tinder-like UI** to match profiles and connect with people having common interests  
-- **Community space** to discuss, share ideas, and post updates 
-- Real-time **chat and connection** between users  
-- **Chatbot**: Provides real-time assistance and answers user queries instantly.
-
-The goal of SkillSocket is to make learning more **collaborative, accessible, and meaningful**, bridging the gap between skill-seekers and skill-sharers. 
+**SkillSocket** is an interactive platform designed to enable users to **exchange skills, connect, and collaborate in real time**. It connects learners and mentors across diverse domains such as coding, design, art, and communication. The platform features **collaboration rooms**, a **Tinder-like matching interface** for connecting users with similar interests, **community spaces** for discussions, and **real-time chat** supported by an **AI chatbot** for instant assistance. By fostering collaboration and meaningful connections, SkillSocket aims to make learning more **accessible, engaging, and community-driven**.
 
 ---
 
-## Requirements  
+## Requirements
 
 ### Frontend
-<pre>
-  Package / Library              Version
-------------------------------  -----------
-  Flutter                         3.0.0 or above
-  Dart                            >=3.0.0 <4.0.0
-  cupertino_icons                 ^1.0.2
-  http                            ^1.0.0
-  shared_preferences              ^2.0.0
-  url_launcher                    ^6.0.0
-  table_calendar                  ^3.0.0
-  share_plus                      ^7.0.0
-  pie_chart                       ^5.0.0
-  image_picker                    ^1.0.0
-  intl                            ^0.19.0
-  socket_io_client                ^2.0.3+1
-  swipable_stack                  ^2.0.0
-  flutter_local_notifications     ^17.2.3
-  firebase_core                   ^2.15.0
-  firebase_messaging              ^14.6.5
-  flutter_test                    SDK (for testing)
-  flutter_lints                   ^3.0.0
-</pre>
+
+| Package / Library           | Version       |
+|-----------------------------|--------------------------|
+| Flutter                     | [3.0.0 or above](https://flutter.dev/) |
+| Dart                        | [>=3.0.0 <4.0.0](https://dart.dev/) |
+| cupertino_icons             | [^1.0.2](https://pub.dev/packages/cupertino_icons) |
+| http                        | [^1.0.0](https://pub.dev/packages/http) |
+| shared_preferences          | [^2.0.0](https://pub.dev/packages/shared_preferences) |
+| socket_io_client            | [^2.0.3+1](https://pub.dev/packages/socket_io_client) |
+| swipable_stack              | [^2.0.0](https://pub.dev/packages/swipable_stack) |
+| firebase_core               | [^2.15.0](https://pub.dev/packages/firebase_core) |
+| firebase_messaging          | [^14.6.5](https://pub.dev/packages/firebase_messaging) |
 
 ### Backend
-<pre>
-  Node.js                        >=18.0.0
-  npm                             >=9.0.0
-  MongoDB                         6.0 or above
-  express                         ^4.18.2
-  socket.io                       ^4.7.2
-  mongoose                        ^7.3.1
-</pre>
+
+| Package / Library           | Version       |
+|-----------------------------|--------------------------|
+| Node.js                     | [>=18.0.0](https://nodejs.org/) |
+| npm                         | [>=9.0.0](https://www.npmjs.com/) |
+| MongoDB                     | [6.0 or above](https://www.mongodb.com/) |
+| express                     | [^4.18.2](https://www.npmjs.com/package/express) |
+| socket.io                   | [^4.7.2](https://www.npmjs.com/package/socket.io) |
+| mongoose                    | [^7.3.1](https://www.npmjs.com/package/mongoose) |
+
+### Deployment / DevOps
+
+| Tool / Platform             | Version       |
+|-----------------------------|--------------------------|
+| Docker                      | [Latest stable](https://www.docker.com/) |
+| Render                      | [Cloud deployment](https://render.com/) |
 
 ---
 
 ## How to Use  
 Follow these steps to run the project:  
 
-Clone the Repository:  
+1.Clone the Repository:  
 ```terminal
 git clone https://github.com/AAC-Open-Source-Pool/25AACR02.git
 ```
-Navigate to the folder:
+2.Navigate to the folder:
 ```terminal
 cd 25AACR02
 ```
-Install flutter dependencies:
+3.Install flutter dependencies:
 ```terminal
 flutter pub get
 ```
-Launch the App:
+4.Launch the App:
 ```terminal
 flutter run
 ```
@@ -129,16 +118,17 @@ Ghulam Sahir Ansari
 ---
 
 ## Contribution
-Understand the project: Read the README to align your changes with the project’s purpose and flow.<br><br>
-Use the same technology stack: Make sure your edits use the same versions of languages and libraries.<br><br>
-Document your changes: Clearly explain the issue, your solution, and provide example outputs.<br><br>
-Submit a Pull Request: Follow standard Git etiquettes for submitting contributions.<br><br>
+**This section provides instructions and details on how to submit a contribution via a pull request. It is important to follow these guidelines to make sure your pull request is accepted.**
+1. Before choosing to propose changes to this project, it is advisable to go through the readme.md file of the project to get the philosophy and the motive that went behind this project. The pull request should align with the philosophy and the motive of the original poster of this project.
+2. To add your changes, make sure that the programming language in which you are proposing the changes should be the same as the programming language that has been used in the project. The versions of the programming language and the libraries(if any) used should also match with the original code.
+3. Write a documentation on the changes that you are proposing. The documentation should include the problems you have noticed in the code(if any), the changes you would like to propose, the reason for these changes, and sample test cases. Remember that the topics in the documentation are strictly not limited to the topics aforementioned, but are just an inclusion.
+4. Submit a pull request via [Git etiquettes](https://gist.github.com/mikepea/863f63d6e37281e329f8) 
 
 ---
 
-## Improvement
-Add video calling for live collaboration<br><br>
-Integrate AI skill-matching for better user pairing<br><br>
-Add points and badges to gamify learning<br><br>
-Enable offline material sharing via Bluetooth or Wi-Fi Direct<br><br>
-Calendar integration for scheduling sessions<br><br>
+## Improvements
+- Add **video calling** for live collaboration
+- Integrate **AI skill-matching** for better user pairing
+- Add **points and badges** to gamify learning
+- Enable **offline material sharing** via Bluetooth or Wi-Fi Direct
+- **Calendar integration** for scheduling sessions
