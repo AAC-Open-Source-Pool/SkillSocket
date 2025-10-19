@@ -6,6 +6,7 @@ import 'package:barter_system/reviews.dart';
 import 'package:barter_system/notification.dart';
 import 'package:barter_system/services/post_service.dart';
 import 'package:barter_system/models/backend_models.dart';
+import 'package:barter_system/services/user_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +22,7 @@ class _CommunityState extends State<Community> {
   int currentPage = 1;
   bool hasMorePosts = true;
   String? currentUserId;
+  String? _profileImageUrl;
 
   @override
   void initState() {
@@ -30,6 +32,7 @@ class _CommunityState extends State<Community> {
     _searchController.addListener(() {
       _filterPosts(_searchController.text);
     });
+    _fetchProfileImage();
   }
 
   @override
@@ -43,6 +46,21 @@ class _CommunityState extends State<Community> {
     setState(() {
       currentUserId = prefs.getString('userId');
     });
+  }
+
+  Future<void> _fetchProfileImage() async {
+    try {
+      final userData = await UserService.getUserProfile(); // ✅ Adjust if needed
+      if (userData != null &&
+          userData['profileImage'] != null &&
+          userData['profileImage'].toString().isNotEmpty) {
+        setState(() {
+          _profileImageUrl = userData['profileImage'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching profile image: $e');
+    }
   }
 
   Future<void> _loadPosts({bool refresh = false}) async {
@@ -283,29 +301,31 @@ class _CommunityState extends State<Community> {
       ),
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: const Text(
           'SkillSocket',
-          style: TextStyle(
-              fontSize: 20,
-              //fontStyle: FontStyle.italic,
-              color: Color.fromARGB(255, 255, 255, 255)),
+          style: TextStyle(fontSize: 20, color: Colors.white),
         ),
-        backgroundColor: Color(0xFF123b53),
-        iconTheme:
-            IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
+        backgroundColor: const Color(0xFF123b53),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
               onPressed: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => Notifications()));
               },
-              icon: Icon(Icons.notifications)),
+              icon: const Icon(Icons.notifications)),
           IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Profile()));
-              },
-              icon: Icon(Icons.person_rounded)),
+            onPressed: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => Profile()));
+            },
+            icon: _profileImageUrl != null
+                ? CircleAvatar(
+                    backgroundImage: NetworkImage(_profileImageUrl!),
+                    radius: 14,
+                  )
+                : const Icon(Icons.person_rounded),
+          ),
         ],
       ),
       body: RefreshIndicator(

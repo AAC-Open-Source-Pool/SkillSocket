@@ -6,6 +6,7 @@ import 'package:barter_system/reviews.dart';
 import 'package:barter_system/notification.dart';
 import 'package:barter_system/services/todo_service.dart';
 import 'package:barter_system/services/event_service.dart';
+import 'package:barter_system/services/user_service.dart'; // ✅ Added
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -104,11 +105,29 @@ class _MyHomePageState extends State<MyHomePage> {
   final Map<DateTime, List<Map<String, dynamic>>> _todos = {};
   final Map<DateTime, List<Map<String, dynamic>>> _events = {};
 
+  String? _profileImageUrl; // ✅ Added variable
+
   @override
   void initState() {
     super.initState();
     _loadTodosForDate(_focusedDay);
     _loadEventsForDate(_focusedDay);
+    _fetchProfileImage(); // ✅ Fetch image on load
+  }
+
+  Future<void> _fetchProfileImage() async {
+    try {
+      final userData = await UserService.getUserProfile(); // ✅ Adjust if needed
+      if (userData != null &&
+          userData['profileImage'] != null &&
+          userData['profileImage'].toString().isNotEmpty) {
+        setState(() {
+          _profileImageUrl = userData['profileImage'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching profile image: $e');
+    }
   }
 
   DateTime _getDateKey(DateTime date) {
@@ -219,13 +238,6 @@ class _MyHomePageState extends State<MyHomePage> {
             DrawerHeader(
                 child: Row(
               children: [
-                /*IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(Icons.arrow_back_ios_new_rounded),
-                  color: Color.fromARGB(255, 255, 255, 255),
-                ),*/
                 Expanded(
                   child: Align(
                     alignment: Alignment.center,
@@ -240,80 +252,67 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             )),
             ListTile(
-              leading: Icon(
-                Icons.history,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text(
-                'History',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
+              leading: const Icon(Icons.history, color: Colors.white),
+              title: const Text('History',
+                  style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => History()));
+                    MaterialPageRoute(builder: (context) => const History()));
               },
             ),
-            Divider(color: Colors.white, thickness: 1),
+            const Divider(color: Colors.white, thickness: 1),
             ListTile(
-              leading: Icon(
-                Icons.reviews,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              title: Text(
-                'Reviews',
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
+              leading: const Icon(Icons.reviews, color: Colors.white),
+              title: const Text('Reviews',
+                  style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Reviews()));
+                    MaterialPageRoute(builder: (context) => const Reviews()));
               },
             ),
-            Divider(color: Colors.white, thickness: 1),
+            const Divider(color: Colors.white, thickness: 1),
             ListTile(
-                leading: Icon(
-                  Icons.logout,
-                  color: Color.fromARGB(255, 255, 255, 255),
-                ),
-                title: Text(
-                  'Sign Out',
-                  style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-                ),
+                leading: const Icon(Icons.logout, color: Colors.white),
+                title: const Text('Sign Out',
+                    style: TextStyle(color: Colors.white)),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => LoginScreen()));
                 }),
-            Divider(color: Colors.white, thickness: 1),
+            const Divider(color: Colors.white, thickness: 1),
           ],
         ),
       ),
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: const Text(
           'SkillSocket',
-          style: TextStyle(
-              fontSize: 20,
-              // fontStyle: FontStyle.italic,
-              color: Color.fromARGB(255, 255, 255, 255)),
+          style: TextStyle(fontSize: 20, color: Colors.white),
         ),
-        backgroundColor: Color(0xFF123b53),
-        iconTheme:
-            IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
+        backgroundColor: const Color(0xFF123b53),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
               onPressed: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => Notifications()));
               },
-              icon: Icon(Icons.notifications)),
+              icon: const Icon(Icons.notifications)),
           IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Profile()));
-              },
-              icon: Icon(Icons.person_rounded)),
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Profile()));
+            },
+            icon: _profileImageUrl != null
+                ? CircleAvatar(
+                    backgroundImage: NetworkImage(_profileImageUrl!),
+                    radius: 14,
+                  )
+                : const Icon(Icons.person_rounded),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -334,7 +333,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         _selectedDay = selectedDay;
                         _focusedDay = focusedDay;
                       });
-                      // Load todos and events for selected date
                       _loadTodosForDate(selectedDay);
                       _loadEventsForDate(selectedDay);
                     },
@@ -422,15 +420,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                           onPressed: () async {
                                             if (editController.text.isEmpty)
                                               return;
-
                                             final eventId = event['_id'];
                                             if (eventId == null) {
                                               Navigator.pop(context);
                                               return;
                                             }
-
                                             Navigator.pop(context);
-
                                             try {
                                               final updatedEvent =
                                                   await EventService
@@ -438,9 +433,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                                           editController.text);
                                               if (updatedEvent != null) {
                                                 setState(() {
-                                                  final updatedEvents = [
-                                                    ...todaysEvents
-                                                  ];
+                                                  final updatedEvents =
+                                                      [...todaysEvents];
                                                   updatedEvents[index] =
                                                       updatedEvent;
                                                   _events[dateKey] =
@@ -485,11 +479,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     const Icon(Icons.delete, color: Colors.red),
                                 onPressed: () async {
                                   final eventId = event['_id'];
-                                  if (eventId == null) {
-                                    print('Event ID is null, cannot delete');
-                                    return;
-                                  }
-
+                                  if (eventId == null) return;
                                   try {
                                     final success =
                                         await EventService.deleteEvent(eventId);
@@ -547,7 +537,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     if (_todoController.text.isNotEmpty) {
                       final task = _todoController.text;
                       _todoController.clear();
-
                       try {
                         final newTodo =
                             await TodoService.createTodo(dateKey, task);
@@ -666,18 +655,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     }
                   },
                 ),
-                Padding(
-                  padding: EdgeInsets.all(25.0),
-                ),
+                const Padding(padding: EdgeInsets.all(25.0)),
               ],
             )),
       ),
-       floatingActionButton: Container(
+      floatingActionButton: Container(
         width: 60,
         height: 60,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-          image: DecorationImage(
+          image: const DecorationImage(
             image: AssetImage('assets/new-chatbot-skyblue.png'),
             fit: BoxFit.cover,
           ),
@@ -697,5 +684,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-
