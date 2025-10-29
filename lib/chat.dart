@@ -5,6 +5,7 @@ import 'package:barter_system/services/user_service.dart';
 import 'package:barter_system/profilepage.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
+import 'config/app_config.dart';
 
 class Chat extends StatefulWidget {
   final String chatId;
@@ -95,7 +96,7 @@ class _ChatState extends State<Chat> {
 
   void _connectToServer() {
     socket = IO.io(
-  "https://skillsocket-backend.onrender.com/",
+      AppConfig.socketUrl,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
