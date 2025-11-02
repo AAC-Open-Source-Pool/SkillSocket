@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:barter_system/services/connection_service.dart';
-import 'package:barter_system/services/notification_service.dart';
-import 'package:barter_system/chat.dart';
+import 'package:skillsocket/services/connection_service.dart';
+import 'package:skillsocket/services/notification_service.dart';
+import 'package:skillsocket/chat.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({super.key});

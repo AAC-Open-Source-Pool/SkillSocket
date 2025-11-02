@@ -6,6 +6,22 @@ import '../config/app_config.dart';
 class ChatService {
   static String get baseUrl => AppConfig.baseUrl;
 
+  // Test backend connectivity
+  static Future<bool> testConnection() async {
+    try {
+      print('🔍 Testing backend connection to: $baseUrl');
+      final response = await http.get(
+        Uri.parse(baseUrl.replaceAll('/api', '/ping')), // Use ping endpoint
+      ).timeout(Duration(seconds: 10));
+      
+      print('📡 Connection test response: ${response.statusCode}');
+      return response.statusCode == 200;
+    } catch (e) {
+      print('❌ Backend connection test failed: $e');
+      return false;
+    }
+  }
+
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
     final prefs = await SharedPreferences.getInstance();
@@ -36,28 +52,44 @@ class ChatService {
   static Future<List<Map<String, dynamic>>?> getUserChats() async {
     try {
       final headers = await _getHeaders();
+      final userId = await getCurrentUserId();
 
-      print(
-          'Making GET request to: $baseUrl/messages/conversations'); // Debug log
-      print('With headers: $headers'); // Debug log
+      if (userId == null) {
+        print('❌ No user ID found - user not logged in');
+        return [];
+      }
+
+      print('🔄 Making GET request to: $baseUrl/messages/conversations');
+      print('🔑 With userId: $userId');
+      print('📋 With headers: $headers');
 
       final response = await http.get(
         Uri.parse('$baseUrl/messages/conversations'),
         headers: headers,
-      );
+      ).timeout(Duration(seconds: 30));
 
-      print('Get chats response status: ${response.statusCode}'); // Debug log
-      print('Get chats response body: ${response.body}'); // Debug log
+      print('📡 Get chats response status: ${response.statusCode}');
+      print('📄 Get chats response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return List<Map<String, dynamic>>.from(data['conversations'] ?? []);
+        final conversations = List<Map<String, dynamic>>.from(data['conversations'] ?? []);
+        print('✅ Successfully loaded ${conversations.length} conversations');
+        return conversations;
+      } else if (response.statusCode == 401) {
+        print('❌ Unauthorized - token may be expired');
+        return [];
       } else {
-        print('Get chats error: ${response.statusCode} - ${response.body}');
+        print('❌ Get chats error: ${response.statusCode} - ${response.body}');
         return [];
       }
     } catch (e) {
-      print('Get chats exception: $e');
+      print('❌ Get chats exception: $e');
+      if (e.toString().contains('TimeoutException')) {
+        print('⏰ Request timed out - check internet connection');
+      } else if (e.toString().contains('SocketException')) {
+        print('🌐 Network error - check internet connection');
+      }
       return [];
     }
   }
@@ -98,29 +130,49 @@ class ChatService {
   static Future<List<Map<String, dynamic>>?> searchUsers(String query) async {
     try {
       final headers = await _getHeaders();
+      final userId = await getCurrentUserId();
 
-      print(
-          'Making GET request to: $baseUrl/messages/search/users?q=$query'); // Debug log
-      print('With headers: $headers'); // Debug log
+      if (userId == null) {
+        print('❌ No user ID found - user not logged in');
+        return [];
+      }
+
+      if (query.trim().length < 2) {
+        print('❌ Search query too short: "$query"');
+        return [];
+      }
+
+      print('🔍 Making GET request to: $baseUrl/messages/search/users?q=$query');
+      print('🔑 With userId: $userId');
+      print('📋 With headers: $headers');
 
       final response = await http.get(
-        Uri.parse('$baseUrl/messages/search/users?q=$query'),
+        Uri.parse('$baseUrl/messages/search/users?q=${Uri.encodeQueryComponent(query)}'),
         headers: headers,
-      );
+      ).timeout(Duration(seconds: 30));
 
-      print(
-          'Search users response status: ${response.statusCode}'); // Debug log
-      print('Search users response body: ${response.body}'); // Debug log
+      print('📡 Search users response status: ${response.statusCode}');
+      print('📄 Search users response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return List<Map<String, dynamic>>.from(data['users'] ?? []);
+        final users = List<Map<String, dynamic>>.from(data['users'] ?? []);
+        print('✅ Successfully found ${users.length} users for query: "$query"');
+        return users;
+      } else if (response.statusCode == 401) {
+        print('❌ Unauthorized - token may be expired');
+        return [];
       } else {
-        print('Search users error: ${response.statusCode} - ${response.body}');
+        print('❌ Search users error: ${response.statusCode} - ${response.body}');
         return [];
       }
     } catch (e) {
-      print('Search users exception: $e');
+      print('❌ Search users exception: $e');
+      if (e.toString().contains('TimeoutException')) {
+        print('⏰ Request timed out - check internet connection');
+      } else if (e.toString().contains('SocketException')) {
+        print('🌐 Network error - check internet connection');
+      }
       return [];
     }
   }

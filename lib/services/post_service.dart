@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/app_config.dart';
 
 class PostService {
-  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
+  static String get baseUrl => AppConfig.postsUrl;
 
   // Get auth token from shared preferences
   static Future<String?> _getToken() async {

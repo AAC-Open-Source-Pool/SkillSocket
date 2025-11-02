@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:barter_system/notification.dart';
-import 'package:barter_system/services/user_service.dart';
+import 'package:skillsocket/notification.dart';
+import 'package:skillsocket/services/user_service.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -47,12 +47,13 @@ class _ProfileState extends State<Profile> {
     });
 
     try {
-     final userProfile = await UserService.getUserProfile();
+      print('🔄 Loading current user profile...');
+      final userProfile = await UserService.getUserProfile();
 
       if (userProfile != null) {
+        print('✅ Successfully loaded profile data');
         setState(() {
           _nameController.text = userProfile['name'] ?? '';
-
           _locationController.text = userProfile['location'] ?? '';
 
           // New fields
@@ -87,12 +88,39 @@ class _ProfileState extends State<Profile> {
           }
         });
       } else {
-        // If profile loading fails, show default values or error
+        print('❌ Profile not found or authentication failed');
+        // If profile loading fails, show default values and error message
         _initializeDefaultProfile();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to load profile. Please log in again or check your connection.'),
+              backgroundColor: Colors.orange,
+              action: SnackBarAction(
+                label: 'Retry',
+                textColor: Colors.white,
+                onPressed: _loadUserProfile,
+              ),
+            ),
+          );
+        }
       }
     } catch (e) {
-      print('Error loading profile: $e');
+      print('❌ Error loading profile: $e');
       _initializeDefaultProfile();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Network error. Please check your internet connection.'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _loadUserProfile,
+            ),
+          ),
+        );
+      }
     }
 
     setState(() {

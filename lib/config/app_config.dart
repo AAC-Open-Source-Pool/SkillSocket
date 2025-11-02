@@ -1,12 +1,21 @@
 class AppConfig {
+  // Production URLs (deployed backend)
+  static const String _prodBaseUrl = 'https://skillsocket-backend.onrender.com/api';
+  static const String _prodSocketUrl = 'https://skillsocket-backend.onrender.com/';
+  
+  // Development URLs (local backend)
+  static const String _devBaseUrl = 'http://localhost:3000/api';
+  static const String _devSocketUrl = 'http://localhost:3000/';
+  
+  // Environment-based URL selection
   static const String _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.skillsocket.dev/api', // Fallback URL
+    defaultValue: _prodBaseUrl, // Use production by default
   );
 
   static const String _socketUrl = String.fromEnvironment(
     'SOCKET_BASE_URL',
-    defaultValue: 'https://api.skillsocket.dev/',
+    defaultValue: _prodSocketUrl, // Use production by default
   );
 
   // API endpoints
@@ -31,10 +40,20 @@ class AppConfig {
   static bool get isDevelopment =>
       _baseUrl.contains('localhost') || _baseUrl.contains('127.0.0.1');
 
+  // Helper methods for environment URLs
+  static String get productionBaseUrl => _prodBaseUrl;
+  static String get productionSocketUrl => _prodSocketUrl;
+  static String get developmentBaseUrl => _devBaseUrl;
+  static String get developmentSocketUrl => _devSocketUrl;
+
   // Debug info
   static Map<String, dynamic> get debugInfo => {
         'baseUrl': _baseUrl,
         'socketUrl': _socketUrl,
+        'productionBaseUrl': _prodBaseUrl,
+        'productionSocketUrl': _prodSocketUrl,
+        'developmentBaseUrl': _devBaseUrl,
+        'developmentSocketUrl': _devSocketUrl,
         'isProduction': isProduction,
         'isDevelopment': isDevelopment,
       };

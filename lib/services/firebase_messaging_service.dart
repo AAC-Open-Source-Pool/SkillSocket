@@ -3,12 +3,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
 
 class FirebaseMessagingService {
   static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   static final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
   
-  static const String baseUrl = 'https://skillsocket-backend.onrender.com/api';
+  static String get baseUrl => AppConfig.baseUrl;
 
   // Initialize Firebase Messaging
   static Future<void> initialize() async {

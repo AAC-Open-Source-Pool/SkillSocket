@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:barter_system/services/user_service.dart';
-import 'package:barter_system/services/review_service.dart';
+import 'package:skillsocket/services/user_service.dart';
+import 'package:skillsocket/services/review_service.dart';
 
 class UserProfilePage extends StatefulWidget {
   final String userId;
@@ -36,11 +36,32 @@ class _UserProfilePageState extends State<UserProfilePage> {
     setState(() => _isLoading = true);
 
     try {
+      print('🔄 Loading profile for user ID: ${widget.userId}');
+      
       final userProfile = await UserService.getUserProfileById(widget.userId);
-      final reviewsData =
-          await ReviewService.getUserReviews(userId: widget.userId);
+      final reviewsData = await ReviewService.getUserReviews(userId: widget.userId);
       final reviews = reviewsData?['reviews'] ?? [];
 
+      if (userProfile == null) {
+        print('❌ Profile not found for user: ${widget.userId}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Profile not found. User may not exist or server error.'),
+              backgroundColor: Colors.red,
+              action: SnackBarAction(
+                label: 'Retry',
+                textColor: Colors.white,
+                onPressed: _loadUserProfile,
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      print('✅ Successfully loaded profile data');
+      
       setState(() {
         _userProfile = userProfile;
         _reviews = List<Map<String, dynamic>>.from(reviews).map((review) {
@@ -55,7 +76,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
         }).toList();
       });
     } catch (e) {
-      print("Error loading user profile: $e");
+      print("❌ Error loading user profile: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load profile. Please check your internet connection.'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _loadUserProfile,
+            ),
+          ),
+        );
+      }
     }
 
     setState(() => _isLoading = false);

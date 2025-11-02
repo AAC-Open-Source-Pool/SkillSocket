@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:swipable_stack/swipable_stack.dart';
-import 'package:barter_system/services/connection_service.dart';
-import 'package:barter_system/services/user_service.dart';
+import 'package:skillsocket/services/connection_service.dart';
+import 'package:skillsocket/services/user_service.dart';
+import 'config/app_config.dart';
 // import 'package:shared_preferences/shared_preferences.dart'; // For future local storage
 
 class ProfileEditScreen extends StatefulWidget {
@@ -64,8 +65,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   Future<void> fetchMatchingProfiles() async {
     setState(() => isLoading = true);
-  final url = Uri.parse(
-  'https://skillsocket-backend.onrender.com/api/users/match?required=${widget.requiredSkill}&offered=${widget.offeredSkill}');
+    final url = Uri.parse(
+        '${AppConfig.baseUrl}/users/match?required=${widget.requiredSkill}&offered=${widget.offeredSkill}');
 
     try {
       final response = await http.get(url);

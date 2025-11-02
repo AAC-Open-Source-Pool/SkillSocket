@@ -1,4 +1,4 @@
-import 'package:barter_system/signup2.dart';
+import 'package:skillsocket/signup2.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';

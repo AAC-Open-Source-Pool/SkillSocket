@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:barter_system/home.dart';
-import 'package:barter_system/chats.dart';
-import 'package:barter_system/skillpopup.dart';
-import 'package:barter_system/community.dart';
-import 'package:barter_system/studyroom.dart';
+import 'package:skillsocket/home.dart';
+import 'package:skillsocket/chats.dart';
+import 'package:skillsocket/skillpopup.dart';
+import 'package:skillsocket/community.dart';
+import 'package:skillsocket/studyroom.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});

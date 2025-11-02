@@ -4,19 +4,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 
 class ReviewService {
+  // Base URL for the review API
+  static String get baseUrl => AppConfig.reviewsUrl;
+
   // Like a review
   static Future<Map<String, dynamic>?> likeReview(String reviewId) async {
     try {
       final headers = await _getHeaders();
+      final url = '$baseUrl/like/$reviewId';
+      print('🔄 Making POST request to: $url');
+      
       final response = await http.post(
-        Uri.parse('$baseUrl/like/$reviewId'),
+        Uri.parse(url),
         headers: headers,
       );
+      
+      print('📡 Like review response status: ${response.statusCode}');
+      print('📄 Like review response body: ${response.body}');
+      
       if (response.statusCode == 200) {
+        print('✅ Successfully liked review');
         return jsonDecode(response.body);
+      } else {
+        print('❌ Error liking review: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('Exception liking review: $e');
+      print('❌ Exception liking review: $e');
     }
     return null;
   }
@@ -25,21 +38,28 @@ class ReviewService {
   static Future<Map<String, dynamic>?> dislikeReview(String reviewId) async {
     try {
       final headers = await _getHeaders();
+      final url = '$baseUrl/dislike/$reviewId';
+      print('🔄 Making POST request to: $url');
+      
       final response = await http.post(
-        Uri.parse('$baseUrl/dislike/$reviewId'),
+        Uri.parse(url),
         headers: headers,
       );
+      
+      print('📡 Dislike review response status: ${response.statusCode}');
+      print('📄 Dislike review response body: ${response.body}');
+      
       if (response.statusCode == 200) {
+        print('✅ Successfully disliked review');
         return jsonDecode(response.body);
+      } else {
+        print('❌ Error disliking review: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('Exception disliking review: $e');
+      print('❌ Exception disliking review: $e');
     }
     return null;
   }
-  // Base URL for the review API
-
-  static String get baseUrl => AppConfig.reviewsUrl;
 
   // Get headers with authentication token
   static Future<Map<String, String>> _getHeaders() async {
@@ -57,37 +77,54 @@ class ReviewService {
     required String revieweeId,
     required double rating,
     required String title,
+    String? comment, // Added comment parameter
   }) async {
     try {
       final headers = await _getHeaders();
+      final url = '$baseUrl/add';
+      
+      print('🔄 Making POST request to: $url');
+      
+      final body = {
+        'revieweeId': revieweeId,
+        'rating': rating,
+        'title': title,
+        'comment': comment ?? title, // Use title as comment if not provided
+      };
+      
+      print('📋 With body: $body');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/add'),
+        Uri.parse(url),
         headers: headers,
-        body: jsonEncode({
-          'revieweeId': revieweeId,
-          'rating': rating,
-          'title': title,
-        }),
+        body: jsonEncode(body),
       );
 
-      print('Add review response: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('📡 Add review response status: ${response.statusCode}');
+      print('📄 Add review response body: ${response.body}');
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
+        print('✅ Successfully added review');
         return data;
       } else {
-        print('Error adding review: ${response.statusCode} - ${response.body}');
-        final errorData = jsonDecode(response.body);
-        return {
-          'success': false,
-          'message': errorData['message'] ?? 'Failed to add review'
-        };
+        print('❌ Error adding review: ${response.statusCode} - ${response.body}');
+        try {
+          final errorData = jsonDecode(response.body);
+          return {
+            'success': false,
+            'message': errorData['message'] ?? 'Failed to add review'
+          };
+        } catch (e) {
+          return {
+            'success': false,
+            'message': 'Failed to add review (${response.statusCode})'
+          };
+        }
       }
     } catch (e) {
-      print('Exception adding review: $e');
-      return {'success': false, 'message': 'Network error occurred'};
+      print('❌ Exception adding review: $e');
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
@@ -99,23 +136,34 @@ class ReviewService {
   }) async {
     try {
       final headers = await _getHeaders();
+      final url = '$baseUrl/user/$userId?page=$page&limit=$limit';
+      
+      print('🔄 Making GET request to: $url');
+      print('📋 With headers: $headers');
 
-      final response = await http.get(
-        Uri.parse('$baseUrl/user/$userId?page=$page&limit=$limit'),
-        headers: headers,
-      );
+      final response = await http.get(Uri.parse(url), headers: headers);
 
-      print('Get user reviews response: ${response.statusCode}');
+      print('📡 Get user reviews response status: ${response.statusCode}');
+      print('📄 Get user reviews response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
+          print('✅ Successfully loaded user reviews');
           return data['data'];
+        } else {
+          print('❌ API returned success=false: ${data['message'] ?? 'Unknown error'}');
+          return null;
         }
+      } else if (response.statusCode == 404) {
+        print('ℹ️ No reviews found for user: $userId');
+        return {'reviews': [], 'totalReviews': 0, 'averageRating': 0.0};
+      } else {
+        print('❌ Get user reviews error: ${response.statusCode} - ${response.body}');
+        return null;
       }
-      return null;
     } catch (e) {
-      print('Exception getting user reviews: $e');
+      print('❌ Exception getting user reviews: $e');
       return null;
     }
   }

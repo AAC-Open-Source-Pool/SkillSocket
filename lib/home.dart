@@ -1,12 +1,12 @@
-import 'package:barter_system/chatbot.dart';
-import 'package:barter_system/history.dart';
-import 'package:barter_system/login.dart';
-import 'package:barter_system/profile.dart';
-import 'package:barter_system/reviews.dart';
-import 'package:barter_system/notification.dart';
-import 'package:barter_system/services/todo_service.dart';
-import 'package:barter_system/services/event_service.dart';
-import 'package:barter_system/services/user_service.dart'; // ✅ Added
+import 'package:skillsocket/chatbot.dart';
+import 'package:skillsocket/history.dart';
+import 'package:skillsocket/login.dart';
+import 'package:skillsocket/profile.dart';
+import 'package:skillsocket/reviews.dart';
+import 'package:skillsocket/notification.dart';
+import 'package:skillsocket/services/todo_service.dart';
+import 'package:skillsocket/services/event_service.dart';
+import 'package:skillsocket/services/user_service.dart'; // ✅ Added
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 

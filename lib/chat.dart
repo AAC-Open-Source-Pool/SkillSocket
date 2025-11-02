@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:barter_system/services/chat_service.dart';
-import 'package:barter_system/services/user_service.dart';
-import 'package:barter_system/profilepage.dart';
+import 'package:skillsocket/services/chat_service.dart';
+import 'package:skillsocket/services/user_service.dart';
+import 'package:skillsocket/profilepage.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'config/app_config.dart';
@@ -95,23 +95,45 @@ class _ChatState extends State<Chat> {
   }
 
   void _connectToServer() {
-    socket = IO.io(
-      AppConfig.socketUrl,
-      IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .disableAutoConnect()
-          .build(),
-    );
+    try {
+      socket = IO.io(
+        AppConfig.socketUrl,
+        IO.OptionBuilder()
+            .setTransports(['websocket', 'polling']) // Add polling as fallback
+            .setReconnectionAttempts(3)
+            .setReconnectionDelay(1000)
+            .setTimeout(5000)
+            .build(),
+      );
 
-    socket.connect();
+      socket.onConnect((_) {
+        print("Connected to socket server");
+        if (currentUserId != null) {
+          socket.emit("joinRoom", currentUserId);
+        }
+      });
 
-    socket.onConnect((_) {
-      print("Connected to socket server");
-      if (currentUserId != null) {
-        socket.emit("joinRoom", currentUserId);
-      }
-    });
+      socket.onConnectError((error) {
+        print("Socket connection error: $error");
+        // Continue without real-time messaging
+      });
 
+      socket.onError((error) {
+        print("Socket error: $error");
+        // Don't show error to user, just log it
+      });
+
+      // Setup socket event listeners
+      _setupSocketEventListeners();
+
+      socket.connect();
+    } catch (e) {
+      print("Failed to initialize socket: $e");
+      // Continue without real-time messaging
+    }
+  }
+
+  void _setupSocketEventListeners() {
     // Only add messages from other users to prevent duplicates
     socket.on("receiveMessage", (data) {
       if (mounted && data['from']['_id'] != currentUserId) {

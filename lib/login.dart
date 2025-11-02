@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main_navigation.dart';
 import 'signup.dart';
+import 'config/app_config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -61,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-  Uri.parse('https://skillsocket-backend.onrender.com/api/auth/login'),
+        Uri.parse('${AppConfig.authUrl}/login'),
         headers: {
           'Content-Type': 'application/json',
         },

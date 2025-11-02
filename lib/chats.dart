@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'chat.dart';
 import 'new_chat_screen.dart';
-import 'package:barter_system/profile.dart';
-import 'package:barter_system/reviews.dart';
-import 'package:barter_system/notification.dart';
-import 'package:barter_system/history.dart';
-import 'package:barter_system/login.dart';
-import 'package:barter_system/services/chat_service.dart';
-import 'package:barter_system/services/user_service.dart'; // ✅ Added
+import 'package:skillsocket/profile.dart';
+import 'package:skillsocket/reviews.dart';
+import 'package:skillsocket/notification.dart';
+import 'package:skillsocket/history.dart';
+import 'package:skillsocket/login.dart';
+import 'package:skillsocket/services/chat_service.dart';
+import 'package:skillsocket/services/user_service.dart'; // ✅ Added
+import 'package:skillsocket/config/app_config.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'notification_helper.dart';
 
@@ -72,7 +73,52 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _initializeChats() async {
+    print('🔄 Initializing chats...');
+    
+    // Test backend connectivity first
+    final isConnected = await ChatService.testConnection();
+    if (!isConnected) {
+      print('❌ Backend connection failed');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Cannot connect to server. Please check your internet connection.'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _initializeChats,
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    
     currentUserId = await ChatService.getCurrentUserId();
+    print('👤 Current user ID: $currentUserId');
+    
+    if (currentUserId == null) {
+      print('❌ No user ID found - user may not be logged in');
+      // Show error message to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Please log in to view chats'),
+            backgroundColor: Colors.orange,
+            action: SnackBarAction(
+              label: 'Login',
+              textColor: Colors.white,
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    
     await _loadChats();
 
     if (currentUserId != null) {
@@ -81,34 +127,67 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
   }
 
   void _connectToSocket() {
-    socket = IO.io(
-      "https://skillsocket-backend.onrender.com/",
-      IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .disableAutoConnect()
-          .build(),
-    );
+    try {
+      print('🔌 Connecting to socket server: ${AppConfig.socketUrl}');
+      socket = IO.io(
+        AppConfig.socketUrl,
+        IO.OptionBuilder()
+            .setTransports(['websocket', 'polling']) // Add polling as fallback
+            .setReconnectionAttempts(3)
+            .setReconnectionDelay(1000)
+            .setTimeout(5000)
+            .build(),
+      );
 
-    socket.connect();
-
-    socket.onConnect((_) {
-      if (currentUserId != null) socket.emit("joinRoom", currentUserId);
-    });
-
-    socket.on("receiveMessage", (data) {
-      if (mounted) {
-        _updateChatWithNewMessage(data);
-        if (data['from'] != null && data['from']['_id'] != currentUserId) {
-          NotificationHelper.showNotification(
-            'New Message from ${data['from']['name'] ?? 'Someone'}',
-            data['content'] ?? '',
-          );
+      socket.onConnect((_) {
+        print('✅ Connected to socket server');
+        if (currentUserId != null) {
+          socket.emit("joinRoom", currentUserId);
+          print('📡 Joined room for user: $currentUserId');
         }
-      }
-    });
+      });
 
-    socket.onError((error) => print("Socket error: $error"));
-    socket.onDisconnect((_) => print("Disconnected from socket server"));
+      socket.on("receiveMessage", (data) {
+        print('📨 Received message: $data');
+        if (mounted) {
+          _updateChatWithNewMessage(data);
+          if (data['from'] != null && data['from']['_id'] != currentUserId) {
+            NotificationHelper.showNotification(
+              'New Message from ${data['from']['name'] ?? 'Someone'}',
+              data['content'] ?? '',
+            );
+          }
+        }
+      });
+
+      socket.onError((error) {
+        print("❌ Socket error: $error");
+        // Don't show error message for every socket error, just log it
+      });
+
+      socket.onDisconnect((reason) {
+        print("🔌 Disconnected from socket server: $reason");
+        // Try to reconnect after a short delay
+        if (mounted) {
+          Future.delayed(Duration(seconds: 2), () {
+            if (mounted) {
+              socket.connect();
+            }
+          });
+        }
+      });
+
+      socket.onConnectError((error) {
+        print("❌ Socket connection error: $error");
+        // Real-time messaging will not work, but app continues normally
+        print("ℹ️ Continuing without real-time messaging");
+      });
+
+      socket.connect();
+    } catch (e) {
+      print("❌ Failed to initialize socket: $e");
+      print("ℹ️ Continuing without real-time messaging");
+    }
   }
 
   void _updateChatWithNewMessage(dynamic messageData) {
@@ -160,22 +239,51 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin {
   Future<void> _loadChats() async {
     setState(() => _isLoading = true);
     try {
+      print('🔄 Loading chats and unread counts...');
       final results = await Future.wait([
         ChatService.getUserChats(),
         ChatService.getUnreadCounts(),
       ]);
       final chatData = results[0] as List<Map<String, dynamic>>?;
       final unread = results[1] as Map<String, int>;
-      if (chatData != null) {
+      
+      print('📋 Chat data received: ${chatData?.length ?? 0} chats');
+      print('🔢 Unread counts: $unread');
+      
+      if (mounted) {
         setState(() {
-          chats = chatData;
+          chats = chatData ?? [];
           _unreadCounts = unread;
         });
       }
+      
+      if (chatData?.isEmpty ?? true) {
+        print('ℹ️ No chats found - this is normal for new users');
+      }
     } catch (e) {
-      print('Error loading chats: $e');
+      print('❌ Error loading chats: $e');
+      if (mounted) {
+        setState(() {
+          chats = [];
+          _unreadCounts = {};
+        });
+        // Show error message to user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load chats. Please check your internet connection.'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _loadChats,
+            ),
+          ),
+        );
+      }
     }
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   String _formatLastMessageTime(String timestamp) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:barter_system/services/review_service.dart';
-import 'package:barter_system/services/user_service.dart';
+import 'package:skillsocket/services/review_service.dart';
+import 'package:skillsocket/services/user_service.dart';
 
 class Reviews extends StatefulWidget {
   const Reviews({super.key});

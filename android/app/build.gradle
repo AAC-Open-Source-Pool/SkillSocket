@@ -5,7 +5,7 @@ plugins {
     id "com.google.gms.google-services"
 }
 android {
-    namespace = "com.example.barter_system"
+    namespace = "com.example.skillsocket"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.barter_system"
+        applicationId = "com.example.skillsocket"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

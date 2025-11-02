@@ -1,5 +1,5 @@
-//import 'package:barter_system/login.dart';
-import 'package:barter_system/splashscreen.dart'; // import the new splash page
+//import 'package:skillsocket/login.dart';
+import 'package:skillsocket/splashscreen.dart'; // import the new splash page
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

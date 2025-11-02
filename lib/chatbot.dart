@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'config/app_config.dart';
 
 class ChatbotScreen extends StatefulWidget {
   @override
@@ -206,7 +207,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         print('MCP Gateway error, falling back to Gemini: $mcpError');
 
         final response = await http.post(
-          Uri.parse('https://skillsocket-backend.onrender.com/api/chat'),
+          Uri.parse('${AppConfig.chatUrl}'),
           headers: {
             'Content-Type': 'application/json',
           },

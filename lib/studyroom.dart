@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:barter_system/notification.dart';
-import 'package:barter_system/profile.dart';
-import 'package:barter_system/reviews.dart';
-import 'package:barter_system/history.dart';
-import 'package:barter_system/login.dart';
+import 'package:skillsocket/notification.dart';
+import 'package:skillsocket/profile.dart';
+import 'package:skillsocket/reviews.dart';
+import 'package:skillsocket/history.dart';
+import 'package:skillsocket/login.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:barter_system/services/user_service.dart'; // ✅ Added for fetching user data
+import 'package:skillsocket/services/user_service.dart'; // ✅ Added for fetching user data
 
 class StudyRoom extends StatefulWidget {
   @override

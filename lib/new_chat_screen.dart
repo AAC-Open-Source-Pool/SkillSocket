@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:barter_system/services/chat_service.dart';
+import 'package:skillsocket/services/chat_service.dart';
 import 'chat.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -36,29 +36,45 @@ class _NewChatScreenState extends State<NewChatScreen> {
     });
 
     try {
+      print('🔍 Searching for users with query: "$query"');
       final users = await ChatService.searchUsers(query);
-      setState(() {
-        _searchResults = users ?? [];
-      });
-    } catch (e) {
-      print('Error searching users: $e');
-      setState(() {
-        _searchResults = [];
-      });
-
+      print('👥 Found ${users?.length ?? 0} users');
+      
       if (mounted) {
+        setState(() {
+          _searchResults = users ?? [];
+        });
+      }
+      
+      if (users?.isEmpty ?? true) {
+        print('ℹ️ No users found for query: "$query"');
+      }
+    } catch (e) {
+      print('❌ Error searching users: $e');
+      if (mounted) {
+        setState(() {
+          _searchResults = [];
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error searching users. Please try again.'),
+          SnackBar(
+            content: Text('Failed to search users. Please check your internet connection.'),
             backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: () => _searchUsers(query),
+            ),
           ),
         );
       }
     }
 
-    setState(() {
-      _isSearching = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isSearching = false;
+      });
+    }
   }
 
   void _startChat(Map<String, dynamic> user) {

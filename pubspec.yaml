@@ -1,5 +1,5 @@
-name: barter_system
-description: A new Flutter project.
+name: skillsocket
+description: A skill sharing platform with real-time chat.
 publish_to: "none"
 
 version: 1.0.0+1

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:barter_system/notification.dart';
-import 'package:barter_system/popup.dart';
-import 'package:barter_system/profile.dart';
+import 'package:skillsocket/notification.dart';
+import 'package:skillsocket/popup.dart';
+import 'package:skillsocket/profile.dart';
 
 class SkillMatchApp extends StatefulWidget {
   const SkillMatchApp({super.key});
